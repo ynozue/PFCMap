@@ -6,9 +6,11 @@ import Observation
 final class PFCMapStore {
     // データ毎のStoreを保持する
     @ObservationIgnored var locationStore: LocationStore
+    @ObservationIgnored var shopSearchStore: ShopSearchStore
     
     init(factory: Factory) {
         // Factoryからリポジトリを取得してStoreの初期化など
         self.locationStore = LocationStore(locationRepository: factory.makeLocationRepository())
+        self.shopSearchStore = ShopSearchStore(shopSearchRepository: factory.makeShopSearchRepository())
     }
 }

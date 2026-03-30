@@ -27,4 +27,13 @@ extension Factory {
             return LocationRepositoryDummy()
         }
     }
+    
+    func makeShopSearchRepository() -> any ShopSearchRepository {
+        switch env {
+        case .prod, .dev:
+            return ShopSearchRepositoryImpl()
+        case .preview:
+            return ShopSearchRepositoryDummy()
+        }
+    }
 }

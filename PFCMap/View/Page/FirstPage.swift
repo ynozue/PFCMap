@@ -12,6 +12,14 @@ struct FirstPage: View {
                 Map(position: $model.cameraPosition) {
                     // User location mark
                     UserAnnotation()
+                    
+                    // 検索結果の表示
+                    ForEach(store.shopSearchStore.shops) { shop in
+                        Marker(shop.name, coordinate: CLLocationCoordinate2D(
+                            latitude: shop.location.latitude,
+                            longitude: shop.location.longitude
+                        ))
+                    }
                 }
                 .mapStyle(.standard(emphasis: .automatic))
                 .mapControls {
@@ -20,7 +28,7 @@ struct FirstPage: View {
                     MapScaleView()
                 }
                 
-                if model.isLoading {
+                if model.isLoading || model.isLoadingSearch {
                     ProgressView()
                         .padding()
                         .background(.thinMaterial)
@@ -28,6 +36,17 @@ struct FirstPage: View {
                 }
             }
             .navigationTitle("PFC Map")
+            .searchable(text: $model.searchText, prompt: "お店を検索")
+            .onSubmit(of: .search) {
+                Task {
+                    await model.searchShops(shopSearchStore: store.shopSearchStore)
+                }
+            }
+            .onChange(of: model.searchText) { oldValue, newValue in
+                if newValue.isEmpty {
+                    model.clearSearch(shopSearchStore: store.shopSearchStore)
+                }
+            }
             .task {
                 await model.onAppear(locationStore: store.locationStore)
             }
