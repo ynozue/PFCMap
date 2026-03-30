@@ -9,9 +9,23 @@ import SwiftUI
 
 @main
 struct PFCMapApp: App {
+    @State private var store: PFCMapStore
+    
+    init() {
+        #if DEBUG
+        let env: PFCMapEnv = .dev
+        #else
+        let env: PFCMapEnv = .prod
+        #endif
+        
+        let factory = Factory.create(env: env)
+        _store = State(wrappedValue: PFCMapStore(factory: factory))
+    }
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            FirstPage()
+                .environment(store)
         }
     }
 }
