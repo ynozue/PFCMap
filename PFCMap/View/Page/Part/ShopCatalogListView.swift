@@ -64,10 +64,9 @@ struct ShopCatalogListView: View {
                 model.selectAll(shops: newValue)
             }
         }
-        .background(.background)
-
-        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: -2)
+        .liquidGlassBackground(cornerRadius: 24)
+        .padding(.horizontal, 16)
+        .padding(.bottom, 8) // 下部にも少し余白を持たせて浮遊感を出す
     }
     
     @ViewBuilder
