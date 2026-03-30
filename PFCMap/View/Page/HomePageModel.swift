@@ -13,32 +13,13 @@ final class HomePageModel {
     
     init() {}
     
-    func onAppear(locationStore: LocationStore, shopCatalogStore: ShopCatalogStore) async {
-        // カタログデータの初期読み込み
-        Task {
-            do {
-                try await shopCatalogStore.load()
-            } catch {
-                print("Failed to load shop catalog: \(error)")
-            }
-        }
-        
-        // すでに取得済みの場合はスキップ
-        if locationStore.currentLocation != nil { return }
-        
-        isLoading = true
-        defer { isLoading = false }
-        
-        do {
-            try await locationStore.fetchCurrentLocation()
-            if let location = locationStore.currentLocation {
-                cameraPosition = .region(MKCoordinateRegion(
-                    center: CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude),
-                    span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
-                ))
-            }
-        } catch {
-            errorMessage = "現在地の取得に失敗しました。"
+    func onAppear(locationStore: LocationStore) {
+        // スプラッシュですでに取得済みの現在地をカメラ位置に設定
+        if let location = locationStore.currentLocation {
+            cameraPosition = .region(MKCoordinateRegion(
+                center: CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude),
+                span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
+            ))
         }
     }
     

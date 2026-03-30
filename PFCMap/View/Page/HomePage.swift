@@ -48,8 +48,8 @@ struct HomePage: View {
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
-            .task {
-                await model.onAppear(locationStore: store.locationStore, shopCatalogStore: store.shopCatalogStore)
+            .onAppear {
+                model.onAppear(locationStore: store.locationStore)
             }
             .alert("エラー", isPresented: Binding(get: { model.errorMessage != nil }, set: { if !$0 { model.errorMessage = nil } })) {
                 Button("OK", role: .cancel) {}

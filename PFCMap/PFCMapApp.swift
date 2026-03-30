@@ -24,8 +24,14 @@ struct PFCMapApp: App {
     
     var body: some Scene {
         WindowGroup {
-            HomePage()
-                .environment(store)
+            Group {
+                if store.isInitialized {
+                    HomePage()
+                } else {
+                    SplashPage()
+                }
+            }
+            .environment(store)
         }
     }
 }

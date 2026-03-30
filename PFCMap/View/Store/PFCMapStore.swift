@@ -9,10 +9,16 @@ final class PFCMapStore {
     @ObservationIgnored var shopSearchStore: ShopSearchStore
     @ObservationIgnored var shopCatalogStore: ShopCatalogStore
     
+    var isInitialized: Bool = false
+    
     init(factory: Factory) {
         // Factoryからリポジトリを取得してStoreの初期化など
-        self.locationStore = LocationStore(locationRepository: factory.makeLocationRepository())
-        self.shopSearchStore = ShopSearchStore(shopSearchRepository: factory.makeShopSearchRepository())
+        self.locationStore = LocationStore(
+            locationRepository: factory.makeLocationRepository()
+        )
+        self.shopSearchStore = ShopSearchStore(
+            shopSearchRepository: factory.makeShopSearchRepository()
+        )
         self.shopCatalogStore = ShopCatalogStore(
             remoteClient: factory.makePFCRemoteClient(),
             repository: factory.makeShopCatalogRepository()
