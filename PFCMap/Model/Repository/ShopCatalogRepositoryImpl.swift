@@ -3,14 +3,38 @@ import SwiftData
 import NZData
 
 public actor ShopCatalogRepositoryImpl {
+    private let remoteClient: any PFCRemoteClient
     private let dataOperator: DataOperator
     
-    public init(modelContainer: ModelContainer) {
+    public init(remoteClient: any PFCRemoteClient, modelContainer: ModelContainer) {
+        self.remoteClient = remoteClient
         self.dataOperator = DataOperator(modelContainer: modelContainer)
     }
 }
 
 extension ShopCatalogRepositoryImpl: ShopCatalogRepository {
+    public func sync() async throws {
+        let dtos = try await remoteClient.fetchShops()
+        let shops = dtos.map { dto in
+            ShopCatalog(
+                id: dto.id,
+                name: dto.name,
+                items: dto.items.map { item in
+                    ShopItem(
+                        id: item.id,
+                        name: item.name,
+                        calorie: item.calorie,
+                        protein: item.protein,
+                        fat: item.fat,
+                        carbohydrate: item.carbohydrate,
+                        photoData: nil
+                    )
+                }
+            )
+        }
+        try await saveShops(shops)
+    }
+
     public func fetchShops() async throws -> [ShopCatalog] {
         try await dataOperator.fetchShops()
     }

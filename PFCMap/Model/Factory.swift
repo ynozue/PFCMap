@@ -53,7 +53,8 @@ extension Factory {
             // SwiftData 用のコンテナ初期化などは本来 App で行うが、ここでは簡易化のため
             // 実運用上は Factory が保持するか、他から提供するようにする
             let container = try! ModelContainer(for: ShopCatalogEntity.self, ShopItemEntity.self)
-            return ShopCatalogRepositoryImpl(modelContainer: container)
+            let remoteClient = makePFCRemoteClient()
+            return ShopCatalogRepositoryImpl(remoteClient: remoteClient, modelContainer: container)
         case .preview:
             return ShopCatalogRepositoryDummy()
         }

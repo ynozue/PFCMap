@@ -3,6 +3,7 @@ import SwiftUI
 @MainActor
 struct MenuPage: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(PFCMapStore.self) private var store
     @State private var model = MenuPageModel()
     
     var body: some View {
@@ -31,13 +32,13 @@ struct MenuPage: View {
                 
                 Section("デバッグメニュー") {
                     Button {
-                        Task { await model.syncAPI() }
+                        Task { await model.syncAPI(store: store) }
                     } label: {
                         Label("API同期", systemImage: "arrow.triangle.2.circlepath")
                     }
                     
                     Button {
-                        Task { await model.generateDBData() }
+                        Task { await model.generateDBData(store: store) }
                     } label: {
                         Label("DB情報の生成", systemImage: "plus.square.on.square")
                     }
@@ -64,4 +65,5 @@ struct MenuPage: View {
 
 #Preview {
     MenuPage()
+        .environment(PFCMapStore(factory: .create(env: .preview)))
 }

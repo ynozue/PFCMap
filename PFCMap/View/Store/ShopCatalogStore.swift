@@ -19,27 +19,15 @@ public final class ShopCatalogStore {
         
         // If empty, fetch from API and save to SwiftData
         if fetchedShops.isEmpty {
-            let remoteShops = try await remoteClient.fetchShops()
-            let domainShops = remoteShops.map { dto in
-                ShopCatalog(
-                    id: dto.id,
-                    name: dto.name,
-                    items: dto.items.map { idto in
-                        ShopItem(
-                            id: idto.id,
-                            name: idto.name,
-                            calorie: idto.calorie,
-                            protein: idto.protein,
-                            fat: idto.fat,
-                            carbohydrate: idto.carbohydrate
-                        )
-                    }
-                )
-            }
-            try await repository.saveShops(domainShops)
-            self.shops = domainShops
+            try await sync()
         } else {
             self.shops = fetchedShops
         }
+    }
+
+    public func sync() async throws {
+        try await repository.sync()
+        // Reload from DB
+        self.shops = try await repository.fetchShops()
     }
 }

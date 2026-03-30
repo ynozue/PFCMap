@@ -5,6 +5,11 @@ public actor ShopCatalogRepositoryDummy: ShopCatalogRepository {
     
     public init() {}
     
+    public func sync() async throws {
+        // Dummy implementation for sync
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+    }
+    
     public func fetchShops() async throws -> [ShopCatalog] {
         return shops
     }
