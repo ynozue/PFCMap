@@ -19,6 +19,9 @@ extension ShopCatalogRepositoryImpl: ShopCatalogRepository {
             ShopCatalog(
                 id: dto.id,
                 name: dto.name,
+                category: dto.category ?? "",
+                suitabilityMark: dto.suitabilityMark ?? "",
+                description: dto.description ?? "",
                 items: dto.items.map { item in
                     ShopItem(
                         id: item.id,
@@ -59,7 +62,14 @@ private extension DataOperator {
     
     func addShop(_ shop: ShopCatalog) async throws {
         try await withTransaction {
-            let entity = ShopCatalogEntity(id: shop.id, name: shop.name)
+            let entity = ShopCatalogEntity(
+                id: shop.id,
+                name: shop.name,
+                category: shop.category,
+                suitabilityMark: shop.suitabilityMark,
+                descriptionText: shop.description,
+                items: []
+            )
             entity.items = shop.items.map { item in
                 ShopItemEntity(
                     id: item.id,
@@ -82,7 +92,13 @@ private extension DataOperator {
             try delete(existing)
             
             for shop in shops {
-                let entity = ShopCatalogEntity(id: shop.id, name: shop.name)
+                let entity = ShopCatalogEntity(
+                    id: shop.id,
+                    name: shop.name,
+                    category: shop.category,
+                    suitabilityMark: shop.suitabilityMark,
+                    descriptionText: shop.description
+                )
                 entity.items = shop.items.map { item in
                     ShopItemEntity(
                         id: item.id,

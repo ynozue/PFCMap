@@ -8,9 +8,9 @@ public actor ShopSearchRepositoryDummy: ShopSearchRepository {
         // ダミーデータを返す
         return await MainActor.run {
             [
-                ShopSearchResult(name: "マクドナルド 渋谷店", location: Location(latitude: 35.6586, longitude: 139.7011)),
-                ShopSearchResult(name: "セブン-イレブン 渋谷駅前店", location: Location(latitude: 35.6596, longitude: 139.7021)),
-                ShopSearchResult(name: "スターバックス コーヒー 渋谷公園通り店", location: Location(latitude: 35.6616, longitude: 139.7001))
+                ShopSearchResult(name: "サイゼリヤ 渋谷道玄坂店", location: Location(latitude: 35.6596, longitude: 139.6991)),
+                ShopSearchResult(name: "ガスト 渋谷駅前店", location: Location(latitude: 35.6586, longitude: 139.7011)),
+                ShopSearchResult(name: "大戸屋 渋谷文化村通り店", location: Location(latitude: 35.6616, longitude: 139.6981))
             ]
         }
     }

@@ -3,10 +3,14 @@ import Foundation
 public struct ShopCatalogResponseDTO: Decodable, Sendable {
     public let id: String
     public let name: String
+    public let category: String?
+    public let suitabilityMark: String?
+    public let description: String?
     public let items: [ShopItemResponseDTO]
     
     enum CodingKeys: String, CodingKey {
-        case id, name
+        case id, name, category, description
+        case suitabilityMark = "suitability_mark"
         case items = "menus"
     }
 }
