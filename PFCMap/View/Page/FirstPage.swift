@@ -8,17 +8,36 @@ struct FirstPage: View {
     
     var body: some View {
         NavigationStack {
-            Map(position: $model.cameraPosition) {
-                // User location mark
-                UserAnnotation()
-            }
-            .mapStyle(.standard(emphasis: .automatic))
-            .mapControls {
-                MapUserLocationButton()
-                MapCompass()
-                MapScaleView()
+            ZStack {
+                Map(position: $model.cameraPosition) {
+                    // User location mark
+                    UserAnnotation()
+                }
+                .mapStyle(.standard(emphasis: .automatic))
+                .mapControls {
+                    MapUserLocationButton()
+                    MapCompass()
+                    MapScaleView()
+                }
+                
+                if model.isLoading {
+                    ProgressView()
+                        .padding()
+                        .background(.thinMaterial)
+                        .cornerRadius(8)
+                }
             }
             .navigationTitle("PFC Map")
+            .task {
+                await model.onAppear(locationStore: store.locationStore)
+            }
+            .alert("エラー", isPresented: Binding(get: { model.errorMessage != nil }, set: { if !$0 { model.errorMessage = nil } })) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                if let errorMessage = model.errorMessage {
+                    Text(errorMessage)
+                }
+            }
         }
     }
 }

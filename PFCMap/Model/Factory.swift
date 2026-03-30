@@ -17,3 +17,14 @@ final class Factory: @unchecked Sendable {
         return Factory(env: env)
     }
 }
+
+extension Factory {
+    func makeLocationRepository() -> any LocationRepository {
+        switch env {
+        case .prod, .dev:
+            return LocationRepositoryImpl()
+        case .preview:
+            return LocationRepositoryDummy()
+        }
+    }
+}
