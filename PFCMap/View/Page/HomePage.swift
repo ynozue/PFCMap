@@ -31,7 +31,7 @@ struct HomePage: View {
                     ShopCatalogListView(
                         shops: store.shopCatalogStore.shops,
                         onSelect: { shop in
-                            // ショップ選択時のアクション（詳細画面への遷移など）をここに記述
+                            store.selectedCatalog = shop
                         },
                         onSelectionChange: { shopIds in
                             Task {
@@ -60,6 +60,12 @@ struct HomePage: View {
             }
             .sheet(isPresented: Binding(get: { model.isMenuShowing }, set: { model.isMenuShowing = $0 })) {
                 MenuPage()
+            }
+            .sheet(item: Binding<ShopCatalog?>(
+                get: { store.selectedCatalog },
+                set: { store.selectedCatalog = $0 }
+            )) { shop in
+                ShopItemListPage(shop: shop)
             }
         }
     }

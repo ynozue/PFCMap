@@ -1,5 +1,6 @@
 import SwiftUI
 import Observation
+import MapKit
 
 @MainActor
 @Observable
@@ -13,5 +14,14 @@ final class LocationStore {
     
     func fetchCurrentLocation() async throws {
         self.currentLocation = try await locationRepository.requestLocation()
+    }
+    
+    func currentRegion(radius: Double = 1000) -> MKCoordinateRegion? {
+        guard let location = currentLocation else { return nil }
+        return MKCoordinateRegion(
+            center: location.coordinate,
+            latitudinalMeters: radius,
+            longitudinalMeters: radius
+        )
     }
 }
