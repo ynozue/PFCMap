@@ -12,8 +12,8 @@ final class ShopSearchStore {
         self.shopSearchRepository = shopSearchRepository
     }
     
-    func search(query: String, region: MKCoordinateRegion?) async throws {
-        self.shops = try await shopSearchRepository.search(query: query, region: region)
+    func search(queries: [String], region: MKCoordinateRegion?) async throws {
+        self.shops = try await shopSearchRepository.search(queries: queries, region: region)
     }
     
     func clear() {

@@ -4,7 +4,7 @@ import MapKit
 public actor ShopSearchRepositoryDummy: ShopSearchRepository {
     public init() {}
     
-    public func search(query: String, region: MKCoordinateRegion?) async throws -> [Shop] {
+    public func search(queries: [String], region: MKCoordinateRegion?) async throws -> [Shop] {
         // ダミーデータを返す
         return await MainActor.run {
             [

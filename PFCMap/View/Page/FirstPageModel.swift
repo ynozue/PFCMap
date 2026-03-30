@@ -10,6 +10,7 @@ final class FirstPageModel {
     var isLoadingSearch = false
     var errorMessage: String?
     var searchText: String = ""
+    var visibleRegion: MKCoordinateRegion?
     
     init() {}
     
@@ -34,15 +35,20 @@ final class FirstPageModel {
     }
     
     func searchShops(shopSearchStore: ShopSearchStore) async {
-        guard !searchText.isEmpty else { return }
+        let queries = searchText
+            .replacingOccurrences(of: "　", with: " ")
+            .split(separator: " ", omittingEmptySubsequences: true)
+            .map { String($0) }
+        
+        guard !queries.isEmpty else { return }
         
         isLoadingSearch = true
         defer { isLoadingSearch = false }
         
         do {
             // 現在の表示領域内を優先して検索する
-            let region = cameraPosition.region
-            try await shopSearchStore.search(query: searchText, region: region)
+            let region = visibleRegion
+            try await shopSearchStore.search(queries: queries, region: region)
             
             // 検索結果がある場合は最初の結果に合わせてカメラを移動する（任意）
             if let firstShop = shopSearchStore.shops.first {
@@ -61,3 +67,4 @@ final class FirstPageModel {
         shopSearchStore.clear()
     }
 }
+

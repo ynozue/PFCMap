@@ -21,6 +21,9 @@ struct FirstPage: View {
                         ))
                     }
                 }
+                .onMapCameraChange { context in
+                    model.visibleRegion = context.region
+                }
                 .mapStyle(.standard(emphasis: .automatic))
                 .mapControls {
                     MapUserLocationButton()
