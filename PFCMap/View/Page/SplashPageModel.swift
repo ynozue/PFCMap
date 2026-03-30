@@ -45,7 +45,7 @@ final class SplashPageModel {
                     }
                 }
                 
-                // 初期化時の検索結果はクリアしておく（HomePageで改めて行われるため）
+                // 初期化時の検索結果はクリアしておく（MapPageで改めて行われるため）
                 store.shopSearchStore.clear()
             }
             

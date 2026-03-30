@@ -26,7 +26,7 @@ struct PFCMapApp: App {
         WindowGroup {
             Group {
                 if store.isInitialized {
-                    HomePage()
+                    MapPage()
                 } else {
                     SplashPage()
                 }

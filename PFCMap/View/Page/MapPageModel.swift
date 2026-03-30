@@ -4,7 +4,7 @@ import Observation
 
 @MainActor
 @Observable
-final class HomePageModel {
+final class MapPageModel {
     var cameraPosition: MapCameraPosition = .automatic
     var isLoading = false
     var errorMessage: String?
