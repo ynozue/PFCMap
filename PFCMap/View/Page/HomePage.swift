@@ -8,11 +8,19 @@ struct HomePage: View {
     
     var body: some View {
         NavigationStack {
-            ZStack {
-                mapView
-                loadingOverlay
+            GeometryReader { geometry in
+                ZStack {
+                    mapView
+                    loadingOverlay
+                }
+                .safeAreaInset(edge: .bottom) {
+                    ShopListView(shops: store.shopCatalogStore.shops) { shop in
+                        // ショップ選択時のアクション（詳細画面への遷移など）をここに記述
+                    }
+                    .frame(height: geometry.size.height / 4)
+                    .ignoresSafeArea(edges: .bottom)
+                }
             }
-            .navigationTitle("PFC Map")
             .task {
                 await model.onAppear(locationStore: store.locationStore, shopCatalogStore: store.shopCatalogStore)
             }
@@ -30,8 +38,6 @@ struct HomePage: View {
         Map(position: $model.cameraPosition) {
             // User location mark
             UserAnnotation()
-            
-            searchResultMarkers
         }
         .onMapCameraChange { context in
             model.visibleRegion = context.region
@@ -44,19 +50,9 @@ struct HomePage: View {
         }
     }
     
-    @MapContentBuilder
-    private var searchResultMarkers: some MapContent {
-        ForEach(store.shopSearchStore.results) { result in
-            Marker(result.name, coordinate: CLLocationCoordinate2D(
-                latitude: result.location.latitude,
-                longitude: result.location.longitude
-            ))
-        }
-    }
-    
     @ViewBuilder
     private var loadingOverlay: some View {
-        if model.isLoading || model.isLoadingSearch {
+        if model.isLoading {
             ProgressView()
                 .padding()
                 .background(.thinMaterial)

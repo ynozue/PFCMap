@@ -7,9 +7,7 @@ import Observation
 final class HomePageModel {
     var cameraPosition: MapCameraPosition = .automatic
     var isLoading = false
-    var isLoadingSearch = false
     var errorMessage: String?
-    var searchText: String = ""
     var visibleRegion: MKCoordinateRegion?
     
     init() {}
@@ -41,38 +39,5 @@ final class HomePageModel {
         } catch {
             errorMessage = "現在地の取得に失敗しました。"
         }
-    }
-    
-    func searchShops(shopSearchStore: ShopSearchStore) async {
-        let queries = searchText
-            .replacingOccurrences(of: "　", with: " ")
-            .split(separator: " ", omittingEmptySubsequences: true)
-            .map { String($0) }
-        
-        guard !queries.isEmpty else { return }
-        
-        isLoadingSearch = true
-        defer { isLoadingSearch = false }
-        
-        do {
-            // 現在の表示領域内を優先して検索する
-            let region = visibleRegion
-            try await shopSearchStore.search(queries: queries, region: region)
-            
-            // 検索結果がある場合は最初の結果に合わせてカメラを移動する（任意）
-            if let firstShop = shopSearchStore.results.first {
-                cameraPosition = .region(MKCoordinateRegion(
-                    center: CLLocationCoordinate2D(latitude: firstShop.location.latitude, longitude: firstShop.location.longitude),
-                    span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
-                ))
-            }
-        } catch {
-            errorMessage = "検索に失敗しました。"
-        }
-    }
-    
-    func clearSearch(shopSearchStore: ShopSearchStore) {
-        searchText = ""
-        shopSearchStore.clear()
     }
 }
