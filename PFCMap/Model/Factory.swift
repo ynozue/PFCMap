@@ -52,7 +52,7 @@ extension Factory {
         case .prod, .dev:
             // SwiftData 用のコンテナ初期化などは本来 App で行うが、ここでは簡易化のため
             // 実運用上は Factory が保持するか、他から提供するようにする
-            let container = try! ModelContainer(for: ShopEntity.self, MenuEntity.self)
+            let container = try! ModelContainer(for: ShopCatalogEntity.self, ShopItemEntity.self)
             return ShopCatalogRepositoryImpl(modelContainer: container)
         case .preview:
             return ShopCatalogRepositoryDummy()

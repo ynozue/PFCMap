@@ -3,7 +3,7 @@ import SwiftData
 import NZData
 
 @Model
-public final class MenuEntity {
+public final class ShopItemEntity {
     @Attribute(.unique) public var id: String
     public var name: String
     public var calorie: Double
@@ -31,15 +31,15 @@ public final class MenuEntity {
     }
 }
 
-extension MenuEntity: DomainConvertibleModel {
-    public typealias Domain = Menu
+extension ShopItemEntity: DomainConvertibleModel {
+    public typealias Domain = ShopItem
     public typealias PKey = String
 
-    public static func primaryKey(_ key: String) -> Predicate<MenuEntity> {
-        return #Predicate<MenuEntity> { $0.id == key }
+    public static func primaryKey(_ key: String) -> Predicate<ShopItemEntity> {
+        return #Predicate<ShopItemEntity> { $0.id == key }
     }
     
-    public func toDomain() -> Menu {
+    public func toDomain() -> ShopItem {
         .init(
             id: id,
             name: name,

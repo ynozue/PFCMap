@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Menu: Sendable, Identifiable, Equatable {
+public struct ShopItem: Sendable, Identifiable, Equatable {
     public let id: String
     public let name: String
     public let calorie: Double

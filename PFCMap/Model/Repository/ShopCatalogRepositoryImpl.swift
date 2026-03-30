@@ -11,15 +11,15 @@ public actor ShopCatalogRepositoryImpl {
 }
 
 extension ShopCatalogRepositoryImpl: ShopCatalogRepository {
-    public func fetchShops() async throws -> [Shop] {
+    public func fetchShops() async throws -> [ShopCatalog] {
         try await dataOperator.fetchShops()
     }
     
-    public func addShop(_ shop: Shop) async throws {
+    public func addShop(_ shop: ShopCatalog) async throws {
         try await dataOperator.addShop(shop)
     }
     
-    public func saveShops(_ shops: [Shop]) async throws {
+    public func saveShops(_ shops: [ShopCatalog]) async throws {
         try await dataOperator.saveShops(shops)
     }
     
@@ -29,45 +29,45 @@ extension ShopCatalogRepositoryImpl: ShopCatalogRepository {
 }
 
 private extension DataOperator {
-    func fetchShops() async throws -> [Shop] {
-        try await fetch(ShopEntity.self)
+    func fetchShops() async throws -> [ShopCatalog] {
+        try await fetch(ShopCatalogEntity.self)
     }
     
-    func addShop(_ shop: Shop) async throws {
+    func addShop(_ shop: ShopCatalog) async throws {
         try await withTransaction {
-            let entity = ShopEntity(id: shop.id, name: shop.name)
-            entity.menus = shop.menus.map { menu in
-                MenuEntity(
-                    id: menu.id,
-                    name: menu.name,
-                    calorie: menu.calorie,
-                    protein: menu.protein,
-                    fat: menu.fat,
-                    carbohydrate: menu.carbohydrate,
-                    photoData: menu.photoData
+            let entity = ShopCatalogEntity(id: shop.id, name: shop.name)
+            entity.items = shop.items.map { item in
+                ShopItemEntity(
+                    id: item.id,
+                    name: item.name,
+                    calorie: item.calorie,
+                    protein: item.protein,
+                    fat: item.fat,
+                    carbohydrate: item.carbohydrate,
+                    photoData: item.photoData
                 )
             }
             try insert(entity)
         }
     }
     
-    func saveShops(_ shops: [Shop]) async throws {
+    func saveShops(_ shops: [ShopCatalog]) async throws {
         try await withTransaction {
             // Delete existing
-            let existing = try modelContext.fetch(FetchDescriptor<ShopEntity>())
+            let existing = try modelContext.fetch(FetchDescriptor<ShopCatalogEntity>())
             try delete(existing)
             
             for shop in shops {
-                let entity = ShopEntity(id: shop.id, name: shop.name)
-                entity.menus = shop.menus.map { menu in
-                    MenuEntity(
-                        id: menu.id,
-                        name: menu.name,
-                        calorie: menu.calorie,
-                        protein: menu.protein,
-                        fat: menu.fat,
-                        carbohydrate: menu.carbohydrate,
-                        photoData: menu.photoData
+                let entity = ShopCatalogEntity(id: shop.id, name: shop.name)
+                entity.items = shop.items.map { item in
+                    ShopItemEntity(
+                        id: item.id,
+                        name: item.name,
+                        calorie: item.calorie,
+                        protein: item.protein,
+                        fat: item.fat,
+                        carbohydrate: item.carbohydrate,
+                        photoData: item.photoData
                     )
                 }
                 try insert(entity)
@@ -77,7 +77,7 @@ private extension DataOperator {
     
     func clearAll() async throws {
         try await withTransaction {
-            let existing = try modelContext.fetch(FetchDescriptor<ShopEntity>())
+            let existing = try modelContext.fetch(FetchDescriptor<ShopCatalogEntity>())
             try delete(existing)
         }
     }

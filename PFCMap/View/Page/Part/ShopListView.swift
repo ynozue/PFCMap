@@ -2,8 +2,8 @@ import SwiftUI
 
 @MainActor
 struct ShopListView: View {
-    let shops: [Shop]
-    var onSelect: (Shop) -> Void = { _ in }
+    let shops: [ShopCatalog]
+    var onSelect: (ShopCatalog) -> Void = { _ in }
     @State private var viewModel = ShopListViewModel()
     
     var body: some View {
@@ -52,7 +52,7 @@ struct ShopListView: View {
 
 @MainActor
 struct ShopRowView: View {
-    let shop: Shop
+    let shop: ShopCatalog
     
     var body: some View {
         HStack(spacing: 16) {
@@ -70,12 +70,12 @@ struct ShopRowView: View {
                     .font(.headline)
                     .foregroundStyle(.primary)
                 
-                if let firstMenu = shop.menus.first {
+                if let firstItem = shop.items.first {
                     HStack(spacing: 8) {
-                        Text("\(Int(firstMenu.calorie)) kcal")
-                        Text("P: \(Int(firstMenu.protein))g")
-                        Text("F: \(Int(firstMenu.fat))g")
-                        Text("C: \(Int(firstMenu.carbohydrate))g")
+                        Text("\(Int(firstItem.calorie)) kcal")
+                        Text("P: \(Int(firstItem.protein))g")
+                        Text("F: \(Int(firstItem.fat))g")
+                        Text("C: \(Int(firstItem.carbohydrate))g")
                     }
                     .font(.caption2)
                     .foregroundStyle(.secondary)
@@ -105,8 +105,8 @@ struct ShopRowView: View {
     ZStack(alignment: .bottom) {
         Color.gray.opacity(0.2).ignoresSafeArea()
         ShopListView(shops: [
-            Shop(name: "松屋", menus: [.init(name: "牛めし", calorie: 700, protein: 20, fat: 20, carbohydrate: 100)]),
-            Shop(name: "吉野家", menus: [.init(name: "牛丼", calorie: 650, protein: 18, fat: 18, carbohydrate: 90)])
+            ShopCatalog(name: "松屋", items: [.init(name: "牛めし", calorie: 700, protein: 20, fat: 20, carbohydrate: 100)]),
+            ShopCatalog(name: "吉野家", items: [.init(name: "牛丼", calorie: 650, protein: 18, fat: 18, carbohydrate: 90)])
         ])
         .frame(height: 250)
     }

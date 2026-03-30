@@ -1,16 +1,17 @@
 import Foundation
 
-public struct ShopResponseDTO: Decodable, Sendable {
+public struct ShopCatalogResponseDTO: Decodable, Sendable {
     public let id: String
     public let name: String
-    public let menus: [MenuResponseDTO]
+    public let items: [ShopItemResponseDTO]
     
     enum CodingKeys: String, CodingKey {
-        case id, name, menus
+        case id, name
+        case items = "menus"
     }
 }
 
-public struct MenuResponseDTO: Decodable, Sendable {
+public struct ShopItemResponseDTO: Decodable, Sendable {
     public let id: String
     public let name: String
     public let calorie: Double

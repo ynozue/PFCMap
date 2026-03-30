@@ -1,19 +1,19 @@
 import Foundation
 
 public actor ShopCatalogRepositoryDummy: ShopCatalogRepository {
-    private var shops: [Shop] = []
+    private var shops: [ShopCatalog] = []
     
     public init() {}
     
-    public func fetchShops() async throws -> [Shop] {
+    public func fetchShops() async throws -> [ShopCatalog] {
         return shops
     }
     
-    public func addShop(_ shop: Shop) async throws {
+    public func addShop(_ shop: ShopCatalog) async throws {
         shops.append(shop)
     }
     
-    public func saveShops(_ shops: [Shop]) async throws {
+    public func saveShops(_ shops: [ShopCatalog]) async throws {
         self.shops = shops
     }
     

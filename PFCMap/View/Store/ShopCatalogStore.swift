@@ -4,7 +4,7 @@ import Observation
 @MainActor
 @Observable
 public final class ShopCatalogStore {
-    public private(set) var shops: [Shop] = []
+    public private(set) var shops: [ShopCatalog] = []
     private let remoteClient: any PFCRemoteClient
     private let repository: any ShopCatalogRepository
     
@@ -21,17 +21,17 @@ public final class ShopCatalogStore {
         if fetchedShops.isEmpty {
             let remoteShops = try await remoteClient.fetchShops()
             let domainShops = remoteShops.map { dto in
-                Shop(
+                ShopCatalog(
                     id: dto.id,
                     name: dto.name,
-                    menus: dto.menus.map { mdto in
-                        Menu(
-                            id: mdto.id,
-                            name: mdto.name,
-                            calorie: mdto.calorie,
-                            protein: mdto.protein,
-                            fat: mdto.fat,
-                            carbohydrate: mdto.carbohydrate
+                    items: dto.items.map { idto in
+                        ShopItem(
+                            id: idto.id,
+                            name: idto.name,
+                            calorie: idto.calorie,
+                            protein: idto.protein,
+                            fat: idto.fat,
+                            carbohydrate: idto.carbohydrate
                         )
                     }
                 )
