@@ -9,9 +9,23 @@ struct HomePage: View {
     var body: some View {
         NavigationStack {
             GeometryReader { geometry in
-                ZStack {
+                ZStack(alignment: .topLeading) {
                     mapView
                     loadingOverlay
+                    
+                    Button {
+                        model.isMenuShowing.toggle()
+                    } label: {
+                        Image(systemName: "line.3.horizontal")
+                            .font(.system(size: 24))
+                            .foregroundStyle(.primary)
+                            .padding(14)
+                            .background(.thinMaterial)
+                            .clipShape(Circle())
+                            .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+                    }
+                    .padding(.leading, 16)
+                    .padding(.top, 8)
                 }
                 .safeAreaInset(edge: .bottom) {
                     ShopListView(shops: store.shopCatalogStore.shops) { shop in
@@ -21,6 +35,7 @@ struct HomePage: View {
                     .ignoresSafeArea(edges: .bottom)
                 }
             }
+            .toolbar(.hidden, for: .navigationBar)
             .task {
                 await model.onAppear(locationStore: store.locationStore, shopCatalogStore: store.shopCatalogStore)
             }
@@ -30,6 +45,9 @@ struct HomePage: View {
                 if let errorMessage = model.errorMessage {
                     Text(errorMessage)
                 }
+            }
+            .sheet(isPresented: Binding(get: { model.isMenuShowing }, set: { model.isMenuShowing = $0 })) {
+                MenuPage()
             }
         }
     }

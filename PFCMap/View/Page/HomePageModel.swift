@@ -9,6 +9,7 @@ final class HomePageModel {
     var isLoading = false
     var errorMessage: String?
     var visibleRegion: MKCoordinateRegion?
+    var isMenuShowing = false
     
     init() {}
     
