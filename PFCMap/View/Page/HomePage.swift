@@ -31,7 +31,7 @@ struct HomePage: View {
                     ShopCatalogListView(shops: store.shopCatalogStore.shops) { shop in
                         // ショップ選択時のアクション（詳細画面への遷移など）をここに記述
                     }
-                    .frame(height: 150)
+                    .frame(height: 180)
                     .ignoresSafeArea(edges: .bottom)
                 }
             }

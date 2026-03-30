@@ -9,7 +9,7 @@ public struct ShopItem: Sendable, Identifiable, Equatable {
     public let carbohydrate: Double
     public let photoData: Data?
     
-    public init(
+    public nonisolated init(
         id: String = UUID().uuidString,
         name: String,
         calorie: Double,

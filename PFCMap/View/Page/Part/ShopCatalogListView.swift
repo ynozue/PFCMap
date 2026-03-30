@@ -4,110 +4,148 @@ import SwiftUI
 struct ShopCatalogListView: View {
     let shops: [ShopCatalog]
     var onSelect: (ShopCatalog) -> Void = { _ in }
-    @State private var viewModel = ShopCatalogListViewModel()
+    @State private var model = ShopCatalogListViewModel()
+    
+    // 3列のグリッド定義
+    private let columns = [
+        GridItem(.flexible(), spacing: 8),
+        GridItem(.flexible(), spacing: 8),
+        GridItem(.flexible(), spacing: 8)
+    ]
     
     var body: some View {
-        VStack(spacing: 0) {
-            // Drag indicator to make it look like a sheet
-            RoundedRectangle(cornerRadius: 2.5)
-                .fill(Color.secondary.opacity(0.4))
-                .frame(width: 40, height: 5)
-                .padding(.top, 8)
-                .padding(.bottom, 12)
+        VStack(alignment: .leading, spacing: 8) {
+            // Header
+            HStack {
+                Spacer()
+                Button(model.selectedShopIds.isEmpty ? "Select All" : "Clear All") {
+                    if model.selectedShopIds.isEmpty {
+                        model.selectAll(shops: shops)
+                    } else {
+                        model.selectedShopIds.removeAll()
+                    }
+                }
+                .font(.caption.bold())
+                .foregroundStyle(.blue)
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 12)
             
             if shops.isEmpty {
-                VStack(spacing: 12) {
-                    Image(systemName: "tray")
-                        .font(.largeTitle)
-                        .foregroundStyle(.tertiary)
-                    Text("表示できる店舗情報がありません")
-                        .foregroundStyle(.secondary)
-                        .font(.body)
-                }
-                .frame(maxHeight: .infinity)
-                .padding(.bottom, 20)
+                emptyView
             } else {
                 ScrollView {
-                    LazyVStack(spacing: 0) {
+                    LazyVGrid(columns: columns, spacing: 8) {
                         ForEach(shops) { shop in
-                            ShopRowView(shop: shop)
-                                .onTapGesture {
-                                    onSelect(shop)
-                                }
-                            if shop.id != shops.last?.id {
-                                Divider()
-                                    .padding(.horizontal)
+                            ShopCatalogCardView(
+                                shop: shop,
+                                isSelected: model.isSelected(id: shop.id)
+                            )
+                            .onTapGesture {
+                                model.toggleSelection(id: shop.id)
+                                onSelect(shop)
                             }
                         }
                     }
-                    .padding(.bottom, 20)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 16)
                 }
             }
         }
-        .background(.thinMaterial)
+        .task {
+            // 初期表示時に全選択
+            if !shops.isEmpty && model.selectedShopIds.isEmpty {
+                model.selectAll(shops: shops)
+            }
+        }
+        .onChange(of: shops) { _, newValue in
+            // 初めてデータがロードされた際に全選択
+            if model.selectedShopIds.isEmpty && !newValue.isEmpty {
+                model.selectAll(shops: newValue)
+            }
+        }
+        .background(.background)
+
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .shadow(color: .black.opacity(0.12), radius: 15, x: 0, y: -5)
+        .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: -2)
+    }
+    
+    @ViewBuilder
+    private var emptyView: some View {
+        VStack(spacing: 8) {
+            Image(systemName: "fork.knife.circle")
+                .font(.title2)
+                .foregroundStyle(.tertiary)
+            Text("店舗情報がありません")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 100)
     }
 }
 
 @MainActor
-struct ShopRowView: View {
+struct ShopCatalogCardView: View {
     let shop: ShopCatalog
+    let isSelected: Bool
     
     var body: some View {
-        HStack(spacing: 16) {
-            // Icon
+        HStack(alignment: .center, spacing: 6) {
+            // Smaller Icon
             ZStack {
                 Circle()
-                    .fill(Color.orange.gradient)
-                    .frame(width: 48, height: 48)
-                Image(systemName: "fork.knife")
-                    .foregroundStyle(.white)
-            }
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(shop.name)
-                    .font(.headline)
-                    .foregroundStyle(.primary)
+                    .fill(isSelected ? Color.blue.gradient : Color.gray.opacity(0.08).gradient)
+                    .frame(width: 24, height: 24)
                 
-                if let firstItem = shop.items.first {
-                    HStack(spacing: 8) {
-                        Text("\(Int(firstItem.calorie)) kcal")
-                        Text("P: \(Int(firstItem.protein))g")
-                        Text("F: \(Int(firstItem.fat))g")
-                        Text("C: \(Int(firstItem.carbohydrate))g")
-                    }
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 2)
-                    .background(Color.secondary.opacity(0.1))
-                    .cornerRadius(4)
-                } else {
-                    Text("メニュー情報なし")
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
-                }
+                Image(systemName: "fork.knife")
+                    .font(.system(size: 10))
+                    .foregroundStyle(isSelected ? .white : .secondary)
             }
             
-            Spacer()
-            
-            Image(systemName: "chevron.right")
-                .font(.footnote.bold())
-                .foregroundStyle(.tertiary)
+            // Name (Up to 2 lines)
+            Text(shop.name)
+                .font(.system(size: 11, weight: .medium, design: .rounded))
+                .foregroundStyle(isSelected ? .primary : .secondary)
+                .lineLimit(2)
+                .multilineTextAlignment(.leading)
+                .minimumScaleFactor(0.85)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding()
-        .contentShape(Rectangle())
+
+        .padding(.horizontal, 8)
+        .padding(.vertical, 6)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(height: 48) // 高さを固定してグリッドの揃えを綺麗にする
+        .background {
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(isSelected ? .blue.opacity(0.06) : .secondary.opacity(0.03))
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .stroke(isSelected ? Color.blue.opacity(0.2) : Color.clear, lineWidth: 1)
+        }
+        .scaleEffect(isSelected ? 1.02 : 1.0)
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isSelected)
     }
 }
 
+
 #Preview {
     ZStack(alignment: .bottom) {
-        Color.gray.opacity(0.2).ignoresSafeArea()
+        Color.gray.opacity(0.1).ignoresSafeArea()
         ShopCatalogListView(shops: [
-            ShopCatalog(name: "松屋", items: [.init(name: "牛めし", calorie: 700, protein: 20, fat: 20, carbohydrate: 100)]),
-            ShopCatalog(name: "吉野家", items: [.init(name: "牛丼", calorie: 650, protein: 18, fat: 18, carbohydrate: 90)])
+            ShopCatalog(id: "1", name: "ガスト", items: []),
+            ShopCatalog(id: "2", name: "サイゼリヤ", items: []),
+            ShopCatalog(id: "3", name: "大戸屋", items: []),
+            ShopCatalog(id: "4", name: "吉野家", items: []),
+            ShopCatalog(id: "5", name: "すき家", items: []),
+            ShopCatalog(id: "6", name: "松屋", items: []),
+            ShopCatalog(id: "7", name: "モスバーガー", items: []),
+            ShopCatalog(id: "8", name: "サブウェイ", items: [])
         ])
-        .frame(height: 250)
+        .frame(height: 180)
     }
 }
+
+
