@@ -4,7 +4,7 @@ public actor PFCRemoteClientDummy: PFCRemoteClient {
     public init() {}
     
     public func fetchShops() async throws -> [ShopCatalogResponseDTO] {
-        return [
+        await [
             .init(
                 id: UUID(), name: "ガスト", category: "ファミリーレストラン", suitabilityMark: "○",
                 description: "低カロリーメニューが豊富で糖質0麺への変更も可能",
