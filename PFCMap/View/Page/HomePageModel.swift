@@ -41,4 +41,20 @@ final class HomePageModel {
             errorMessage = "現在地の取得に失敗しました。"
         }
     }
+    
+    func onShopSelectionChange(shopIds: Set<String>, shopCatalogStore: ShopCatalogStore, shopSearchStore: ShopSearchStore) async {
+        let selectedShops = shopCatalogStore.shops.filter { shopIds.contains($0.id) }
+        let queries = selectedShops.map { $0.name }
+        
+        if queries.isEmpty {
+            shopSearchStore.clear()
+            return
+        }
+        
+        do {
+            try await shopSearchStore.search(queries: queries, region: visibleRegion)
+        } catch {
+            print("Search failed: \(error)")
+        }
+    }
 }

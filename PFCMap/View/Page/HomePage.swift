@@ -28,9 +28,21 @@ struct HomePage: View {
                     .padding(.top, 8)
                 }
                 .safeAreaInset(edge: .bottom) {
-                    ShopCatalogListView(shops: store.shopCatalogStore.shops) { shop in
-                        // ショップ選択時のアクション（詳細画面への遷移など）をここに記述
-                    }
+                    ShopCatalogListView(
+                        shops: store.shopCatalogStore.shops,
+                        onSelect: { shop in
+                            // ショップ選択時のアクション（詳細画面への遷移など）をここに記述
+                        },
+                        onSelectionChange: { shopIds in
+                            Task {
+                                await model.onShopSelectionChange(
+                                    shopIds: shopIds,
+                                    shopCatalogStore: store.shopCatalogStore,
+                                    shopSearchStore: store.shopSearchStore
+                                )
+                            }
+                        }
+                    )
                     .frame(height: 180)
                     .ignoresSafeArea(edges: .bottom)
                 }
@@ -56,6 +68,14 @@ struct HomePage: View {
         Map(position: $model.cameraPosition) {
             // User location mark
             UserAnnotation()
+            
+            // Search Results
+            ForEach(store.shopSearchStore.results) { result in
+                Marker(result.name, coordinate: CLLocationCoordinate2D(
+                    latitude: result.location.latitude,
+                    longitude: result.location.longitude
+                ))
+            }
         }
         .onMapCameraChange { context in
             model.visibleRegion = context.region

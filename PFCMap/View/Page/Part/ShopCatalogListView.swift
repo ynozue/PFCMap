@@ -4,6 +4,7 @@ import SwiftUI
 struct ShopCatalogListView: View {
     let shops: [ShopCatalog]
     var onSelect: (ShopCatalog) -> Void = { _ in }
+    var onSelectionChange: (Set<String>) -> Void = { _ in }
     @State private var model = ShopCatalogListViewModel()
     
     // 3列のグリッド定義
@@ -57,6 +58,9 @@ struct ShopCatalogListView: View {
             if !shops.isEmpty && model.selectedShopIds.isEmpty {
                 model.selectAll(shops: shops)
             }
+        }
+        .onChange(of: model.selectedShopIds) { _, newValue in
+            onSelectionChange(newValue)
         }
         .onChange(of: shops) { _, newValue in
             // 初めてデータがロードされた際に全選択
