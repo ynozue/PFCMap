@@ -14,15 +14,17 @@ public actor ShopSearchRepositoryImpl: ShopSearchRepository {
         let search = MKLocalSearch(request: request)
         let response = try await search.start()
         
-        return response.mapItems.map { item in
-            Shop(
-                id: item.phoneNumber ?? UUID().uuidString,
-                name: item.name ?? "不明な店",
-                location: Location(
-                    latitude: item.placemark.coordinate.latitude,
-                    longitude: item.placemark.coordinate.longitude
+        return await MainActor.run {
+            response.mapItems.map { item in
+                Shop(
+                    id: item.phoneNumber ?? UUID().uuidString,
+                    name: item.name ?? "不明な店",
+                    location: Location(
+                        latitude: item.location.coordinate.latitude,
+                        longitude: item.location.coordinate.longitude
+                    )
                 )
-            )
+            }
         }
     }
 }
