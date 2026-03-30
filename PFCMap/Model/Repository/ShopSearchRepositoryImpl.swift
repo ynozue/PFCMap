@@ -4,8 +4,8 @@ import MapKit
 public actor ShopSearchRepositoryImpl: ShopSearchRepository {
     public init() {}
     
-    public func search(queries: [String], region: MKCoordinateRegion?) async throws -> [Shop] {
-        try await withThrowingTaskGroup(of: [Shop].self) { group in
+    public func search(queries: [String], region: MKCoordinateRegion?) async throws -> [ShopSearchResult] {
+        try await withThrowingTaskGroup(of: [ShopSearchResult].self) { group in
             for query in queries {
                 group.addTask {
                     let request = MKLocalSearch.Request()
@@ -19,7 +19,7 @@ public actor ShopSearchRepositoryImpl: ShopSearchRepository {
                     
                     return await MainActor.run {
                         response.mapItems.map { item in
-                            Shop(
+                            ShopSearchResult(
                                 id: item.phoneNumber ?? UUID().uuidString,
                                 name: item.name ?? "不明な店",
                                 location: Location(
@@ -32,7 +32,7 @@ public actor ShopSearchRepositoryImpl: ShopSearchRepository {
                 }
             }
             
-            var allShops: [Shop] = []
+            var allShops: [ShopSearchResult] = []
             var seenIds = Set<String>()
             for try await shops in group {
                 for shop in shops {

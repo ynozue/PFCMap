@@ -1,4 +1,5 @@
 import Foundation
+import SwiftData
 
 enum PFCMapEnv {
     case prod
@@ -34,6 +35,27 @@ extension Factory {
             return ShopSearchRepositoryImpl()
         case .preview:
             return ShopSearchRepositoryDummy()
+        }
+    }
+    
+    func makePFCRemoteClient() -> any PFCRemoteClient {
+        switch env {
+        case .prod, .dev:
+            return PFCRemoteClientImpl()
+        case .preview:
+            return PFCRemoteClientDummy()
+        }
+    }
+    
+    func makeShopCatalogRepository() -> any ShopCatalogRepository {
+        switch env {
+        case .prod, .dev:
+            // SwiftData 用のコンテナ初期化などは本来 App で行うが、ここでは簡易化のため
+            // 実運用上は Factory が保持するか、他から提供するようにする
+            let container = try! ModelContainer(for: ShopEntity.self, MenuEntity.self)
+            return ShopCatalogRepositoryImpl(modelContainer: container)
+        case .preview:
+            return ShopCatalogRepositoryDummy()
         }
     }
 }

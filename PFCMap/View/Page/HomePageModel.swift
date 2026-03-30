@@ -14,7 +14,16 @@ final class HomePageModel {
     
     init() {}
     
-    func onAppear(locationStore: LocationStore) async {
+    func onAppear(locationStore: LocationStore, shopCatalogStore: ShopCatalogStore) async {
+        // カタログデータの初期読み込み
+        Task {
+            do {
+                try await shopCatalogStore.load()
+            } catch {
+                print("Failed to load shop catalog: \(error)")
+            }
+        }
+        
         // すでに取得済みの場合はスキップ
         if locationStore.currentLocation != nil { return }
         
@@ -51,7 +60,7 @@ final class HomePageModel {
             try await shopSearchStore.search(queries: queries, region: region)
             
             // 検索結果がある場合は最初の結果に合わせてカメラを移動する（任意）
-            if let firstShop = shopSearchStore.shops.first {
+            if let firstShop = shopSearchStore.results.first {
                 cameraPosition = .region(MKCoordinateRegion(
                     center: CLLocationCoordinate2D(latitude: firstShop.location.latitude, longitude: firstShop.location.longitude),
                     span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)

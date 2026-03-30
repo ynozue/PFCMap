@@ -5,7 +5,7 @@ import MapKit
 @MainActor
 @Observable
 final class ShopSearchStore {
-    var shops: [Shop] = []
+    var results: [ShopSearchResult] = []
     private let shopSearchRepository: any ShopSearchRepository
     
     init(shopSearchRepository: any ShopSearchRepository) {
@@ -13,10 +13,10 @@ final class ShopSearchStore {
     }
     
     func search(queries: [String], region: MKCoordinateRegion?) async throws {
-        self.shops = try await shopSearchRepository.search(queries: queries, region: region)
+        self.results = try await shopSearchRepository.search(queries: queries, region: region)
     }
     
     func clear() {
-        self.shops = []
+        self.results = []
     }
 }
