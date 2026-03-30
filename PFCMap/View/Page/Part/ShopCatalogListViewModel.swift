@@ -3,11 +3,11 @@ import SwiftUI
 @MainActor
 @Observable
 class ShopCatalogListViewModel {
-    var selectedShopIds: Set<String> = []
+    var selectedShopIds: Set<UUID> = []
     
     init() {}
     
-    func toggleSelection(id: String) {
+    func toggleSelection(id: UUID) {
         if selectedShopIds.contains(id) {
             selectedShopIds.remove(id)
         } else {
@@ -19,7 +19,7 @@ class ShopCatalogListViewModel {
         selectedShopIds = Set(shops.map { $0.id })
     }
     
-    func isSelected(id: String) -> Bool {
+    func isSelected(id: UUID) -> Bool {
         selectedShopIds.contains(id)
     }
 }

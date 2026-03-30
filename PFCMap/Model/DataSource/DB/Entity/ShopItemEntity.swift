@@ -4,7 +4,7 @@ import NZData
 
 @Model
 public final class ShopItemEntity {
-    @Attribute(.unique) public var id: String
+    @Attribute(.unique) public var id: UUID
     public var name: String
     public var calorie: Double
     public var protein: Double
@@ -13,7 +13,7 @@ public final class ShopItemEntity {
     @Attribute(.externalStorage) public var photoData: Data?
     
     public init(
-        id: String,
+        id: UUID,
         name: String,
         calorie: Double,
         protein: Double,
@@ -33,9 +33,9 @@ public final class ShopItemEntity {
 
 extension ShopItemEntity: DomainConvertibleModel {
     public typealias Domain = ShopItem
-    public typealias PKey = String
+    public typealias PKey = UUID
 
-    public static func primaryKey(_ key: String) -> Predicate<ShopItemEntity> {
+    public static func primaryKey(_ key: UUID) -> Predicate<ShopItemEntity> {
         return #Predicate<ShopItemEntity> { $0.id == key }
     }
     

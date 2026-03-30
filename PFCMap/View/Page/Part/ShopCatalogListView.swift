@@ -4,7 +4,7 @@ import SwiftUI
 struct ShopCatalogListView: View {
     let shops: [ShopCatalog]
     var onSelect: (ShopCatalog) -> Void = { _ in }
-    var onSelectionChange: (Set<String>) -> Void = { _ in }
+    var onSelectionChange: (Set<UUID>) -> Void = { _ in }
     @State private var model = ShopCatalogListViewModel()
     
     // 3列のグリッド定義
@@ -158,11 +158,11 @@ struct ShopCatalogCardView: View {
     ZStack(alignment: .bottom) {
         Color.gray.opacity(0.1).ignoresSafeArea()
         ShopCatalogListView(shops: [
-            ShopCatalog(id: "1", name: "ガスト", category: "ファミリーレストラン", suitabilityMark: "○"),
-            ShopCatalog(id: "2", name: "サイゼリヤ", category: "ファミリーレストラン", suitabilityMark: "○"),
-            ShopCatalog(id: "3", name: "大戸屋", category: "定食", suitabilityMark: "○"),
-            ShopCatalog(id: "4", name: "吉野家", category: "牛丼・丼もの", suitabilityMark: "○"),
-            ShopCatalog(id: "21", name: "マクドナルド", category: "ハンバーガー", suitabilityMark: "-")
+            ShopCatalog(name: "ガスト", category: "ファミリーレストラン", suitabilityMark: "○"),
+            ShopCatalog(name: "サイゼリヤ", category: "ファミリーレストラン", suitabilityMark: "○"),
+            ShopCatalog(name: "大戸屋", category: "定食", suitabilityMark: "○"),
+            ShopCatalog(name: "吉野家", category: "牛丼・丼もの", suitabilityMark: "○"),
+            ShopCatalog(name: "マクドナルド", category: "ハンバーガー", suitabilityMark: "-")
         ])
         .frame(height: 180)
     }

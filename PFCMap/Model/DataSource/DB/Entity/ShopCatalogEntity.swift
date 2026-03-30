@@ -4,7 +4,7 @@ import NZData
 
 @Model
 public final class ShopCatalogEntity {
-    @Attribute(.unique) public var id: String
+    @Attribute(.unique) public var id: UUID
     public var name: String
     public var category: String
     public var suitabilityMark: String
@@ -12,7 +12,7 @@ public final class ShopCatalogEntity {
     @Relationship(deleteRule: .cascade) public var items: [ShopItemEntity]
     
     public init(
-        id: String,
+        id: UUID,
         name: String,
         category: String = "",
         suitabilityMark: String = "",
@@ -30,9 +30,9 @@ public final class ShopCatalogEntity {
 
 extension ShopCatalogEntity: DomainConvertibleModel {
     public typealias Domain = ShopCatalog
-    public typealias PKey = String
+    public typealias PKey = UUID
 
-    public static func primaryKey(_ key: String) -> Predicate<ShopCatalogEntity> {
+    public static func primaryKey(_ key: UUID) -> Predicate<ShopCatalogEntity> {
         return #Predicate<ShopCatalogEntity> { $0.id == key }
     }
     

@@ -1,7 +1,7 @@
 import Foundation
 
 public struct ShopCatalog: Sendable, Identifiable, Equatable {
-    public let id: String
+    public let id: UUID
     public let name: String
     public let category: String
     public let suitabilityMark: String
@@ -9,7 +9,7 @@ public struct ShopCatalog: Sendable, Identifiable, Equatable {
     public let items: [ShopItem]
     
     public nonisolated init(
-        id: String = UUID().uuidString,
+        id: UUID = UUID(),
         name: String,
         category: String = "",
         suitabilityMark: String = "",

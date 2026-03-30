@@ -20,7 +20,6 @@ public actor ShopSearchRepositoryImpl: ShopSearchRepository {
                     return await MainActor.run {
                         response.mapItems.map { item in
                             ShopSearchResult(
-                                id: item.phoneNumber ?? UUID().uuidString,
                                 name: item.name ?? "不明な店",
                                 location: Location(
                                     latitude: item.location.coordinate.latitude,
@@ -33,7 +32,7 @@ public actor ShopSearchRepositoryImpl: ShopSearchRepository {
             }
             
             var allShops: [ShopSearchResult] = []
-            var seenIds = Set<String>()
+            var seenIds = Set<UUID>()
             for try await shops in group {
                 for shop in shops {
                     if !seenIds.contains(shop.id) {

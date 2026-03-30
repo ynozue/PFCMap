@@ -42,7 +42,7 @@ final class HomePageModel {
         }
     }
     
-    func onShopSelectionChange(shopIds: Set<String>, shopCatalogStore: ShopCatalogStore, shopSearchStore: ShopSearchStore) async {
+    func onShopSelectionChange(shopIds: Set<UUID>, shopCatalogStore: ShopCatalogStore, shopSearchStore: ShopSearchStore) async {
         let selectedShops = shopCatalogStore.shops.filter { shopIds.contains($0.id) }
         let queries = selectedShops.map { $0.name }
         
