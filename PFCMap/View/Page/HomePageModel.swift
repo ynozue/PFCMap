@@ -4,7 +4,7 @@ import Observation
 
 @MainActor
 @Observable
-final class FirstPageModel {
+final class HomePageModel {
     var cameraPosition: MapCameraPosition = .automatic
     var isLoading = false
     var isLoadingSearch = false
@@ -67,4 +67,3 @@ final class FirstPageModel {
         shopSearchStore.clear()
     }
 }
-

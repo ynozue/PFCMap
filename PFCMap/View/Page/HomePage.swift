@@ -2,9 +2,9 @@ import SwiftUI
 import MapKit
 
 @MainActor
-struct FirstPage: View {
+struct HomePage: View {
     @Environment(PFCMapStore.self) private var store
-    @State private var model = FirstPageModel()
+    @State private var model = HomePageModel()
     
     var body: some View {
         NavigationStack {
@@ -65,6 +65,6 @@ struct FirstPage: View {
 }
 
 #Preview {
-    FirstPage()
+    HomePage()
         .environment(PFCMapStore(factory: .create(env: .preview)))
 }

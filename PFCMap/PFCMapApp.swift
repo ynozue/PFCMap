@@ -24,7 +24,7 @@ struct PFCMapApp: App {
     
     var body: some Scene {
         WindowGroup {
-            FirstPage()
+            HomePage()
                 .environment(store)
         }
     }
