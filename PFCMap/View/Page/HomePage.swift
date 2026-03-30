@@ -28,10 +28,10 @@ struct HomePage: View {
                     .padding(.top, 8)
                 }
                 .safeAreaInset(edge: .bottom) {
-                    ShopListView(shops: store.shopCatalogStore.shops) { shop in
+                    ShopCatalogListView(shops: store.shopCatalogStore.shops) { shop in
                         // ショップ選択時のアクション（詳細画面への遷移など）をここに記述
                     }
-                    .frame(height: geometry.size.height / 4)
+                    .frame(height: 150)
                     .ignoresSafeArea(edges: .bottom)
                 }
             }

@@ -2,6 +2,6 @@ import SwiftUI
 
 @MainActor
 @Observable
-class ShopListViewModel {
+class ShopCatalogListViewModel {
     init() {}
 }

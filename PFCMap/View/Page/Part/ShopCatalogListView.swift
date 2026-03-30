@@ -1,10 +1,10 @@
 import SwiftUI
 
 @MainActor
-struct ShopListView: View {
+struct ShopCatalogListView: View {
     let shops: [ShopCatalog]
     var onSelect: (ShopCatalog) -> Void = { _ in }
-    @State private var viewModel = ShopListViewModel()
+    @State private var viewModel = ShopCatalogListViewModel()
     
     var body: some View {
         VStack(spacing: 0) {
@@ -104,7 +104,7 @@ struct ShopRowView: View {
 #Preview {
     ZStack(alignment: .bottom) {
         Color.gray.opacity(0.2).ignoresSafeArea()
-        ShopListView(shops: [
+        ShopCatalogListView(shops: [
             ShopCatalog(name: "松屋", items: [.init(name: "牛めし", calorie: 700, protein: 20, fat: 20, carbohydrate: 100)]),
             ShopCatalog(name: "吉野家", items: [.init(name: "牛丼", calorie: 650, protein: 18, fat: 18, carbohydrate: 90)])
         ])
