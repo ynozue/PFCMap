@@ -1,0 +1,24 @@
+{
+  "originHash" : "ff0471da67d02e55cb05bfa2f74ebb83b1f7771069f26653e1b0feeb9c55d26e",
+  "pins" : [
+    {
+      "identity" : "nzutils",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ynozue/NZUtils.git",
+      "state" : {
+        "revision" : "1c7d28c65cf19342406d130a33b903adaab819c4",
+        "version" : "1.1.1"
+      }
+    },
+    {
+      "identity" : "swift-collections",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-collections.git",
+      "state" : {
+        "revision" : "6675bc0ff86e61436e615df6fc5174e043e57924",
+        "version" : "1.4.1"
+      }
+    }
+  ],
+  "version" : 3
+}
