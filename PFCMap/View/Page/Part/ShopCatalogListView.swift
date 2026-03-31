@@ -45,10 +45,42 @@ struct ShopCatalogListView: View {
             )
             
             // Header
-            HStack {
-                Text("メニューリスト")
-                    .font(.headline)
-                    .foregroundStyle(.primary)
+            HStack(spacing: 8) {
+                // Protein Filter Toggle
+                Button {
+                    withAnimation {
+                        model.isProteinFilterEnabled.toggle()
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "line.3.horizontal.decrease.circle")
+                        Text("P≥20g")
+                    }
+                    .font(.system(size: 11, weight: .bold))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .foregroundStyle(model.isProteinFilterEnabled ? .white : .orange)
+                    .background(model.isProteinFilterEnabled ? Color.orange : Color.orange.opacity(0.1))
+                    .clipShape(Capsule())
+                }
+                
+                // Fat Filter Toggle
+                Button {
+                    withAnimation {
+                        model.isFatFilterEnabled.toggle()
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "line.3.horizontal.decrease.circle")
+                        Text("F≤20g")
+                    }
+                    .font(.system(size: 11, weight: .bold))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .foregroundStyle(model.isFatFilterEnabled ? .white : .yellow)
+                    .background(model.isFatFilterEnabled ? Color.yellow : Color.yellow.opacity(0.1))
+                    .clipShape(Capsule())
+                }
                 
                 Button {
                     withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) {
@@ -70,11 +102,11 @@ struct ShopCatalogListView: View {
                     }
                 } label: {
                     HStack(spacing: 4) {
-                        Image(systemName: "line.3.horizontal.decrease.circle")
+                        Image(systemName: "arrow.up.arrow.down.circle")
                         Text(model.sortType.rawValue)
                     }
-                    .font(.subheadline)
-                    .padding(.horizontal, 12)
+                    .font(.system(size: 11, weight: .bold))
+                    .padding(.horizontal, 10)
                     .padding(.vertical, 6)
                     .background(Color.blue.opacity(0.1))
                     .clipShape(Capsule())
