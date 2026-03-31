@@ -4,7 +4,6 @@ public struct ShopCatalogResponseDTO: Decodable, Sendable {
     public let id: UUID
     public let name: String
     public let category: String?
-    public let suitabilityMark: String?
     public let description: String?
     public let items: [ShopItemResponseDTO]
     
@@ -12,21 +11,18 @@ public struct ShopCatalogResponseDTO: Decodable, Sendable {
         id: UUID,
         name: String,
         category: String? = nil,
-        suitabilityMark: String? = nil,
         description: String? = nil,
         items: [ShopItemResponseDTO] = []
     ) {
         self.id = id
         self.name = name
         self.category = category
-        self.suitabilityMark = suitabilityMark
         self.description = description
         self.items = items
     }
     
     enum CodingKeys: String, CodingKey {
         case id, name, category, description
-        case suitabilityMark = "suitability_mark"
         case items = "menus"
     }
 }

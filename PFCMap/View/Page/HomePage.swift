@@ -9,45 +9,47 @@ struct HomePage: View {
     var body: some View {
         NavigationStack {
             GeometryReader { geometry in
-                ZStack(alignment: .topLeading) {
+                ZStack(alignment: .bottom) {
                     mapView
-                    loadingOverlay
                     
-                    Button {
-                        model.isMenuShowing.toggle()
-                    } label: {
-                        Image(systemName: "line.3.horizontal")
-                            .font(.system(size: 24))
-                            .foregroundStyle(.primary)
-                            .padding(14)
-                            .background(.thinMaterial)
-                            .clipShape(Circle())
-                            .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
-                    }
-                    .padding(.leading, 16)
-                    .padding(.top, 8)
-                }
-                .safeAreaInset(edge: .bottom) {
                     ShopCatalogListView(
                         shops: store.shopCatalogStore.shops,
-                        onSelect: { _ in },
-                        onSelectionChange: { shopIds in
-                            Task {
-                                await model.onShopSelectionChange(
-                                    shopIds: shopIds,
-                                    shopCatalogStore: store.shopCatalogStore,
-                                    shopSearchStore: store.shopSearchStore
-                                )
-                            }
+                        maxHeight: geometry.size.height,
+                        onSelect: { shop in
+                            // 必要に応じて地図への移動処理などをここに追加可能
                         }
                     )
-                    .frame(height: 180)
-                    .ignoresSafeArea(edges: .bottom)
+                    
+                    loadingOverlay
+                    
+                    // Location Button Overlay
+                    VStack {
+                        Button {
+                            model.isMenuShowing.toggle()
+                        } label: {
+                            Image(systemName: "line.3.horizontal")
+                                .font(.system(size: 24))
+                                .foregroundStyle(.primary)
+                                .padding(14)
+                                .background(.thinMaterial)
+                                .clipShape(Circle())
+                                .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+                        }
+                        .padding(.leading, 16)
+                        .padding(.top, 8)
+                        
+                        Spacer()
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
             .onAppear {
-                model.onAppear(locationStore: store.locationStore)
+                model.onAppear(
+                    locationStore: store.locationStore,
+                    shopCatalogStore: store.shopCatalogStore,
+                    shopSearchStore: store.shopSearchStore
+                )
             }
             .alert("エラー", isPresented: Binding(get: { model.errorMessage != nil }, set: { if !$0 { model.errorMessage = nil } })) {
                 Button("OK", role: .cancel) {}
@@ -59,7 +61,6 @@ struct HomePage: View {
             .sheet(isPresented: Binding(get: { model.isMenuShowing }, set: { model.isMenuShowing = $0 })) {
                 MenuPage()
             }
-
         }
     }
     

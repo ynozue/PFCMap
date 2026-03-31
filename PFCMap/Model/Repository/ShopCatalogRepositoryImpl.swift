@@ -20,7 +20,6 @@ extension ShopCatalogRepositoryImpl: ShopCatalogRepository {
                 id: dto.id,
                 name: dto.name,
                 category: dto.category ?? "",
-                suitabilityMark: dto.suitabilityMark ?? "",
                 description: dto.description ?? "",
                 items: dto.items.map { item in
                     ShopItem(
@@ -66,7 +65,6 @@ private extension DataOperator {
                 id: shop.id,
                 name: shop.name,
                 category: shop.category,
-                suitabilityMark: shop.suitabilityMark,
                 descriptionText: shop.description,
                 items: []
             )
@@ -96,7 +94,6 @@ private extension DataOperator {
                     id: shop.id,
                     name: shop.name,
                     category: shop.category,
-                    suitabilityMark: shop.suitabilityMark,
                     descriptionText: shop.description
                 )
                 entity.items = shop.items.map { item in

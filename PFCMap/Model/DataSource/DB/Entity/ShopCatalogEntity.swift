@@ -7,7 +7,6 @@ public final class ShopCatalogEntity {
     @Attribute(.unique) public var id: UUID
     public var name: String
     public var category: String
-    public var suitabilityMark: String
     public var descriptionText: String // descriptionはSwift標準にあるので避けるため
     @Relationship(deleteRule: .cascade) public var items: [ShopItemEntity]
     
@@ -15,14 +14,12 @@ public final class ShopCatalogEntity {
         id: UUID,
         name: String,
         category: String = "",
-        suitabilityMark: String = "",
         descriptionText: String = "",
         items: [ShopItemEntity] = []
     ) {
         self.id = id
         self.name = name
         self.category = category
-        self.suitabilityMark = suitabilityMark
         self.descriptionText = descriptionText
         self.items = items
     }
@@ -41,7 +38,6 @@ extension ShopCatalogEntity: DomainConvertibleModel {
             id: id,
             name: name,
             category: category,
-            suitabilityMark: suitabilityMark,
             description: descriptionText,
             items: items.map { $0.toDomain() }
         )

@@ -3,153 +3,208 @@ import SwiftUI
 @MainActor
 struct ShopCatalogListView: View {
     let shops: [ShopCatalog]
+    let maxHeight: CGFloat
     var onSelect: (ShopCatalog) -> Void = { _ in }
-    var onSelectionChange: (Set<UUID>) -> Void = { _ in }
     @State private var model = ShopCatalogListViewModel()
     
-    // 3列のグリッド定義
-    private let columns = [
-        GridItem(.flexible(), spacing: 8),
-        GridItem(.flexible(), spacing: 8),
-        GridItem(.flexible(), spacing: 8)
-    ]
+    private var sortedItems: [ShopCatalogListViewModel.DisplayItem] {
+        model.displayItems(from: shops)
+    }
+    
+    // 現在の高さ（計算値）
+    private var currentHeight: CGFloat {
+        model.isExpanded ? maxHeight * 0.85 : maxHeight * 0.3
+    }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            // Header
+        VStack(alignment: .leading, spacing: 0) {
+            // Drag Handle
             HStack {
                 Spacer()
-                Button(model.selectedShopIds.isEmpty ? "Select All" : "Clear All") {
-                    if model.selectedShopIds.isEmpty {
-                        model.selectAll(shops: shops)
-                    } else {
-                        model.selectedShopIds.removeAll()
+                RoundedRectangle(cornerRadius: 3)
+                    .fill(Color.secondary.opacity(0.3))
+                    .frame(width: 40, height: 5)
+                Spacer()
+            }
+            .padding(.top, 8)
+            .padding(.bottom, 4)
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture()
+                    .onEnded { value in
+                        if value.translation.height < -50 {
+                            withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) {
+                                model.isExpanded = true
+                            }
+                        } else if value.translation.height > 50 {
+                            withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) {
+                                model.isExpanded = false
+                            }
+                        }
                     }
+            )
+            
+            // Header
+            HStack {
+                Text("メニューリスト")
+                    .font(.headline)
+                    .foregroundStyle(.primary)
+                
+                Button {
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) {
+                        model.isExpanded.toggle()
+                    }
+                } label: {
+                    Image(systemName: model.isExpanded ? "chevron.down.circle.fill" : "chevron.up.circle.fill")
+                        .font(.title3)
+                        .foregroundStyle(.blue.secondary)
                 }
-                .font(.caption.bold())
-                .foregroundStyle(.blue)
+                
+                Spacer()
+                
+                Menu {
+                    Picker("ソート順", selection: $model.sortType) {
+                        ForEach(ShopCatalogListViewModel.SortType.allCases, id: \.self) { type in
+                            Text(type.rawValue).tag(type)
+                        }
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "line.3.horizontal.decrease.circle")
+                        Text(model.sortType.rawValue)
+                    }
+                    .font(.subheadline)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.blue.opacity(0.1))
+                    .clipShape(Capsule())
+                }
             }
             .padding(.horizontal, 16)
-            .padding(.top, 12)
+            .padding(.top, 8)
+            .padding(.bottom, 8)
             
             if shops.isEmpty {
                 emptyView
             } else {
                 ScrollView {
-                    LazyVGrid(columns: columns, spacing: 8) {
-                        ForEach(shops) { shop in
-                            ShopCatalogCardView(
-                                shop: shop,
-                                isSelected: model.isSelected(id: shop.id)
-                            )
-                            .onTapGesture {
-                                model.toggleSelection(id: shop.id)
-                                onSelect(shop)
-                            }
+                    LazyVStack(spacing: 12) {
+                        ForEach(sortedItems) { displayItem in
+                            ShopItemRowView(displayItem: displayItem)
+                                .onTapGesture {
+                                    onSelect(displayItem.shop)
+                                }
                         }
                     }
                     .padding(.horizontal, 16)
-                    .padding(.bottom, 16)
+                    .padding(.bottom, 24)
                 }
             }
         }
-        .task {
-            // 初期表示時に全選択
-            if !shops.isEmpty && model.selectedShopIds.isEmpty {
-                model.selectAll(shops: shops)
-            }
-        }
-        .onChange(of: model.selectedShopIds) { _, newValue in
-            onSelectionChange(newValue)
-        }
-        .onChange(of: shops) { _, newValue in
-            // 初めてデータがロードされた際に全選択
-            if model.selectedShopIds.isEmpty && !newValue.isEmpty {
-                model.selectAll(shops: newValue)
-            }
-        }
+        .frame(height: currentHeight, alignment: .top)
         .liquidGlassBackground(cornerRadius: 24)
         .padding(.horizontal, 16)
-        .padding(.bottom, 8) // 下部にも少し余白を持たせて浮遊感を出す
+        .padding(.bottom, 8)
     }
     
     @ViewBuilder
     private var emptyView: some View {
         VStack(spacing: 8) {
             Image(systemName: "fork.knife.circle")
-                .font(.title2)
+                .font(.largeTitle)
                 .foregroundStyle(.tertiary)
             Text("店舗情報がありません")
-                .font(.caption2)
+                .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
-        .frame(height: 100)
+        .frame(height: 200)
     }
 }
 
 @MainActor
-struct ShopCatalogCardView: View {
-    let shop: ShopCatalog
-    let isSelected: Bool
+struct ShopItemRowView: View {
+    let displayItem: ShopCatalogListViewModel.DisplayItem
     
     var body: some View {
-        HStack(alignment: .center, spacing: 8) {
-            // Icon with Suitability indicator
-            ZStack(alignment: .bottomTrailing) {
+        VStack(alignment: .leading, spacing: 8) {
+            // Shop Header
+            HStack(spacing: 8) {
+                // Shop Icon (Placeholder)
                 Circle()
-                    .fill(isSelected ? Color.blue.gradient : Color.gray.opacity(0.08).gradient)
-                    .frame(width: 28, height: 28)
+                    .fill(Color.blue.opacity(0.1))
+                    .frame(width: 24, height: 24)
+                    .overlay {
+                        Image(systemName: "shop")
+                            .font(.system(size: 12))
+                            .foregroundStyle(.blue)
+                    }
                 
-                Image(systemName: "fork.knife")
-                    .font(.system(size: 11))
-                    .foregroundStyle(isSelected ? .white : .secondary)
+                Text(displayItem.shop.name)
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(.secondary)
                 
-                // Suitability Mark Badge
-                if !shop.suitabilityMark.isEmpty {
-                    Text(shop.suitabilityMark)
-                        .font(.system(size: 9, weight: .bold))
-                        .foregroundStyle(shop.suitabilityMark == "○" ? .green : .orange)
-                        .background {
-                            Circle()
-                                .fill(.white)
-                                .shadow(color: .black.opacity(0.1), radius: 1)
-                        }
-                        .offset(x: 4, y: 4)
-                }
+                Spacer()
             }
             
-            VStack(alignment: .leading, spacing: 0) {
-                if !shop.category.isEmpty {
-                    Text(shop.category)
-                        .font(.system(size: 8))
-                        .foregroundStyle(.tertiary)
-                        .textCase(.uppercase)
+            HStack(alignment: .center, spacing: 12) {
+                // Menu Photo
+                if let photoData = displayItem.item.photoData, let image = UIImage(data: photoData) {
+                    Image(uiImage: image)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 80, height: 80)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                } else {
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.gray.opacity(0.1))
+                        .frame(width: 80, height: 80)
+                        .overlay {
+                            Image(systemName: "fork.knife")
+                                .foregroundStyle(.tertiary)
+                        }
                 }
                 
-                Text(shop.name)
-                    .font(.system(size: 11, weight: .medium, design: .rounded))
-                    .foregroundStyle(isSelected ? .primary : .secondary)
-                    .lineLimit(2)
-                    .multilineTextAlignment(.leading)
-                    .minimumScaleFactor(0.85)
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(displayItem.item.name)
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .foregroundStyle(.primary)
+                        .lineLimit(2)
+                    
+                    HStack(alignment: .bottom, spacing: 4) {
+                        Text("\(Int(displayItem.item.calorie))")
+                            .font(.system(size: 20, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.blue)
+                        Text("kcal")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundStyle(.secondary)
+                            .padding(.bottom, 2)
+                    }
+                    
+                    // PFC
+                    HStack(spacing: 12) {
+                        nutrientView(name: "P", value: displayItem.item.protein, color: .orange)
+                        nutrientView(name: "F", value: displayItem.item.fat, color: .yellow)
+                        nutrientView(name: "C", value: displayItem.item.carbohydrate, color: .green)
+                    }
+                }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 8)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .frame(height: 52) // 情報を増やしたため少し高さを出す
-        .background {
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(isSelected ? .blue.opacity(0.06) : .secondary.opacity(0.03))
+        .padding(12)
+        .background(Color.white.opacity(0.5))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 4)
+    }
+    
+    private func nutrientView(name: String, value: Double, color: Color) -> some View {
+        HStack(spacing: 2) {
+            Text(name)
+                .font(.system(size: 10, weight: .bold))
+                .foregroundStyle(color)
+            Text(String(format: "%.1fg", value))
+                .font(.system(size: 12, weight: .medium, design: .rounded))
+                .foregroundStyle(.primary)
         }
-        .overlay {
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .stroke(isSelected ? Color.blue.opacity(0.2) : Color.clear, lineWidth: 1)
-        }
-        .scaleEffect(isSelected ? 1.02 : 1.0)
-        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isSelected)
     }
 }
 
@@ -158,13 +213,23 @@ struct ShopCatalogCardView: View {
     ZStack(alignment: .bottom) {
         Color.gray.opacity(0.1).ignoresSafeArea()
         ShopCatalogListView(shops: [
-            ShopCatalog(name: "ガスト", category: "ファミリーレストラン", suitabilityMark: "○"),
-            ShopCatalog(name: "サイゼリヤ", category: "ファミリーレストラン", suitabilityMark: "○"),
-            ShopCatalog(name: "大戸屋", category: "定食", suitabilityMark: "○"),
-            ShopCatalog(name: "吉野家", category: "牛丼・丼もの", suitabilityMark: "○"),
-            ShopCatalog(name: "マクドナルド", category: "ハンバーガー", suitabilityMark: "-")
-        ])
-        .frame(height: 180)
+            ShopCatalog(
+                name: "ガスト",
+                category: "ファミリーレストラン",
+                items: [
+                    ShopItem(name: "チーズINハンバーグ", calorie: 750, protein: 35.2, fat: 45.1, carbohydrate: 28.5),
+                    ShopItem(name: "蒸し鶏のエコスラッド", calorie: 120, protein: 12.5, fat: 3.2, carbohydrate: 5.1)
+                ]
+            ),
+            ShopCatalog(
+                name: "大戸屋",
+                category: "定食",
+                items: [
+                    ShopItem(name: "しまほっけの炭火焼き定食", calorie: 580, protein: 42.1, fat: 12.5, carbohydrate: 65.2)
+                ]
+            )
+        ], maxHeight: 600)
+        .frame(height: 400)
     }
 }
 

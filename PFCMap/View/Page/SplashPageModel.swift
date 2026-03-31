@@ -34,8 +34,6 @@ final class SplashPageModel {
                 )
                 let searchResults = store.shopSearchStore.results
                 
-
-                
                 // 初期化時の検索結果はクリアしておく（MapPageで改めて行われるため）
                 store.shopSearchStore.clear()
             }

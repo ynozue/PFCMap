@@ -13,29 +13,25 @@ final class HomePageModel {
     
     init() {}
     
-    func onAppear(locationStore: LocationStore) {
+    func onAppear(locationStore: LocationStore, shopCatalogStore: ShopCatalogStore, shopSearchStore: ShopSearchStore) {
         // スプラッシュですでに取得済みの現在地をカメラ位置に設定
         if let location = locationStore.currentLocation {
             cameraPosition = .region(MKCoordinateRegion(
                 center: CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude),
-                span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
+                span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1) // 範囲を少し広げた
             ))
         }
-    }
-    
-    func onShopSelectionChange(shopIds: Set<UUID>, shopCatalogStore: ShopCatalogStore, shopSearchStore: ShopSearchStore) async {
-        let selectedShops = shopCatalogStore.shops.filter { shopIds.contains($0.id) }
-        let queries = selectedShops.map { $0.name }
         
-        if queries.isEmpty {
-            shopSearchStore.clear()
-            return
-        }
-        
-        do {
-            try await shopSearchStore.search(queries: queries, region: visibleRegion)
-        } catch {
-            print("Search failed: \(error)")
+        // 全ショップを地図上に検索して表示
+        Task {
+            let queries = shopCatalogStore.shops.map { $0.name }
+            if !queries.isEmpty {
+                do {
+                    try await shopSearchStore.search(queries: queries, region: visibleRegion)
+                } catch {
+                    print("Initial search failed: \(error)")
+                }
+            }
         }
     }
 }
