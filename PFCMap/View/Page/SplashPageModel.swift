@@ -16,27 +16,11 @@ final class SplashPageModel {
         defer { isLoading = false }
         
         do {
-            // カタログデータの読み込み
+            // カタログデータの読み取り（SwiftData）
             try await store.shopCatalogStore.load()
             
-            // 現在地の取得
-            try await store.locationStore.fetchCurrentLocation()
-            
-            // 近くの店舗の検索 (500m以内)
-            if let currentLocation = store.locationStore.currentLocation {
-                let shops = store.shopCatalogStore.shops
-                let queries = shops.map { $0.name }
-                
-                // 検索リポジトリは Store 内にあるが、SplashPageModel は Store を通じて直接叩く
-                try await store.shopSearchStore.search(
-                    queries: queries,
-                    region: store.locationStore.currentRegion(radius: 1000)
-                )
-                let searchResults = store.shopSearchStore.results
-                
-                // 初期化時の検索結果はクリアしておく（MapPageで改めて行われるため）
-                store.shopSearchStore.clear()
-            }
+            // 設定データの読み込み（UserDefaults）
+            await store.settingsStore.loadSettings()
             
             // ロード完了
             store.isInitialized = true

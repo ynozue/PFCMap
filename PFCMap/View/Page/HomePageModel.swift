@@ -15,20 +15,31 @@ final class HomePageModel {
     init() {}
     
     func onAppear(locationStore: LocationStore, shopCatalogStore: ShopCatalogStore, shopSearchStore: ShopSearchStore, settingsStore: SettingsStore) {
-        // 現在地にカメラを移動
-        updateCameraPosition(distance: settingsStore.mapDistance.rawValue, locationStore: locationStore)
-        
-        // 全ショップを地図上に検索して表示
+        isLoading = true
         Task {
-            let queries = shopCatalogStore.shops
-                .filter { !settingsStore.disabledShopIds.contains($0.id) }
-                .map { $0.name }
-            if !queries.isEmpty {
-                do {
-                    try await shopSearchStore.search(queries: queries, region: visibleRegion)
-                } catch {
-                    print("Initial search failed: \(error)")
+            defer { isLoading = false }
+            do {
+                // 現在地の取得
+                try await locationStore.fetchCurrentLocation()
+                
+                // 現在地にカメラを移動
+                updateCameraPosition(distance: settingsStore.mapDistance.rawValue, locationStore: locationStore)
+                
+                // 全ショップを地図上に検索して表示
+                let queries = shopCatalogStore.shops
+                    .filter { !settingsStore.disabledShopIds.contains($0.id) }
+                    .map { $0.name }
+                
+                if !queries.isEmpty {
+                    // 初回ロード時は visibleRegion がまだ決定していない可能性があるため、
+                    // locationStoreから現在の検索範囲のリージョンを算出して利用する
+                    let radius = Double(settingsStore.mapDistance.rawValue + 100)
+                    let searchRegion = visibleRegion ?? locationStore.currentRegion(radius: radius)
+                    try await shopSearchStore.search(queries: queries, region: searchRegion)
                 }
+            } catch {
+                print("Initial data acquisition failed: \(error)")
+                errorMessage = "情報の取得に失敗しました。\(error.localizedDescription)"
             }
         }
     }
