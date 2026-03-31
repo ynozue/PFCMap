@@ -104,7 +104,7 @@ struct HomePage: View {
             ),
             presenting: store.shopSearchStore.results.first(where: { $0.id == model.selectedResultID })
         ) { result in
-            Button("\(result.name) への経路を表示") {
+            Button("マップアプリで経路を表示") {
                 model.openInMaps(result: result)
                 model.selectedResultID = nil
             }
