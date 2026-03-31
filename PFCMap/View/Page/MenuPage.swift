@@ -44,6 +44,12 @@ struct MenuPage: View {
                     } label: {
                         Label("Fat 閾値", systemImage: "f.circle")
                     }
+                    
+                    NavigationLink {
+                        ShopSettingPage()
+                    } label: {
+                        Label("表示ショップ設定", systemImage: "list.bullet.rectangle")
+                    }
                 }
                 
                 Section("Appについて") {

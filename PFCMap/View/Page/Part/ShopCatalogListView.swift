@@ -12,7 +12,8 @@ struct ShopCatalogListView: View {
         model.displayItems(
             from: shops,
             proteinThreshold: store.settingsStore.proteinThreshold,
-            fatThreshold: store.settingsStore.fatThreshold
+            fatThreshold: store.settingsStore.fatThreshold,
+            disabledShopIds: store.settingsStore.disabledShopIds
         )
     }
     

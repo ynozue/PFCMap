@@ -21,8 +21,10 @@ class ShopCatalogListViewModel {
         let item: ShopItem
     }
     
-    func displayItems(from shops: [ShopCatalog], proteinThreshold: Int, fatThreshold: Int) -> [DisplayItem] {
-        var items = shops.flatMap { shop in
+    func displayItems(from shops: [ShopCatalog], proteinThreshold: Int, fatThreshold: Int, disabledShopIds: Set<UUID>) -> [DisplayItem] {
+        var items = shops
+            .filter { !disabledShopIds.contains($0.id) }
+            .flatMap { shop in
             shop.items.compactMap { item -> DisplayItem? in
                 if isProteinFilterEnabled {
                     // pが閾値以上

@@ -27,7 +27,9 @@ final class HomePageModel {
         
         // 全ショップを地図上に検索して表示
         Task {
-            let queries = shopCatalogStore.shops.map { $0.name }
+            let queries = shopCatalogStore.shops
+                .filter { !settingsStore.disabledShopIds.contains($0.id) }
+                .map { $0.name }
             if !queries.isEmpty {
                 do {
                     try await shopSearchStore.search(queries: queries, region: visibleRegion)
