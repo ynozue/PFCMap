@@ -66,7 +66,7 @@ struct HomePage: View {
     }
     
     private func mapView(height: CGFloat) -> some View {
-        Map(position: $model.cameraPosition) {
+        Map(position: $model.cameraPosition, selection: $model.selectedResultID) {
             // User location mark
             UserAnnotation()
             
@@ -83,6 +83,7 @@ struct HomePage: View {
                     latitude: result.location.latitude,
                     longitude: result.location.longitude
                 ))
+                .tag(result.id)
             }
         }
         .onMapCameraChange { context in
@@ -95,6 +96,24 @@ struct HomePage: View {
             MapScaleView()
         }
         .contentMargins(.bottom, height / 5)
+        .alert(
+            "経路案内",
+            isPresented: Binding(
+                get: { model.selectedResultID != nil },
+                set: { if !$0 { model.selectedResultID = nil } }
+            ),
+            presenting: store.shopSearchStore.results.first(where: { $0.id == model.selectedResultID })
+        ) { result in
+            Button("\(result.name) への経路を表示") {
+                model.openInMaps(result: result)
+                model.selectedResultID = nil
+            }
+            Button("キャンセル", role: .cancel) {
+                model.selectedResultID = nil
+            }
+        } message: { result in
+            Text("\(result.name) までの経路をマップアプリで表示しますか？")
+        }
     }
     
     @ViewBuilder

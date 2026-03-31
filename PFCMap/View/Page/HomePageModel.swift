@@ -10,6 +10,7 @@ final class HomePageModel {
     var errorMessage: String?
     var visibleRegion: MKCoordinateRegion?
     var isMenuShowing = false
+    var selectedResultID: UUID? = nil
     
     init() {}
     
@@ -38,5 +39,20 @@ final class HomePageModel {
                 }
             }
         }
+    }
+    
+    func openInMaps(result: ShopSearchResult) {
+        let coordinate = CLLocationCoordinate2D(
+            latitude: result.location.latitude,
+            longitude: result.location.longitude
+        )
+        let placemark = MKPlacemark(coordinate: coordinate)
+        let mapItem = MKMapItem(placemark: placemark)
+        mapItem.name = result.name
+        
+        // 徒歩での経路案内をデフォルトに設定
+        mapItem.openInMaps(launchOptions: [
+            MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeWalking
+        ])
     }
 }
