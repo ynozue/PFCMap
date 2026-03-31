@@ -18,8 +18,7 @@ public actor PFCRemoteClientDummy: PFCRemoteClient {
                 description: "若鶏のグリルやサラダなど高タンパク・低糖質な単品メニューが充実",
                 items: [
                     .init(id: UUID(), name: "ミラノ風ドリア", calorie: 521, protein: 15.3, fat: 22.8, carbohydrate: 59.9),
-                    .init(id: UUID(), name: "若鶏のディアボラ風", calorie: 390, protein: 31.0, fat: 17.7, carbohydrate: 6.0),
-                    .init(id: UUID(), name: "小エビのサラダ", calorie: 190, protein: 11.3, fat: 13.8, carbohydrate: 4.9)
+                    .init(id: UUID(), name: "若鶏のディアボラ風", calorie: 390, protein: 31.0, fat: 17.7, carbohydrate: 6.0)
                 ]
             ),
             .init(
@@ -87,33 +86,11 @@ public actor PFCRemoteClientDummy: PFCRemoteClient {
                 ]
             ),
             .init(
-                id: UUID(), name: "ロイヤルホスト", category: "ファミリーレストラン",
-                description: "満足感のあるチキンサラダなどの主食級サラダメニューが充実",
-                items: [
-                    .init(id: UUID(), name: "食いしんぼうのシェフサラダ", calorie: 450, protein: 18.0, fat: 35.0, carbohydrate: 12.0),
-                    .init(id: UUID(), name: "黒×黒ハンバーグ", calorie: 850, protein: 42.0, fat: 55.0, carbohydrate: 35.0)
-                ]
-            ),
-            .init(
                 id: UUID(), name: "デニーズ", category: "ファミリーレストラン",
                 description: "大豆ミートへの変更オプションがあり健康志向に対応",
                 items: [
                     .init(id: UUID(), name: "大豆ミートのナポリタン", calorie: 480, protein: 18.0, fat: 12.0, carbohydrate: 75.0),
                     .init(id: UUID(), name: "和風ハンバーグ", calorie: 550, protein: 25.0, fat: 35.0, carbohydrate: 28.0)
-                ]
-            ),
-            .init(
-                id: UUID(), name: "しゃぶ葉", category: "しゃぶしゃぶ",
-                description: "茹でる調理で余分な脂が落ち野菜も大量に摂取できる",
-                items: [
-                    .init(id: UUID(), name: "牛＆豚しゃぶしゃぶ食べ放題（標準摂取目安）", calorie: 650, protein: 45.0, fat: 40.0, carbohydrate: 20.0)
-                ]
-            ),
-            .init(
-                id: UUID(), name: "焼肉きんぐ", category: "焼肉",
-                description: "赤身肉やラム肉・海鮮など低脂質なタンパク質源を選択可能",
-                items: [
-                    .init(id: UUID(), name: "きんぐコース（赤身肉中心目安）", calorie: 850, protein: 65.0, fat: 55.0, carbohydrate: 15.0)
                 ]
             ),
             .init(
@@ -152,14 +129,6 @@ public actor PFCRemoteClientDummy: PFCRemoteClient {
                 items: [
                     .init(id: UUID(), name: "オリジナルチキン", calorie: 237, protein: 18.3, fat: 14.7, carbohydrate: 7.9),
                     .init(id: UUID(), name: "コールスロー（M）", calorie: 154, protein: 1.3, fat: 11.5, carbohydrate: 11.5)
-                ]
-            ),
-            .init(
-                id: UUID(), name: "餃子の王将", category: "中華",
-                description: "炭水化物と脂質の割合が高いがメニューの選び方次第で対応可能",
-                items: [
-                    .init(id: UUID(), name: "餃子（1枚6個）", calorie: 346, protein: 10.5, fat: 18.5, carbohydrate: 32.5),
-                    .init(id: UUID(), name: "野菜炒め", calorie: 450, protein: 15.0, fat: 35.0, carbohydrate: 12.0)
                 ]
             ),
             .init(
