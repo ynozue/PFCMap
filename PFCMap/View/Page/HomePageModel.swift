@@ -55,4 +55,30 @@ final class HomePageModel {
             MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeWalking
         ])
     }
+    
+    func canOpenAppleMaps() -> Bool {
+        guard let url = URL(string: "maps://") else { return false }
+        return UIApplication.shared.canOpenURL(url)
+    }
+    
+    func canOpenGoogleMaps() -> Bool {
+        guard let url = URL(string: "comgooglemaps://") else { return false }
+        return UIApplication.shared.canOpenURL(url)
+    }
+    
+    func openAppStoreForGoogleMaps() {
+        if let url = URL(string: "https://apps.apple.com/app/google-maps/id585027354") {
+            UIApplication.shared.open(url)
+        }
+    }
+    
+    func openInGoogleMaps(result: ShopSearchResult) {
+        let latitude = result.location.latitude
+        let longitude = result.location.longitude
+        // 徒歩経路をデフォルトに設定（directionsmode=walking）
+        let urlString = "comgooglemaps://?daddr=\(latitude),\(longitude)&directionsmode=walking"
+        if let url = URL(string: urlString) {
+            UIApplication.shared.open(url)
+        }
+    }
 }

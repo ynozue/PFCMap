@@ -97,22 +97,40 @@ struct HomePage: View {
         }
         .contentMargins(.bottom, height / 5)
         .alert(
-            "経路案内",
+            model.canOpenAppleMaps() || model.canOpenGoogleMaps() ? "経路案内" : "マップアプリが見つかりません",
             isPresented: Binding(
                 get: { model.selectedResultID != nil },
                 set: { if !$0 { model.selectedResultID = nil } }
             ),
             presenting: store.shopSearchStore.results.first(where: { $0.id == model.selectedResultID })
         ) { result in
-            Button("マップアプリで経路を表示") {
-                model.openInMaps(result: result)
-                model.selectedResultID = nil
+            if model.canOpenAppleMaps() {
+                Button("Apple マップで表示") {
+                    model.openInMaps(result: result)
+                    model.selectedResultID = nil
+                }
+            }
+            if model.canOpenGoogleMaps() {
+                Button("Google マップで表示") {
+                    model.openInGoogleMaps(result: result)
+                    model.selectedResultID = nil
+                }
+            }
+            if !model.canOpenAppleMaps() && !model.canOpenGoogleMaps() {
+                Button("Google マップをインストール") {
+                    model.openAppStoreForGoogleMaps()
+                    model.selectedResultID = nil
+                }
             }
             Button("キャンセル", role: .cancel) {
                 model.selectedResultID = nil
             }
         } message: { result in
-            Text("\(result.name) までの経路をマップアプリで表示しますか？")
+            if model.canOpenAppleMaps() || model.canOpenGoogleMaps() {
+                Text("\(result.name) までの経路をマップアプリで表示しますか？")
+            } else {
+                Text("経路案内を利用するには、マップアプリをインストールしてください。")
+            }
         }
     }
     
