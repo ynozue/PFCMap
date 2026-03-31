@@ -10,7 +10,7 @@ struct HomePage: View {
         NavigationStack {
             GeometryReader { geometry in
                 ZStack(alignment: .bottom) {
-                    mapView
+                    mapView(height: geometry.size.height)
                     
                     ShopCatalogListView(
                         shops: store.shopCatalogStore.shops,
@@ -65,7 +65,7 @@ struct HomePage: View {
         }
     }
     
-    private var mapView: some View {
+    private func mapView(height: CGFloat) -> some View {
         Map(position: $model.cameraPosition) {
             // User location mark
             UserAnnotation()
@@ -94,6 +94,7 @@ struct HomePage: View {
             MapCompass()
             MapScaleView()
         }
+        .contentMargins(.bottom, height / 5)
     }
     
     @ViewBuilder
