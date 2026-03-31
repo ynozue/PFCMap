@@ -48,7 +48,8 @@ struct HomePage: View {
                 model.onAppear(
                     locationStore: store.locationStore,
                     shopCatalogStore: store.shopCatalogStore,
-                    shopSearchStore: store.shopSearchStore
+                    shopSearchStore: store.shopSearchStore,
+                    settingsStore: store.settingsStore
                 )
             }
             .alert("エラー", isPresented: Binding(get: { model.errorMessage != nil }, set: { if !$0 { model.errorMessage = nil } })) {

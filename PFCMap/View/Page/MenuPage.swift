@@ -9,6 +9,43 @@ struct MenuPage: View {
     var body: some View {
         NavigationStack {
             List {
+                Section("設定") {
+                    Picker(selection: Binding(
+                        get: { store.settingsStore.mapDistance },
+                        set: { store.settingsStore.updateMapDistance($0) }
+                    )) {
+                        Text("500m").tag(500)
+                        Text("750m").tag(750)
+                        Text("1,000m").tag(1000)
+                    } label: {
+                        Label("Map 距離", systemImage: "map")
+                    }
+                    
+                    Picker(selection: Binding(
+                        get: { store.settingsStore.proteinThreshold },
+                        set: { store.settingsStore.updateProteinThreshold($0) }
+                    )) {
+                        Text("15g").tag(15)
+                        Text("20g").tag(20)
+                        Text("25g").tag(25)
+                        Text("30g").tag(30)
+                    } label: {
+                        Label("Protein 閾値", systemImage: "p.circle")
+                    }
+                    
+                    Picker(selection: Binding(
+                        get: { store.settingsStore.fatThreshold },
+                        set: { store.settingsStore.updateFatThreshold($0) }
+                    )) {
+                        Text("15g").tag(15)
+                        Text("20g").tag(20)
+                        Text("25g").tag(25)
+                        Text("30g").tag(30)
+                    } label: {
+                        Label("Fat 閾値", systemImage: "f.circle")
+                    }
+                }
+                
                 Section("Appについて") {
                     HStack {
                         Label("バージョン", systemImage: "info.circle")

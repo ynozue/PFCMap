@@ -13,13 +13,15 @@ final class HomePageModel {
     
     init() {}
     
-    func onAppear(locationStore: LocationStore, shopCatalogStore: ShopCatalogStore, shopSearchStore: ShopSearchStore) {
+    func onAppear(locationStore: LocationStore, shopCatalogStore: ShopCatalogStore, shopSearchStore: ShopSearchStore, settingsStore: SettingsStore) {
         // スプラッシュですでに取得済みの現在地をカメラ位置に設定
         if let location = locationStore.currentLocation {
+            let distance = Double(settingsStore.mapDistance)
+            let diameter = (distance + 100) * 2
             cameraPosition = .region(MKCoordinateRegion(
                 center: location.coordinate,
-                latitudinalMeters: 1200, // 半径500m + 100m = 600m (直径1200m)
-                longitudinalMeters: 1200
+                latitudinalMeters: diameter,
+                longitudinalMeters: diameter
             ))
         }
         

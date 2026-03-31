@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import NZData
 
 enum PFCMapEnv {
     case prod
@@ -59,6 +60,15 @@ extension Factory {
             return ShopCatalogRepositoryImpl(remoteClient: remoteClient, modelContainer: container)
         case .preview:
             return ShopCatalogRepositoryDummy()
+        }
+    }
+    
+    func makeUserDefaultsService() -> any UserDefaultsService {
+        switch env {
+        case .prod, .dev:
+            return UserDefaultsServiceImpl()
+        case .preview:
+            return UserDefaultsServiceDummy()
         }
     }
 }

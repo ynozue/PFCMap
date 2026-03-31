@@ -5,10 +5,15 @@ struct ShopCatalogListView: View {
     let shops: [ShopCatalog]
     let maxHeight: CGFloat
     var onSelect: (ShopCatalog) -> Void = { _ in }
+    @Environment(PFCMapStore.self) private var store
     @State private var model = ShopCatalogListViewModel()
     
     private var sortedItems: [ShopCatalogListViewModel.DisplayItem] {
-        model.displayItems(from: shops)
+        model.displayItems(
+            from: shops,
+            proteinThreshold: store.settingsStore.proteinThreshold,
+            fatThreshold: store.settingsStore.fatThreshold
+        )
     }
     
     // 現在の高さ（計算値）
@@ -54,7 +59,7 @@ struct ShopCatalogListView: View {
                 } label: {
                     HStack(spacing: 4) {
                         Image(systemName: "line.3.horizontal.decrease.circle")
-                        Text("P≥20g")
+                        Text("P≥\(store.settingsStore.proteinThreshold)g")
                     }
                     .font(.system(size: 11, weight: .bold))
                     .padding(.horizontal, 10)
@@ -72,7 +77,7 @@ struct ShopCatalogListView: View {
                 } label: {
                     HStack(spacing: 4) {
                         Image(systemName: "line.3.horizontal.decrease.circle")
-                        Text("F≤20g")
+                        Text("F≤\(store.settingsStore.fatThreshold)g")
                     }
                     .font(.system(size: 11, weight: .bold))
                     .padding(.horizontal, 10)
