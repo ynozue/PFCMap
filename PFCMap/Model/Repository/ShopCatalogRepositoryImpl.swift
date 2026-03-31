@@ -19,7 +19,7 @@ extension ShopCatalogRepositoryImpl: ShopCatalogRepository {
             ShopCatalog(
                 id: dto.id,
                 name: dto.name,
-                category: dto.category ?? "",
+                category: dto.category.flatMap(ShopCategory.init(rawValue:)) ?? .other,
                 description: dto.description ?? "",
                 items: dto.items.map { item in
                     ShopItem(

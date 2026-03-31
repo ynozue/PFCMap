@@ -126,83 +126,94 @@ struct ShopCatalogListView: View {
 struct ShopItemRowView: View {
     let displayItem: ShopCatalogListViewModel.DisplayItem
     
+    private var categoryIcon: String {
+        displayItem.shop.category.iconName
+    }
+    
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            // Shop Header
-            HStack(spacing: 8) {
-                // Shop Icon (Placeholder)
-                Circle()
-                    .fill(Color.blue.opacity(0.1))
-                    .frame(width: 24, height: 24)
+        HStack(alignment: .top, spacing: 10) {
+            // Menu Photo
+            if let photoData = displayItem.item.photoData, let image = UIImage(data: photoData) {
+                Image(uiImage: image)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 52, height: 52)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+            } else {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.gray.opacity(0.1))
+                    .frame(width: 52, height: 52)
                     .overlay {
-                        Image(systemName: "shop")
-                            .font(.system(size: 12))
-                            .foregroundStyle(.blue)
+                        Image(systemName: "fork.knife")
+                            .font(.system(size: 18))
+                            .foregroundStyle(.tertiary)
                     }
-                
-                Text(displayItem.shop.name)
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundStyle(.secondary)
-                
-                Spacer()
             }
             
-            HStack(alignment: .center, spacing: 12) {
-                // Menu Photo
-                if let photoData = displayItem.item.photoData, let image = UIImage(data: photoData) {
-                    Image(uiImage: image)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 80, height: 80)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                } else {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.gray.opacity(0.1))
-                        .frame(width: 80, height: 80)
-                        .overlay {
-                            Image(systemName: "fork.knife")
-                                .foregroundStyle(.tertiary)
-                        }
+            VStack(alignment: .leading, spacing: 2) {
+                // Shop Name with Category Icon
+                HStack(spacing: 4) {
+                    Image(systemName: categoryIcon)
+                        .font(.system(size: 10))
+                        .foregroundStyle(.blue.secondary)
+                    
+                    Text(displayItem.shop.name)
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
                 }
                 
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(displayItem.item.name)
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
-                        .foregroundStyle(.primary)
-                        .lineLimit(2)
-                    
-                    HStack(alignment: .bottom, spacing: 4) {
+                // Menu Name
+                Text(displayItem.item.name)
+                    .font(.system(size: 13, weight: .bold, design: .rounded))
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+                    .fixedSize(horizontal: false, vertical: true)
+                
+                Spacer(minLength: 0)
+                
+                // Calories + PFC
+                HStack(alignment: .center, spacing: 6) {
+                    // Calories
+                    HStack(alignment: .bottom, spacing: 0.5) {
                         Text("\(Int(displayItem.item.calorie))")
-                            .font(.system(size: 20, weight: .heavy, design: .rounded))
+                            .font(.system(size: 11, weight: .bold, design: .rounded))
                             .foregroundStyle(.blue)
                         Text("kcal")
-                            .font(.system(size: 12, weight: .bold))
+                            .font(.system(size: 7, weight: .bold))
                             .foregroundStyle(.secondary)
-                            .padding(.bottom, 2)
+                            .padding(.bottom, 0.5)
                     }
                     
+                    Text("|")
+                        .font(.system(size: 9))
+                        .foregroundStyle(.quaternary)
+                    
                     // PFC
-                    HStack(spacing: 12) {
+                    HStack(spacing: 5) {
                         nutrientView(name: "P", value: displayItem.item.protein, color: .orange)
                         nutrientView(name: "F", value: displayItem.item.fat, color: .yellow)
                         nutrientView(name: "C", value: displayItem.item.carbohydrate, color: .green)
                     }
                 }
+                .fixedSize(horizontal: true, vertical: false)
             }
+            
+            Spacer()
         }
-        .padding(12)
+        .padding(8)
         .background(Color.white.opacity(0.5))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 4)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .shadow(color: .black.opacity(0.03), radius: 6, x: 0, y: 3)
     }
     
     private func nutrientView(name: String, value: Double, color: Color) -> some View {
-        HStack(spacing: 2) {
+        HStack(spacing: 1) {
             Text(name)
-                .font(.system(size: 10, weight: .bold))
+                .font(.system(size: 8, weight: .bold))
                 .foregroundStyle(color)
             Text(String(format: "%.1fg", value))
-                .font(.system(size: 12, weight: .medium, design: .rounded))
+                .font(.system(size: 10, weight: .medium, design: .rounded))
                 .foregroundStyle(.primary)
         }
     }
@@ -215,7 +226,7 @@ struct ShopItemRowView: View {
         ShopCatalogListView(shops: [
             ShopCatalog(
                 name: "ガスト",
-                category: "ファミリーレストラン",
+                category: .familyRestaurant,
                 items: [
                     ShopItem(name: "チーズINハンバーグ", calorie: 750, protein: 35.2, fat: 45.1, carbohydrate: 28.5),
                     ShopItem(name: "蒸し鶏のエコスラッド", calorie: 120, protein: 12.5, fat: 3.2, carbohydrate: 5.1)
@@ -223,7 +234,7 @@ struct ShopItemRowView: View {
             ),
             ShopCatalog(
                 name: "大戸屋",
-                category: "定食",
+                category: .setMeal,
                 items: [
                     ShopItem(name: "しまほっけの炭火焼き定食", calorie: 580, protein: 42.1, fat: 12.5, carbohydrate: 65.2)
                 ]

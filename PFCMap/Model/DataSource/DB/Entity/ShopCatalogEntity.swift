@@ -6,14 +6,14 @@ import NZData
 public final class ShopCatalogEntity {
     @Attribute(.unique) public var id: UUID
     public var name: String
-    public var category: String
+    public var category: ShopCategory
     public var descriptionText: String // descriptionはSwift標準にあるので避けるため
     @Relationship(deleteRule: .cascade) public var items: [ShopItemEntity]
     
     public init(
         id: UUID,
         name: String,
-        category: String = "",
+        category: ShopCategory = .other,
         descriptionText: String = "",
         items: [ShopItemEntity] = []
     ) {
