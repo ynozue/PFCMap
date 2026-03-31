@@ -62,6 +62,9 @@ struct HomePage: View {
             .sheet(isPresented: Binding(get: { model.isMenuShowing }, set: { model.isMenuShowing = $0 })) {
                 MenuPage()
             }
+            .onChange(of: store.settingsStore.mapDistance) { _, newValue in
+                model.updateCameraPosition(distance: newValue.rawValue, locationStore: store.locationStore)
+            }
         }
     }
     
@@ -72,9 +75,33 @@ struct HomePage: View {
             
             // 検索範囲の円を描画
             if let currentLocation = store.locationStore.currentLocation {
-                MapCircle(center: currentLocation.coordinate, radius: CLLocationDistance(store.settingsStore.mapDistance.rawValue))
+                let radius = Double(store.settingsStore.mapDistance.rawValue)
+                MapCircle(center: currentLocation.coordinate, radius: CLLocationDistance(radius))
                     .foregroundStyle(.blue.opacity(0.15))
                     .stroke(.blue, lineWidth: 1)
+                
+                // 半径のラベルを円の右斜め上に表示（60度方向）
+                let radian = 60.0 * Double.pi / 180.0
+                let latOffset = (radius * sin(radian)) / 111320.0
+                let lonOffset = (radius * cos(radian)) / (111320.0 * cos(currentLocation.coordinate.latitude * Double.pi / 180.0))
+                
+                let upperRight = CLLocationCoordinate2D(
+                    latitude: currentLocation.coordinate.latitude + latOffset,
+                    longitude: currentLocation.coordinate.longitude + lonOffset
+                )
+                
+                Annotation("", coordinate: upperRight, anchor: .bottomLeading) {
+                    Text("\(store.settingsStore.mapDistance.label)")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundStyle(.blue)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(.white.opacity(0.85))
+                        .clipShape(Capsule())
+                        .overlay {
+                            Capsule().stroke(.blue.opacity(0.4), lineWidth: 0.5)
+                        }
+                }
             }
             
             // Search Results

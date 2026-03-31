@@ -15,16 +15,8 @@ final class HomePageModel {
     init() {}
     
     func onAppear(locationStore: LocationStore, shopCatalogStore: ShopCatalogStore, shopSearchStore: ShopSearchStore, settingsStore: SettingsStore) {
-        // スプラッシュですでに取得済みの現在地をカメラ位置に設定
-        if let location = locationStore.currentLocation {
-            let distance = Double(settingsStore.mapDistance.rawValue)
-            let diameter = (distance + 100) * 2
-            cameraPosition = .region(MKCoordinateRegion(
-                center: location.coordinate,
-                latitudinalMeters: diameter,
-                longitudinalMeters: diameter
-            ))
-        }
+        // 現在地にカメラを移動
+        updateCameraPosition(distance: settingsStore.mapDistance.rawValue, locationStore: locationStore)
         
         // 全ショップを地図上に検索して表示
         Task {
@@ -38,6 +30,20 @@ final class HomePageModel {
                     print("Initial search failed: \(error)")
                 }
             }
+        }
+    }
+    
+    func updateCameraPosition(distance: Int, locationStore: LocationStore) {
+        guard let location = locationStore.currentLocation else { return }
+        let distanceDouble = Double(distance)
+        let diameter = (distanceDouble + 100) * 2
+        
+        withAnimation {
+            cameraPosition = .region(MKCoordinateRegion(
+                center: location.coordinate,
+                latitudinalMeters: diameter,
+                longitudinalMeters: diameter
+            ))
         }
     }
     
