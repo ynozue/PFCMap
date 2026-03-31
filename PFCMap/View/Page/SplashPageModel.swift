@@ -1,5 +1,6 @@
 import SwiftUI
 import Observation
+import NZData
 
 @MainActor
 @Observable
@@ -16,16 +17,44 @@ final class SplashPageModel {
         defer { isLoading = false }
         
         do {
-            // カタログデータの読み取り（SwiftData）
-            try await store.shopCatalogStore.load()
+            // カタログデータの取得と保存
+            let repository = store.makeShopCatalogRepository()
+            let fetchedShops = try await repository.fetchShops()
             
-            // 設定データの読み込み（UserDefaults）
-            await store.settingsStore.loadSettings()
+            if fetchedShops.isEmpty {
+                try await repository.sync()
+                let syncedShops = try await repository.fetchShops()
+                store.shopCatalogStore.updateShops(syncedShops)
+            } else {
+                store.shopCatalogStore.updateShops(fetchedShops)
+            }
+            
+            // 設定データの読み込み
+            let userDefaultsService = store.makeUserDefaultsService()
+            let distance: Int = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.mapDistance)
+            let mapDistance = MapDistance(rawValue: distance) ?? .m500
+            
+            let protein: Int = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.proteinThreshold)
+            let proteinThreshold = ProteinThreshold(rawValue: protein) ?? .g20
+            
+            let fat: Int = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.fatThreshold)
+            let fatThreshold = FatThreshold(rawValue: fat) ?? .g20
+
+            let ids: [UUID] = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.disabledShopIds)
+            let disabledShopIds = Set(ids)
+            
+            store.settingsStore.updateSettings(
+                mapDistance: mapDistance,
+                proteinThreshold: proteinThreshold,
+                fatThreshold: fatThreshold,
+                disabledShopIds: disabledShopIds
+            )
             
             // ロード完了
             store.isInitialized = true
         } catch {
-            errorMessage = "データの初期化に失敗しました。\(error.localizedDescription)"
+            print("Initialization failed: \(error)")
+            errorMessage = "情報の初期化に失敗しました。\(error.localizedDescription)"
         }
     }
 }

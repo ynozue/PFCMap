@@ -59,7 +59,7 @@ struct ShopCatalogListView: View {
                 Menu {
                     Picker("Protein 閾値", selection: Binding(
                         get: { store.settingsStore.proteinThreshold },
-                        set: { store.settingsStore.updateProteinThreshold($0) }
+                        set: { model.updateProteinThreshold(threshold: $0, store: store) }
                     )) {
                         ForEach(ProteinThreshold.allCases, id: \.self) { threshold in
                             Text(threshold.label).tag(threshold)
@@ -82,7 +82,7 @@ struct ShopCatalogListView: View {
                 Menu {
                     Picker("Fat 閾値", selection: Binding(
                         get: { store.settingsStore.fatThreshold },
-                        set: { store.settingsStore.updateFatThreshold($0) }
+                        set: { model.updateFatThreshold(threshold: $0, store: store) }
                     )) {
                         ForEach(FatThreshold.allCases, id: \.self) { threshold in
                             Text(threshold.label).tag(threshold)

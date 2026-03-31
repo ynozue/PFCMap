@@ -45,12 +45,7 @@ struct HomePage: View {
             }
             .toolbar(.hidden, for: .navigationBar)
             .onAppear {
-                model.onAppear(
-                    locationStore: store.locationStore,
-                    shopCatalogStore: store.shopCatalogStore,
-                    shopSearchStore: store.shopSearchStore,
-                    settingsStore: store.settingsStore
-                )
+                model.onAppear(store: store)
             }
             .alert("エラー", isPresented: Binding(get: { model.errorMessage != nil }, set: { if !$0 { model.errorMessage = nil } })) {
                 Button("OK", role: .cancel) {}
@@ -63,7 +58,7 @@ struct HomePage: View {
                 MenuPage()
             }
             .onChange(of: store.settingsStore.mapDistance) { _, newValue in
-                model.updateCameraPosition(distance: newValue.rawValue, locationStore: store.locationStore)
+                model.updateCameraPosition(distance: newValue.rawValue, store: store)
             }
         }
     }

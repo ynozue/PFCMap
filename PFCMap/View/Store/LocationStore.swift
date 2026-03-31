@@ -5,15 +5,12 @@ import MapKit
 @MainActor
 @Observable
 final class LocationStore {
-    var currentLocation: Location?
-    private let locationRepository: any LocationRepository
+    private(set) var currentLocation: Location?
     
-    init(locationRepository: any LocationRepository) {
-        self.locationRepository = locationRepository
-    }
+    init() {}
     
-    func fetchCurrentLocation() async throws {
-        self.currentLocation = try await locationRepository.requestLocation()
+    func updateCurrentLocation(_ location: Location) {
+        self.currentLocation = location
     }
     
     func currentRegion(radius: Double = 1000) -> MKCoordinateRegion? {

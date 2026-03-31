@@ -14,29 +14,32 @@ final class HomePageModel {
     
     init() {}
     
-    func onAppear(locationStore: LocationStore, shopCatalogStore: ShopCatalogStore, shopSearchStore: ShopSearchStore, settingsStore: SettingsStore) {
+    func onAppear(store: PFCMapStore) {
         isLoading = true
         Task {
             defer { isLoading = false }
             do {
                 // 現在地の取得
-                try await locationStore.fetchCurrentLocation()
+                let locationRepository = store.makeLocationRepository()
+                let location = try await locationRepository.requestLocation()
+                store.locationStore.updateCurrentLocation(location)
                 
                 // 現在地にカメラを移動
-                updateCameraPosition(distance: settingsStore.mapDistance.rawValue, locationStore: locationStore)
+                updateCameraPosition(distance: store.settingsStore.mapDistance.rawValue, store: store)
                 
                 // 全ショップを地図上に検索して表示
-                let queries = shopCatalogStore.shops
-                    .filter { !settingsStore.disabledShopIds.contains($0.id) }
+                let queries = store.shopCatalogStore.shops
+                    .filter { !store.settingsStore.disabledShopIds.contains($0.id) }
                     .map { $0.name }
                 
                 if !queries.isEmpty {
-                    // 初回ロード時は visibleRegion がまだ決定していない可能性があるため、
-                    // locationStoreから現在の検索範囲のリージョンを算出して利用する
                     // PINは2,000m以内を表示するため、検索範囲を2,000m(+バッファ)にする
                     let radius = 2100.0
-                    let searchRegion = visibleRegion ?? locationStore.currentRegion(radius: radius)
-                    try await shopSearchStore.search(queries: queries, region: searchRegion)
+                    let searchRegion = visibleRegion ?? store.locationStore.currentRegion(radius: radius)
+                    
+                    let shopSearchRepository = store.makeShopSearchRepository()
+                    let results = try await shopSearchRepository.search(queries: queries, region: searchRegion)
+                    store.shopSearchStore.updateResults(results)
                 }
             } catch {
                 print("Initial data acquisition failed: \(error)")
@@ -45,8 +48,8 @@ final class HomePageModel {
         }
     }
     
-    func updateCameraPosition(distance: Int, locationStore: LocationStore) {
-        guard let location = locationStore.currentLocation else { return }
+    func updateCameraPosition(distance: Int, store: PFCMapStore) {
+        guard let location = store.locationStore.currentLocation else { return }
         let distanceDouble = Double(distance)
         let diameter = (distanceDouble + 100) * 2
         
@@ -60,12 +63,11 @@ final class HomePageModel {
     }
     
     func openInMaps(result: ShopSearchResult) {
-        let coordinate = CLLocationCoordinate2D(
+        let location = CLLocation(
             latitude: result.location.latitude,
             longitude: result.location.longitude
         )
-        let placemark = MKPlacemark(coordinate: coordinate)
-        let mapItem = MKMapItem(placemark: placemark)
+        let mapItem = MKMapItem(location: location, address: nil)
         mapItem.name = result.name
         
         // 徒歩での経路案内をデフォルトに設定

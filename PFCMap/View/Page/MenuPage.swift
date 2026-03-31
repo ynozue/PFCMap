@@ -12,7 +12,7 @@ struct MenuPage: View {
                 Section("設定") {
                     Picker(selection: Binding(
                         get: { store.settingsStore.mapDistance },
-                        set: { store.settingsStore.updateMapDistance($0) }
+                        set: { model.updateMapDistance(distance: $0, store: store) }
                     )) {
                         ForEach(MapDistance.allCases, id: \.self) { distance in
                             Text(distance.label).tag(distance)
@@ -23,7 +23,7 @@ struct MenuPage: View {
                     
                     Picker(selection: Binding(
                         get: { store.settingsStore.proteinThreshold },
-                        set: { store.settingsStore.updateProteinThreshold($0) }
+                        set: { model.updateProteinThreshold(threshold: $0, store: store) }
                     )) {
                         ForEach(ProteinThreshold.allCases, id: \.self) { threshold in
                             Text(threshold.label).tag(threshold)
@@ -34,7 +34,7 @@ struct MenuPage: View {
                     
                     Picker(selection: Binding(
                         get: { store.settingsStore.fatThreshold },
-                        set: { store.settingsStore.updateFatThreshold($0) }
+                        set: { model.updateFatThreshold(threshold: $0, store: store) }
                     )) {
                         ForEach(FatThreshold.allCases, id: \.self) { threshold in
                             Text(threshold.label).tag(threshold)

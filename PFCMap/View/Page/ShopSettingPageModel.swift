@@ -1,5 +1,6 @@
 import SwiftUI
 import Observation
+import NZData
 
 @MainActor
 @Observable
@@ -16,6 +17,11 @@ final class ShopSettingPageModel {
             disabledIds.insert(shopId)
         }
         store.settingsStore.updateDisabledShopIds(disabledIds)
+        
+        let service = store.makeUserDefaultsService()
+        Task {
+            await service.save(key: PFCMapUserDefaultsKeys.disabledShopIds, value: Array(disabledIds))
+        }
     }
     
     func isShopEnabled(shopId: UUID, store: PFCMapStore) -> Bool {
