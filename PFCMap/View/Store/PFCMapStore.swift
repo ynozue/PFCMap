@@ -10,7 +10,7 @@ final class PFCMapStore {
     @ObservationIgnored var shopCatalogStore: ShopCatalogStore
     
     var isInitialized: Bool = false
-    var selectedCatalog: ShopCatalog? = nil
+
     
     init(factory: Factory) {
         // Factoryからリポジトリを取得してStoreの初期化など

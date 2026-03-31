@@ -30,9 +30,7 @@ struct HomePage: View {
                 .safeAreaInset(edge: .bottom) {
                     ShopCatalogListView(
                         shops: store.shopCatalogStore.shops,
-                        onSelect: { shop in
-                            store.selectedCatalog = shop
-                        },
+                        onSelect: { _ in },
                         onSelectionChange: { shopIds in
                             Task {
                                 await model.onShopSelectionChange(
@@ -61,12 +59,7 @@ struct HomePage: View {
             .sheet(isPresented: Binding(get: { model.isMenuShowing }, set: { model.isMenuShowing = $0 })) {
                 MenuPage()
             }
-            .sheet(item: Binding<ShopCatalog?>(
-                get: { store.selectedCatalog },
-                set: { store.selectedCatalog = $0 }
-            )) { shop in
-                ShopItemListPage(shop: shop)
-            }
+
         }
     }
     

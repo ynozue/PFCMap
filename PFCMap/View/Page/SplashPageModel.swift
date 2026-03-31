@@ -34,16 +34,7 @@ final class SplashPageModel {
                 )
                 let searchResults = store.shopSearchStore.results
                 
-                // 500m以内の店舗を1つ探す
-                for catalog in shops {
-                    let matchingResults = searchResults.filter { $0.name.contains(catalog.name) || catalog.name.contains($0.name) }
-                    if let _ = matchingResults.first(where: {
-                        currentLocation.distance(to: $0.location) <= 500
-                    }) {
-                        store.selectedCatalog = catalog
-                        break
-                    }
-                }
+
                 
                 // 初期化時の検索結果はクリアしておく（MapPageで改めて行われるため）
                 store.shopSearchStore.clear()
