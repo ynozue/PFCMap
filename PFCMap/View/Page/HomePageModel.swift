@@ -1,6 +1,7 @@
 import SwiftUI
 import MapKit
 import Observation
+import NZData
 
 @MainActor
 @Observable
@@ -99,6 +100,14 @@ final class HomePageModel {
         let urlString = "comgooglemaps://?daddr=\(latitude),\(longitude)&directionsmode=walking"
         if let url = URL(string: urlString) {
             UIApplication.shared.open(url)
+        }
+    }
+    
+    func updateMapDistance(distance: MapDistance, store: PFCMapStore) {
+        store.settingsStore.updateMapDistance(distance)
+        let service = store.makeUserDefaultsService()
+        Task {
+            await service.save(key: PFCMapUserDefaultsKeys.mapDistance, value: distance.rawValue)
         }
     }
 }

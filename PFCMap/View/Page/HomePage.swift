@@ -86,16 +86,27 @@ struct HomePage: View {
                 )
                 
                 Annotation("", coordinate: upperRight, anchor: .bottomLeading) {
-                    Text("\(store.settingsStore.mapDistance.label)")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundStyle(.blue)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(.white.opacity(0.85))
-                        .clipShape(Capsule())
-                        .overlay {
-                            Capsule().stroke(.blue.opacity(0.4), lineWidth: 0.5)
+                    Menu {
+                        Picker("距離を選択", selection: Binding(
+                            get: { store.settingsStore.mapDistance },
+                            set: { model.updateMapDistance(distance: $0, store: store) }
+                        )) {
+                            ForEach(MapDistance.allCases, id: \.self) { distance in
+                                Text(distance.label).tag(distance)
+                            }
                         }
+                    } label: {
+                        Text("\(store.settingsStore.mapDistance.label)")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundStyle(.blue)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(.white.opacity(0.85))
+                            .clipShape(Capsule())
+                            .overlay {
+                                Capsule().stroke(.blue.opacity(0.4), lineWidth: 0.5)
+                            }
+                    }
                 }
             }
             
