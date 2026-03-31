@@ -17,8 +17,9 @@ final class HomePageModel {
         // スプラッシュですでに取得済みの現在地をカメラ位置に設定
         if let location = locationStore.currentLocation {
             cameraPosition = .region(MKCoordinateRegion(
-                center: CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude),
-                span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1) // 範囲を少し広げた
+                center: location.coordinate,
+                latitudinalMeters: 1200, // 半径500m + 100m = 600m (直径1200m)
+                longitudinalMeters: 1200
             ))
         }
         
