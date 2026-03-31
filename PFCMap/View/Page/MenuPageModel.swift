@@ -10,6 +10,7 @@ final class MenuPageModel {
     
     init() {}
     
+#if DEBUG
     func syncAPI(store: PFCMapStore) async {
         print("API 同期開始")
         do {
@@ -34,4 +35,5 @@ final class MenuPageModel {
     func triggerCrash() {
         fatalError("Debug: Intentional App Crash")
     }
+#endif
 }

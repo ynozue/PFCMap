@@ -73,6 +73,7 @@ struct MenuPage: View {
                     }
                 }
                 
+#if DEBUG
                 Section("デバッグメニュー") {
                     Button {
                         Task { await model.syncAPI(store: store) }
@@ -92,6 +93,7 @@ struct MenuPage: View {
                         Label("アプリクラッシュ", systemImage: "exclamationmark.triangle")
                     }
                 }
+#endif
             }
             .navigationTitle("メニュー")
             .navigationBarTitleDisplayMode(.inline)

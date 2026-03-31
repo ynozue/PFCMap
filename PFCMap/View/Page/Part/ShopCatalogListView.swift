@@ -215,10 +215,10 @@ struct ShopItemRowView: View {
                     // Calories
                     HStack(alignment: .bottom, spacing: 0.5) {
                         Text("\(Int(displayItem.item.calorie))")
-                            .font(.system(size: 11, weight: .bold, design: .rounded))
+                            .font(.system(size: 13, weight: .bold, design: .rounded))
                             .foregroundStyle(.blue)
                         Text("kcal")
-                            .font(.system(size: 7, weight: .bold))
+                            .font(.system(size: 8, weight: .bold))
                             .foregroundStyle(.secondary)
                             .padding(.bottom, 0.5)
                     }
@@ -248,10 +248,10 @@ struct ShopItemRowView: View {
     private func nutrientView(name: String, value: Double, color: Color) -> some View {
         HStack(spacing: 1) {
             Text(name)
-                .font(.system(size: 8, weight: .bold))
+                .font(.system(size: 9, weight: .bold))
                 .foregroundStyle(color)
             Text(String(format: "%.1fg", value))
-                .font(.system(size: 10, weight: .medium, design: .rounded))
+                .font(.system(size: 11.5, weight: .medium, design: .rounded))
                 .foregroundStyle(.primary)
         }
     }
