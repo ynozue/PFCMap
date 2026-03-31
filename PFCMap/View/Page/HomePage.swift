@@ -97,10 +97,10 @@ struct HomePage: View {
                         }
                     } label: {
                         Text("\(store.settingsStore.mapDistance.label)")
-                            .font(.system(size: 10, weight: .bold))
+                            .font(.system(size: 12, weight: .bold))
                             .foregroundStyle(.blue)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
+                            .padding(.horizontal, 9)
+                            .padding(.vertical, 3)
                             .background(.white.opacity(0.85))
                             .clipShape(Capsule())
                             .overlay {
