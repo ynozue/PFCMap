@@ -53,9 +53,14 @@ struct ShopCatalogListView: View {
             // Header
             HStack(spacing: 8) {
                 // Protein Filter Toggle
-                Button {
-                    withAnimation {
-                        model.isProteinFilterEnabled.toggle()
+                Menu {
+                    Picker("Protein 閾値", selection: Binding(
+                        get: { store.settingsStore.proteinThreshold },
+                        set: { store.settingsStore.updateProteinThreshold($0) }
+                    )) {
+                        ForEach(ProteinThreshold.allCases, id: \.self) { threshold in
+                            Text(threshold.label).tag(threshold)
+                        }
                     }
                 } label: {
                     HStack(spacing: 4) {
@@ -65,15 +70,20 @@ struct ShopCatalogListView: View {
                     .font(.system(size: 11, weight: .bold))
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
-                    .foregroundStyle(model.isProteinFilterEnabled ? .white : .orange)
-                    .background(model.isProteinFilterEnabled ? Color.orange : Color.orange.opacity(0.1))
+                    .foregroundStyle(.white)
+                    .background(Color.orange)
                     .clipShape(Capsule())
                 }
                 
                 // Fat Filter Toggle
-                Button {
-                    withAnimation {
-                        model.isFatFilterEnabled.toggle()
+                Menu {
+                    Picker("Fat 閾値", selection: Binding(
+                        get: { store.settingsStore.fatThreshold },
+                        set: { store.settingsStore.updateFatThreshold($0) }
+                    )) {
+                        ForEach(FatThreshold.allCases, id: \.self) { threshold in
+                            Text(threshold.label).tag(threshold)
+                        }
                     }
                 } label: {
                     HStack(spacing: 4) {
@@ -83,8 +93,8 @@ struct ShopCatalogListView: View {
                     .font(.system(size: 11, weight: .bold))
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
-                    .foregroundStyle(model.isFatFilterEnabled ? .white : .yellow)
-                    .background(model.isFatFilterEnabled ? Color.yellow : Color.yellow.opacity(0.1))
+                    .foregroundStyle(.white)
+                    .background(Color.yellow)
                     .clipShape(Capsule())
                 }
                 

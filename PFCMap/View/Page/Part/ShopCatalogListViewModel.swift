@@ -11,8 +11,6 @@ class ShopCatalogListViewModel {
     }
     
     var sortType: SortType = .calorie
-    var isProteinFilterEnabled: Bool = false
-    var isFatFilterEnabled: Bool = false
     var isExpanded: Bool = true
 
     struct DisplayItem: Identifiable, Equatable {
@@ -26,14 +24,11 @@ class ShopCatalogListViewModel {
             .filter { !disabledShopIds.contains($0.id) }
             .flatMap { shop in
             shop.items.compactMap { item -> DisplayItem? in
-                if isProteinFilterEnabled {
-                    // pが閾値以上
-                    guard item.protein >= Double(proteinThreshold.rawValue) else { return nil }
-                }
-                if isFatFilterEnabled {
-                    // fが閾値以下
-                    guard item.fat <= Double(fatThreshold.rawValue) else { return nil }
-                }
+                // pが閾値以上
+                guard item.protein >= Double(proteinThreshold.rawValue) else { return nil }
+                // fが閾値以下
+                guard item.fat <= Double(fatThreshold.rawValue) else { return nil }
+                
                 return DisplayItem(shop: shop, item: item)
             }
         }
