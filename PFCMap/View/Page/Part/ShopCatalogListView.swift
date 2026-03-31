@@ -13,7 +13,10 @@ struct ShopCatalogListView: View {
             from: shops,
             proteinThreshold: store.settingsStore.proteinThreshold,
             fatThreshold: store.settingsStore.fatThreshold,
-            disabledShopIds: store.settingsStore.disabledShopIds
+            disabledShopIds: store.settingsStore.disabledShopIds,
+            currentLocation: store.locationStore.currentLocation,
+            searchResults: store.shopSearchStore.results,
+            mapDistance: store.settingsStore.mapDistance.rawValue
         )
     }
     

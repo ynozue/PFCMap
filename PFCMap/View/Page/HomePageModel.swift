@@ -33,7 +33,8 @@ final class HomePageModel {
                 if !queries.isEmpty {
                     // 初回ロード時は visibleRegion がまだ決定していない可能性があるため、
                     // locationStoreから現在の検索範囲のリージョンを算出して利用する
-                    let radius = Double(settingsStore.mapDistance.rawValue + 100)
+                    // PINは2,000m以内を表示するため、検索範囲を2,000m(+バッファ)にする
+                    let radius = 2100.0
                     let searchRegion = visibleRegion ?? locationStore.currentRegion(radius: radius)
                     try await shopSearchStore.search(queries: queries, region: searchRegion)
                 }

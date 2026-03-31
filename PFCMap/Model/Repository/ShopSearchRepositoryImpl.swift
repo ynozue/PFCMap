@@ -21,6 +21,7 @@ public actor ShopSearchRepositoryImpl: ShopSearchRepository {
                         response.mapItems.map { item in
                             ShopSearchResult(
                                 name: item.name ?? "不明な店",
+                                query: query,
                                 location: Location(
                                     latitude: item.location.coordinate.latitude,
                                     longitude: item.location.coordinate.longitude

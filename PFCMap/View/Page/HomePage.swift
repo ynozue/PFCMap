@@ -105,7 +105,10 @@ struct HomePage: View {
             }
             
             // Search Results
-            ForEach(store.shopSearchStore.results) { result in
+            ForEach(store.shopSearchStore.results.filter { result in
+                guard let currentLocation = store.locationStore.currentLocation else { return true }
+                return result.location.distance(to: currentLocation) <= 2000
+            }) { result in
                 Marker(result.name, coordinate: CLLocationCoordinate2D(
                     latitude: result.location.latitude,
                     longitude: result.location.longitude
