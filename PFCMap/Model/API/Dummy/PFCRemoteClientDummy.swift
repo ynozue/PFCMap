@@ -103,30 +103,6 @@ public actor PFCRemoteClientDummy: PFCRemoteClient {
                 ]
             ),
             .init(
-                id: UUID(), name: "スシロー", category: "寿司",
-                description: "シャリを半分にする設定が可能で高タンパクな魚介類を選べる",
-                items: [
-                    .init(id: UUID(), name: "まぐろ（シャリ半分）", calorie: 60, protein: 5.0, fat: 0.5, carbohydrate: 8.0),
-                    .init(id: UUID(), name: "寒ぶり", calorie: 120, protein: 4.5, fat: 7.0, carbohydrate: 9.0)
-                ]
-            ),
-            .init(
-                id: UUID(), name: "くら寿司", category: "寿司",
-                description: "「シャリ野菜」や「シャリプチ」など独自の糖質オフメニューがある",
-                items: [
-                    .init(id: UUID(), name: "シャリ野菜 びんちょう赤身", calorie: 32, protein: 3.5, fat: 0.2, carbohydrate: 4.5),
-                    .init(id: UUID(), name: "極み熟成 まぐろ", calorie: 88, protein: 4.5, fat: 0.3, carbohydrate: 16.5)
-                ]
-            ),
-            .init(
-                id: UUID(), name: "はま寿司", category: "寿司",
-                description: "シャリ少なめ対応があり摂取する糖質量を調整しやすい",
-                items: [
-                    .init(id: UUID(), name: "活〆ぶり（シャリ少なめ）", calorie: 95, protein: 4.5, fat: 6.5, carbohydrate: 4.5),
-                    .init(id: UUID(), name: "厳選まぐろ", calorie: 80, protein: 4.8, fat: 0.2, carbohydrate: 14.5)
-                ]
-            ),
-            .init(
                 id: UUID(), name: "しゃぶ葉", category: "しゃぶしゃぶ",
                 description: "茹でる調理で余分な脂が落ち野菜も大量に摂取できる",
                 items: [
