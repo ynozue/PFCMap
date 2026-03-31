@@ -1,6 +1,6 @@
 import Foundation
 import MapKit
 
-public protocol ShopSearchRepository: Sendable {
+protocol ShopSearchRepository: Sendable {
     func search(queries: [String], region: MKCoordinateRegion?) async throws -> [ShopSearchResult]
 }

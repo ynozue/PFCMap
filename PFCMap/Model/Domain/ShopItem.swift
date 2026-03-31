@@ -1,15 +1,15 @@
 import Foundation
 
-public struct ShopItem: Sendable, Identifiable, Equatable {
-    public let id: UUID
-    public let name: String
-    public let calorie: Double
-    public let protein: Double
-    public let fat: Double
-    public let carbohydrate: Double
-    public let photoData: Data?
+struct ShopItem: Sendable, Identifiable, Equatable {
+    let id: UUID
+    let name: String
+    let calorie: Double
+    let protein: Double
+    let fat: Double
+    let carbohydrate: Double
+    let photoData: Data?
     
-    public nonisolated init(
+    nonisolated init(
         id: UUID = UUID(),
         name: String,
         calorie: Double,

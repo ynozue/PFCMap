@@ -1,6 +1,6 @@
 import Foundation
 
-public actor ShopCatalogRepositoryDummy: ShopCatalogRepository {
+actor ShopCatalogRepositoryDummy: ShopCatalogRepository {
     private let shops: [ShopCatalog] = [
         ShopCatalog(
             name: "ガスト", category: .familyRestaurant,
@@ -41,17 +41,17 @@ public actor ShopCatalogRepositoryDummy: ShopCatalogRepository {
         )
     ]
     
-    public init() {}
+    init() {}
 
-    public func sync() async throws {
+    func sync() async throws {
         try await Task.sleep(nanoseconds: 1_000_000_000)
     }
     
-    public func fetchShops() async throws -> [ShopCatalog] {
+    func fetchShops() async throws -> [ShopCatalog] {
         shops
     }
     
-    public func addShop(_ shop: ShopCatalog) async throws {}
-    public func saveShops(_ shops: [ShopCatalog]) async throws {}
-    public func clearAll() async throws {}
+    func addShop(_ shop: ShopCatalog) async throws {}
+    func saveShops(_ shops: [ShopCatalog]) async throws {}
+    func clearAll() async throws {}
 }

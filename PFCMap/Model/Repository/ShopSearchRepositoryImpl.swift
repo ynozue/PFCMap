@@ -1,10 +1,10 @@
 import Foundation
 import MapKit
 
-public actor ShopSearchRepositoryImpl: ShopSearchRepository {
-    public init() {}
+actor ShopSearchRepositoryImpl: ShopSearchRepository {
+    init() {}
     
-    public func search(queries: [String], region: MKCoordinateRegion?) async throws -> [ShopSearchResult] {
+    func search(queries: [String], region: MKCoordinateRegion?) async throws -> [ShopSearchResult] {
         try await withThrowingTaskGroup(of: [ShopSearchResult].self) { group in
             for query in queries {
                 group.addTask {

@@ -1,9 +1,9 @@
 import Foundation
 
-public actor PFCRemoteClientDummy: PFCRemoteClient {
-    public init() {}
+actor PFCRemoteClientDummy: PFCRemoteClient {
+    init() {}
     
-    public func fetchShops() async throws -> [ShopCatalogResponseDTO] {
+    func fetchShops() async throws -> [ShopCatalogResponseDTO] {
         await [
             .init(
                 id: UUID(), name: "ガスト", category: "ファミリーレストラン",

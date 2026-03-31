@@ -1,6 +1,6 @@
 import Foundation
 
-public enum ShopCategory: String, Sendable, CaseIterable, Codable {
+enum ShopCategory: String, Sendable, CaseIterable, Codable {
     case familyRestaurant = "ファミリーレストラン"
     case setMeal = "定食"
     case beefBowl = "牛丼・丼もの"
@@ -13,7 +13,7 @@ public enum ShopCategory: String, Sendable, CaseIterable, Codable {
     case curry = "カレー"
     case other = "その他"
 
-    public var iconName: String {
+    var iconName: String {
         switch self {
         case .familyRestaurant: 
             return "fork.knife"

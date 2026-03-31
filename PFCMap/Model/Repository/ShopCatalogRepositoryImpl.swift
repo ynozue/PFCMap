@@ -2,18 +2,18 @@ import Foundation
 import SwiftData
 import NZData
 
-public actor ShopCatalogRepositoryImpl {
+actor ShopCatalogRepositoryImpl {
     private let remoteClient: any PFCRemoteClient
     private let dataOperator: DataOperator
     
-    public init(remoteClient: any PFCRemoteClient, modelContainer: ModelContainer) {
+    init(remoteClient: any PFCRemoteClient, modelContainer: ModelContainer) {
         self.remoteClient = remoteClient
         self.dataOperator = DataOperator(modelContainer: modelContainer)
     }
 }
 
 extension ShopCatalogRepositoryImpl: ShopCatalogRepository {
-    public func sync() async throws {
+    func sync() async throws {
         let dtos = try await remoteClient.fetchShops()
         let shops = dtos.map { dto in
             ShopCatalog(
@@ -37,19 +37,19 @@ extension ShopCatalogRepositoryImpl: ShopCatalogRepository {
         try await saveShops(shops)
     }
 
-    public func fetchShops() async throws -> [ShopCatalog] {
+    func fetchShops() async throws -> [ShopCatalog] {
         try await dataOperator.fetchShops()
     }
     
-    public func addShop(_ shop: ShopCatalog) async throws {
+    func addShop(_ shop: ShopCatalog) async throws {
         try await dataOperator.addShop(shop)
     }
     
-    public func saveShops(_ shops: [ShopCatalog]) async throws {
+    func saveShops(_ shops: [ShopCatalog]) async throws {
         try await dataOperator.saveShops(shops)
     }
     
-    public func clearAll() async throws {
+    func clearAll() async throws {
         try await dataOperator.clearAll()
     }
 }

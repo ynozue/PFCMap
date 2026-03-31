@@ -1,5 +1,5 @@
 import Foundation
 
-public protocol LocationRepository: Sendable {
+protocol LocationRepository: Sendable {
     func requestLocation() async throws -> Location
 }

@@ -3,16 +3,16 @@ import SwiftData
 import NZData
 
 @Model
-public final class ShopItemEntity {
-    @Attribute(.unique) public var id: UUID
-    public var name: String
-    public var calorie: Double
-    public var protein: Double
-    public var fat: Double
-    public var carbohydrate: Double
-    @Attribute(.externalStorage) public var photoData: Data?
+final class ShopItemEntity {
+    @Attribute(.unique) var id: UUID
+    var name: String
+    var calorie: Double
+    var protein: Double
+    var fat: Double
+    var carbohydrate: Double
+    @Attribute(.externalStorage) var photoData: Data?
     
-    public init(
+    init(
         id: UUID,
         name: String,
         calorie: Double,
@@ -32,14 +32,14 @@ public final class ShopItemEntity {
 }
 
 extension ShopItemEntity: DomainConvertibleModel {
-    public typealias Domain = ShopItem
-    public typealias PKey = UUID
+    typealias Domain = ShopItem
+    typealias PKey = UUID
 
-    public static func primaryKey(_ key: UUID) -> Predicate<ShopItemEntity> {
+    static func primaryKey(_ key: UUID) -> Predicate<ShopItemEntity> {
         return #Predicate<ShopItemEntity> { $0.id == key }
     }
     
-    public func toDomain() -> ShopItem {
+    func toDomain() -> ShopItem {
         .init(
             id: id,
             name: name,

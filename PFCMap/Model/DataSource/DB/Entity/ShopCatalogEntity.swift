@@ -3,14 +3,14 @@ import SwiftData
 import NZData
 
 @Model
-public final class ShopCatalogEntity {
-    @Attribute(.unique) public var id: UUID
-    public var name: String
-    public var category: ShopCategory
-    public var descriptionText: String // descriptionはSwift標準にあるので避けるため
-    @Relationship(deleteRule: .cascade) public var items: [ShopItemEntity]
+final class ShopCatalogEntity {
+    @Attribute(.unique) var id: UUID
+    var name: String
+    var category: ShopCategory
+    var descriptionText: String // descriptionはSwift標準にあるので避けるため
+    @Relationship(deleteRule: .cascade) var items: [ShopItemEntity]
     
-    public init(
+    init(
         id: UUID,
         name: String,
         category: ShopCategory = .other,
@@ -26,14 +26,14 @@ public final class ShopCatalogEntity {
 }
 
 extension ShopCatalogEntity: DomainConvertibleModel {
-    public typealias Domain = ShopCatalog
-    public typealias PKey = UUID
+    typealias Domain = ShopCatalog
+    typealias PKey = UUID
 
-    public static func primaryKey(_ key: UUID) -> Predicate<ShopCatalogEntity> {
+    static func primaryKey(_ key: UUID) -> Predicate<ShopCatalogEntity> {
         return #Predicate<ShopCatalogEntity> { $0.id == key }
     }
     
-    public func toDomain() -> ShopCatalog {
+    func toDomain() -> ShopCatalog {
         .init(
             id: id,
             name: name,

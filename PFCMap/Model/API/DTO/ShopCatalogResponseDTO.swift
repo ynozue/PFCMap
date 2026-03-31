@@ -1,13 +1,13 @@
 import Foundation
 
-public struct ShopCatalogResponseDTO: Decodable, Sendable {
-    public let id: UUID
-    public let name: String
-    public let category: String?
-    public let description: String?
-    public let items: [ShopItemResponseDTO]
+struct ShopCatalogResponseDTO: Decodable, Sendable {
+    let id: UUID
+    let name: String
+    let category: String?
+    let description: String?
+    let items: [ShopItemResponseDTO]
     
-    public init(
+    init(
         id: UUID,
         name: String,
         category: String? = nil,
@@ -27,15 +27,15 @@ public struct ShopCatalogResponseDTO: Decodable, Sendable {
     }
 }
 
-public struct ShopItemResponseDTO: Decodable, Sendable {
-    public let id: UUID
-    public let name: String
-    public let calorie: Double
-    public let protein: Double
-    public let fat: Double
-    public let carbohydrate: Double
+struct ShopItemResponseDTO: Decodable, Sendable {
+    let id: UUID
+    let name: String
+    let calorie: Double
+    let protein: Double
+    let fat: Double
+    let carbohydrate: Double
     
-    public init(
+    init(
         id: UUID,
         name: String,
         calorie: Double,

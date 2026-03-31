@@ -1,5 +1,5 @@
 import Foundation
 
-public protocol PFCRemoteClient: Sendable {
+protocol PFCRemoteClient: Sendable {
     func fetchShops() async throws -> [ShopCatalogResponseDTO]
 }

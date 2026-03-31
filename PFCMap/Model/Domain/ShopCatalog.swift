@@ -1,13 +1,13 @@
 import Foundation
 
-public struct ShopCatalog: Sendable, Identifiable, Equatable {
-    public let id: UUID
-    public let name: String
-    public let category: ShopCategory
-    public let description: String
-    public let items: [ShopItem]
+struct ShopCatalog: Sendable, Identifiable, Equatable {
+    let id: UUID
+    let name: String
+    let category: ShopCategory
+    let description: String
+    let items: [ShopItem]
     
-    public nonisolated init(
+    nonisolated init(
         id: UUID = UUID(),
         name: String,
         category: ShopCategory = .other,

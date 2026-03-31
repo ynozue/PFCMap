@@ -3,17 +3,17 @@ import Observation
 
 @MainActor
 @Observable
-public final class ShopCatalogStore {
-    public private(set) var shops: [ShopCatalog] = []
+final class ShopCatalogStore {
+    private(set) var shops: [ShopCatalog] = []
     private let remoteClient: any PFCRemoteClient
     private let repository: any ShopCatalogRepository
     
-    public init(remoteClient: any PFCRemoteClient, repository: any ShopCatalogRepository) {
+    init(remoteClient: any PFCRemoteClient, repository: any ShopCatalogRepository) {
         self.remoteClient = remoteClient
         self.repository = repository
     }
     
-    public func load() async throws {
+    func load() async throws {
         // First try to fetch from SwiftData
         let fetchedShops = try await repository.fetchShops()
         
@@ -25,7 +25,7 @@ public final class ShopCatalogStore {
         }
     }
 
-    public func sync() async throws {
+    func sync() async throws {
         try await repository.sync()
         // Reload from DB
         self.shops = try await repository.fetchShops()

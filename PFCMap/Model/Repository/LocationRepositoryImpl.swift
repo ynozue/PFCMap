@@ -4,14 +4,14 @@ import CoreLocation
 /// LocationRepositoryの実装
 /// CLLocationManagerは@MainActorを必要とするため、actorではなくfinal classとして定義し、
 /// 実際の位置情報取得処理は@MainActorなLocationManagerHelperに委譲する
-public final class LocationRepositoryImpl: Sendable {
+final class LocationRepositoryImpl: Sendable {
     // LocationManagerHelperは@MainActorに隔離されているため、直接保持せずに
     // メソッド呼び出し時にMainActor上で生成・使用する
-    public init() {}
+    init() {}
 }
 
 extension LocationRepositoryImpl: LocationRepository {
-    public func requestLocation() async throws -> Location {
+    func requestLocation() async throws -> Location {
         try await LocationManagerHelper.shared.requestLocation()
     }
 }

@@ -1,10 +1,10 @@
 import Foundation
 // import NZCore
 
-public actor PFCRemoteClientImpl: PFCRemoteClient {
-    public init() {}
+actor PFCRemoteClientImpl: PFCRemoteClient {
+    init() {}
     
-    public func fetchShops() async throws -> [ShopCatalogResponseDTO] {
+    func fetchShops() async throws -> [ShopCatalogResponseDTO] {
         // 本来は NZCore.remoteClient.fetch などを使って API 通信する
         // 現状はダミーを返す
         await [

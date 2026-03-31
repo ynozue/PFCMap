@@ -1,10 +1,10 @@
 import Foundation
 import MapKit
 
-public actor ShopSearchRepositoryDummy: ShopSearchRepository {
-    public init() {}
+actor ShopSearchRepositoryDummy: ShopSearchRepository {
+    init() {}
     
-    public func search(queries: [String], region: MKCoordinateRegion?) async throws -> [ShopSearchResult] {
+    func search(queries: [String], region: MKCoordinateRegion?) async throws -> [ShopSearchResult] {
         // ダミーデータを返す
         return await MainActor.run {
             [
