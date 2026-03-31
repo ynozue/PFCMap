@@ -7,7 +7,7 @@ trigger: always_on
 - strict concurrency checking を有効にしてください。
 
 ## Data Flow
-- API/DB > Repository > PageModel/ViewModel > Domain > Store > View
+- API/DB > Repository/Service > PageModel/ViewModel > Domain > Store > View
 
 ## ディレクトリ構成
 ```
