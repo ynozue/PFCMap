@@ -7,9 +7,9 @@ import NZData
 final class SettingsStore {
     private let userDefaultsService: any UserDefaultsService
 
-    var mapDistance: Int = 500
-    var proteinThreshold: Int = 20
-    var fatThreshold: Int = 20
+    var mapDistance: MapDistance = .m500
+    var proteinThreshold: ProteinThreshold = .g20
+    var fatThreshold: FatThreshold = .g20
     var disabledShopIds: Set<UUID> = []
 
     init(userDefaultsService: any UserDefaultsService) {
@@ -21,31 +21,37 @@ final class SettingsStore {
     }
 
     func loadSettings() async {
-        self.mapDistance = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.mapDistance)
-        self.proteinThreshold = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.proteinThreshold)
-        self.fatThreshold = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.fatThreshold)
+        let distance: Int = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.mapDistance)
+        self.mapDistance = MapDistance(rawValue: distance) ?? .m500
+        
+        let protein: Int = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.proteinThreshold)
+        self.proteinThreshold = ProteinThreshold(rawValue: protein) ?? .g20
+        
+        let fat: Int = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.fatThreshold)
+        self.fatThreshold = FatThreshold(rawValue: fat) ?? .g20
+
         let ids: [UUID] = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.disabledShopIds)
         self.disabledShopIds = Set(ids)
     }
 
-    func updateMapDistance(_ distance: Int) {
+    func updateMapDistance(_ distance: MapDistance) {
         self.mapDistance = distance
         Task {
-            await userDefaultsService.save(key:  PFCMapUserDefaultsKeys.mapDistance, value: distance)
+            await userDefaultsService.save(key:  PFCMapUserDefaultsKeys.mapDistance, value: distance.rawValue)
         }
     }
 
-    func updateProteinThreshold(_ threshold: Int) {
+    func updateProteinThreshold(_ threshold: ProteinThreshold) {
         self.proteinThreshold = threshold
         Task {
-            await userDefaultsService.save(key: PFCMapUserDefaultsKeys.proteinThreshold, value: threshold)
+            await userDefaultsService.save(key: PFCMapUserDefaultsKeys.proteinThreshold, value: threshold.rawValue)
         }
     }
 
-    func updateFatThreshold(_ threshold: Int) {
+    func updateFatThreshold(_ threshold: FatThreshold) {
         self.fatThreshold = threshold
         Task {
-            await userDefaultsService.save(key: PFCMapUserDefaultsKeys.fatThreshold, value: threshold)
+            await userDefaultsService.save(key: PFCMapUserDefaultsKeys.fatThreshold, value: threshold.rawValue)
         }
     }
 

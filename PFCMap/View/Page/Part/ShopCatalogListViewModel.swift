@@ -21,18 +21,18 @@ class ShopCatalogListViewModel {
         let item: ShopItem
     }
     
-    func displayItems(from shops: [ShopCatalog], proteinThreshold: Int, fatThreshold: Int, disabledShopIds: Set<UUID>) -> [DisplayItem] {
+    func displayItems(from shops: [ShopCatalog], proteinThreshold: ProteinThreshold, fatThreshold: FatThreshold, disabledShopIds: Set<UUID>) -> [DisplayItem] {
         var items = shops
             .filter { !disabledShopIds.contains($0.id) }
             .flatMap { shop in
             shop.items.compactMap { item -> DisplayItem? in
                 if isProteinFilterEnabled {
                     // pが閾値以上
-                    guard item.protein >= Double(proteinThreshold) else { return nil }
+                    guard item.protein >= Double(proteinThreshold.rawValue) else { return nil }
                 }
                 if isFatFilterEnabled {
                     // fが閾値以下
-                    guard item.fat <= Double(fatThreshold) else { return nil }
+                    guard item.fat <= Double(fatThreshold.rawValue) else { return nil }
                 }
                 return DisplayItem(shop: shop, item: item)
             }

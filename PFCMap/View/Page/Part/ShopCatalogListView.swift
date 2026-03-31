@@ -60,7 +60,7 @@ struct ShopCatalogListView: View {
                 } label: {
                     HStack(spacing: 4) {
                         Image(systemName: "line.3.horizontal.decrease.circle")
-                        Text("P≥\(store.settingsStore.proteinThreshold)g")
+                        Text("P≥\(store.settingsStore.proteinThreshold.label)")
                     }
                     .font(.system(size: 11, weight: .bold))
                     .padding(.horizontal, 10)
@@ -78,7 +78,7 @@ struct ShopCatalogListView: View {
                 } label: {
                     HStack(spacing: 4) {
                         Image(systemName: "line.3.horizontal.decrease.circle")
-                        Text("F≤\(store.settingsStore.fatThreshold)g")
+                        Text("F≤\(store.settingsStore.fatThreshold.label)")
                     }
                     .font(.system(size: 11, weight: .bold))
                     .padding(.horizontal, 10)

@@ -70,6 +70,13 @@ struct HomePage: View {
             // User location mark
             UserAnnotation()
             
+            // 検索範囲の円を描画
+            if let currentLocation = store.locationStore.currentLocation {
+                MapCircle(center: currentLocation.coordinate, radius: CLLocationDistance(store.settingsStore.mapDistance.rawValue))
+                    .foregroundStyle(.blue.opacity(0.15))
+                    .stroke(.blue, lineWidth: 1)
+            }
+            
             // Search Results
             ForEach(store.shopSearchStore.results) { result in
                 Marker(result.name, coordinate: CLLocationCoordinate2D(

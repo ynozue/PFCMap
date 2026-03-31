@@ -14,9 +14,9 @@ struct MenuPage: View {
                         get: { store.settingsStore.mapDistance },
                         set: { store.settingsStore.updateMapDistance($0) }
                     )) {
-                        Text("500m").tag(500)
-                        Text("750m").tag(750)
-                        Text("1,000m").tag(1000)
+                        ForEach(MapDistance.allCases, id: \.self) { distance in
+                            Text(distance.label).tag(distance)
+                        }
                     } label: {
                         Label("Map 距離", systemImage: "map")
                     }
@@ -25,10 +25,9 @@ struct MenuPage: View {
                         get: { store.settingsStore.proteinThreshold },
                         set: { store.settingsStore.updateProteinThreshold($0) }
                     )) {
-                        Text("15g").tag(15)
-                        Text("20g").tag(20)
-                        Text("25g").tag(25)
-                        Text("30g").tag(30)
+                        ForEach(ProteinThreshold.allCases, id: \.self) { threshold in
+                            Text(threshold.label).tag(threshold)
+                        }
                     } label: {
                         Label("Protein 閾値", systemImage: "p.circle")
                     }
@@ -37,10 +36,9 @@ struct MenuPage: View {
                         get: { store.settingsStore.fatThreshold },
                         set: { store.settingsStore.updateFatThreshold($0) }
                     )) {
-                        Text("15g").tag(15)
-                        Text("20g").tag(20)
-                        Text("25g").tag(25)
-                        Text("30g").tag(30)
+                        ForEach(FatThreshold.allCases, id: \.self) { threshold in
+                            Text(threshold.label).tag(threshold)
+                        }
                     } label: {
                         Label("Fat 閾値", systemImage: "f.circle")
                     }

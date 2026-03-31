@@ -16,7 +16,7 @@ final class HomePageModel {
     func onAppear(locationStore: LocationStore, shopCatalogStore: ShopCatalogStore, shopSearchStore: ShopSearchStore, settingsStore: SettingsStore) {
         // スプラッシュですでに取得済みの現在地をカメラ位置に設定
         if let location = locationStore.currentLocation {
-            let distance = Double(settingsStore.mapDistance)
+            let distance = Double(settingsStore.mapDistance.rawValue)
             let diameter = (distance + 100) * 2
             cameraPosition = .region(MKCoordinateRegion(
                 center: location.coordinate,
