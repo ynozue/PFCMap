@@ -153,7 +153,7 @@ private extension DataOperator {
                 
                 // アイテムの更新/追加
                 // ShopItemEntity にも ID があるのでそれを利用する
-                var currentItems = entity.items
+                let currentItems = entity.items
                 for item in shop.items {
                     if let existingItem = currentItems.first(where: { $0.id == item.id }) {
                         // 更新

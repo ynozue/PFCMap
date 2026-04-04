@@ -9,6 +9,7 @@ final class SettingsStore {
     var proteinThreshold: ProteinThreshold = .g20
     var fatThreshold: FatThreshold = .g20
     var disabledShopIds: Set<UUID> = []
+    var lastFetchedAt: Date? = nil
 
     init() {}
 
@@ -16,12 +17,14 @@ final class SettingsStore {
         mapDistance: MapDistance,
         proteinThreshold: ProteinThreshold,
         fatThreshold: FatThreshold,
-        disabledShopIds: Set<UUID>
+        disabledShopIds: Set<UUID>,
+        lastFetchedAt: Date?
     ) {
         self.mapDistance = mapDistance
         self.proteinThreshold = proteinThreshold
         self.fatThreshold = fatThreshold
         self.disabledShopIds = disabledShopIds
+        self.lastFetchedAt = lastFetchedAt
     }
 
     func updateMapDistance(_ distance: MapDistance) {
@@ -38,5 +41,9 @@ final class SettingsStore {
 
     func updateDisabledShopIds(_ ids: Set<UUID>) {
         self.disabledShopIds = ids
+    }
+
+    func updateLastFetchedAt(_ date: Date?) {
+        self.lastFetchedAt = date
     }
 }

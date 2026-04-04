@@ -10,37 +10,11 @@ struct MenuPage: View {
         NavigationStack {
             List {
                 Section("設定") {
-                    Picker(selection: Binding(
-                        get: { store.settingsStore.mapDistance },
-                        set: { model.updateMapDistance(distance: $0, store: store) }
-                    )) {
-                        ForEach(MapDistance.allCases, id: \.self) { distance in
-                            Text(distance.label).tag(distance)
-                        }
-                    } label: {
-                        Label("Map 距離", systemImage: "map")
-                    }
-                    
-                    Picker(selection: Binding(
-                        get: { store.settingsStore.proteinThreshold },
-                        set: { model.updateProteinThreshold(threshold: $0, store: store) }
-                    )) {
-                        ForEach(ProteinThreshold.allCases, id: \.self) { threshold in
-                            Text(threshold.label).tag(threshold)
-                        }
-                    } label: {
-                        Label("Protein 閾値", systemImage: "p.circle")
-                    }
-                    
-                    Picker(selection: Binding(
-                        get: { store.settingsStore.fatThreshold },
-                        set: { model.updateFatThreshold(threshold: $0, store: store) }
-                    )) {
-                        ForEach(FatThreshold.allCases, id: \.self) { threshold in
-                            Text(threshold.label).tag(threshold)
-                        }
-                    } label: {
-                        Label("Fat 閾値", systemImage: "f.circle")
+                    HStack {
+                        Label("最終同期日時", systemImage: "arrow.clockwise")
+                        Spacer()
+                        Text(model.lastSyncDateString(date: store.settingsStore.lastFetchedAt))
+                            .foregroundStyle(.secondary)
                     }
                     
                     NavigationLink {
@@ -83,6 +57,12 @@ struct MenuPage: View {
                         Task { await model.generateDBData(store: store) }
                     } label: {
                         Label("DB情報の生成", systemImage: "plus.square.on.square")
+                    }
+                    
+                    Button(role: .destructive) {
+                        Task { await model.deleteLastSyncDate(store: store) }
+                    } label: {
+                        Label("最終同期日時を削除", systemImage: "trash")
                     }
                     
                     Button(role: .destructive) {

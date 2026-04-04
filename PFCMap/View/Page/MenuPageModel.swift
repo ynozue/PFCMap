@@ -11,30 +11,13 @@ final class MenuPageModel {
     
     init() {}
     
-    func updateMapDistance(distance: MapDistance, store: PFCMapStore) {
-        store.settingsStore.updateMapDistance(distance)
-        let service = store.makeUserDefaultsService()
-        Task {
-            await service.save(key: PFCMapUserDefaultsKeys.mapDistance, value: distance.rawValue)
-        }
+    func lastSyncDateString(date: Date?) -> String {
+        guard let date = date else { return "未同期" }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy年MM月dd日 HH時mm分ss秒"
+        return formatter.string(from: date)
     }
-    
-    func updateProteinThreshold(threshold: ProteinThreshold, store: PFCMapStore) {
-        store.settingsStore.updateProteinThreshold(threshold)
-        let service = store.makeUserDefaultsService()
-        Task {
-            await service.save(key: PFCMapUserDefaultsKeys.proteinThreshold, value: threshold.rawValue)
-        }
-    }
-    
-    func updateFatThreshold(threshold: FatThreshold, store: PFCMapStore) {
-        store.settingsStore.updateFatThreshold(threshold)
-        let service = store.makeUserDefaultsService()
-        Task {
-            await service.save(key: PFCMapUserDefaultsKeys.fatThreshold, value: threshold.rawValue)
-        }
-    }
-    
+
 #if DEBUG
     func syncAPI(store: PFCMapStore) async {
         print("API 同期開始")
@@ -43,6 +26,12 @@ final class MenuPageModel {
             try await repository.sync()
             let synchronizedShops = try await repository.fetchShops()
             store.shopCatalogStore.updateShops(synchronizedShops)
+            
+            // 最終同期日時を Store に反映
+            let service = store.makeUserDefaultsService()
+            let lastFetchedAt: Date? = await service.value(key: PFCMapUserDefaultsKeys.lastFetchedAt)
+            store.settingsStore.updateLastFetchedAt(lastFetchedAt)
+            
             print("API 同期完了")
         } catch {
             print("API 同期失敗: \(error)")
@@ -56,10 +45,22 @@ final class MenuPageModel {
             try await repository.sync()
             let generatedShops = try await repository.fetchShops()
             store.shopCatalogStore.updateShops(generatedShops)
+            
+            // 最終同期日時を Store に反映
+            let service = store.makeUserDefaultsService()
+            let lastFetchedAt: Date? = await service.value(key: PFCMapUserDefaultsKeys.lastFetchedAt)
+            store.settingsStore.updateLastFetchedAt(lastFetchedAt)
+            
             print("DB 情報の生成完了")
         } catch {
             print("DB 情報の生成失敗: \(error)")
         }
+    }
+    
+    func deleteLastSyncDate(store: PFCMapStore) async {
+        let service = store.makeUserDefaultsService()
+        await service.save(key: PFCMapUserDefaultsKeys.lastFetchedAt, value: nil)
+        store.settingsStore.updateLastFetchedAt(nil)
     }
     
     func triggerCrash() {

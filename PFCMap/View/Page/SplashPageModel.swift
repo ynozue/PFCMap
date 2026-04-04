@@ -43,11 +43,14 @@ final class SplashPageModel {
             let ids: [UUID] = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.disabledShopIds)
             let disabledShopIds = Set(ids)
             
+            let lastFetchedAt: Date? = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.lastFetchedAt)
+            
             store.settingsStore.updateSettings(
                 mapDistance: mapDistance,
                 proteinThreshold: proteinThreshold,
                 fatThreshold: fatThreshold,
-                disabledShopIds: disabledShopIds
+                disabledShopIds: disabledShopIds,
+                lastFetchedAt: lastFetchedAt
             )
             
             // ロード完了
