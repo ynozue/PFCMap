@@ -11,6 +11,9 @@ final class ShopItemEntity {
     var fat: Double
     var carbohydrate: Double
     @Attribute(.externalStorage) var photoData: Data?
+    var createdAt: Date
+    var updatedAt: Date
+    var deleted: Bool
     
     init(
         id: UUID,
@@ -19,7 +22,10 @@ final class ShopItemEntity {
         protein: Double,
         fat: Double,
         carbohydrate: Double,
-        photoData: Data? = nil
+        photoData: Data? = nil,
+        createdAt: Date = Date(),
+        updatedAt: Date = Date(),
+        deleted: Bool = false
     ) {
         self.id = id
         self.name = name
@@ -28,6 +34,9 @@ final class ShopItemEntity {
         self.fat = fat
         self.carbohydrate = carbohydrate
         self.photoData = photoData
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+        self.deleted = deleted
     }
 }
 
@@ -47,7 +56,10 @@ extension ShopItemEntity: DomainConvertibleModel {
             protein: protein,
             fat: fat,
             carbohydrate: carbohydrate,
-            photoData: photoData
+            photoData: photoData,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deleted: deleted
         )
     }
 }

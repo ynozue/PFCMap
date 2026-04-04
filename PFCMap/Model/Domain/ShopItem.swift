@@ -8,6 +8,9 @@ struct ShopItem: Sendable, Identifiable, Equatable {
     let fat: Double
     let carbohydrate: Double
     let photoData: Data?
+    let createdAt: Date
+    let updatedAt: Date
+    let deleted: Bool
     
     nonisolated init(
         id: UUID = UUID(),
@@ -16,7 +19,10 @@ struct ShopItem: Sendable, Identifiable, Equatable {
         protein: Double,
         fat: Double,
         carbohydrate: Double,
-        photoData: Data? = nil
+        photoData: Data? = nil,
+        createdAt: Date = Date(),
+        updatedAt: Date = Date(),
+        deleted: Bool = false
     ) {
         self.id = id
         self.name = name
@@ -25,5 +31,8 @@ struct ShopItem: Sendable, Identifiable, Equatable {
         self.fat = fat
         self.carbohydrate = carbohydrate
         self.photoData = photoData
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+        self.deleted = deleted
     }
 }

@@ -7,17 +7,27 @@ struct ShopCatalog: Sendable, Identifiable, Equatable {
     let description: String
     let items: [ShopItem]
     
+    let createdAt: Date
+    let updatedAt: Date
+    let deleted: Bool
+    
     nonisolated init(
         id: UUID = UUID(),
         name: String,
         category: ShopCategory = .other,
         description: String = "",
-        items: [ShopItem] = []
+        items: [ShopItem] = [],
+        createdAt: Date = Date(),
+        updatedAt: Date = Date(),
+        deleted: Bool = false
     ) {
         self.id = id
         self.name = name
         self.category = category
         self.description = description
         self.items = items
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+        self.deleted = deleted
     }
 }

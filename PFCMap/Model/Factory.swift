@@ -57,7 +57,8 @@ extension Factory {
             // 実運用上は Factory が保持するか、他から提供するようにする
             let container = try! ModelContainer(for: ShopCatalogEntity.self, ShopItemEntity.self)
             let remoteClient = makePFCRemoteClient()
-            return ShopCatalogRepositoryImpl(remoteClient: remoteClient, modelContainer: container)
+            let userDefaultsService = makeUserDefaultsService()
+            return ShopCatalogRepositoryImpl(remoteClient: remoteClient, modelContainer: container, userDefaultsService: userDefaultsService)
         case .preview:
             return ShopCatalogRepositoryDummy()
         }

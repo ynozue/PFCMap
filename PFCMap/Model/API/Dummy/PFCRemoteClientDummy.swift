@@ -136,8 +136,17 @@ actor PFCRemoteClientDummy: PFCRemoteClient {
                 description: "ライスの量が多く糖質過多になりやすい",
                 items: [
                     .init(id: UUID(), name: "ポークカレー（ライス300g）", calorie: 748, protein: 9.5, fat: 28.5, carbohydrate: 110.5),
-                    .init(id: UUID(), name: "低糖質カリフラワーライス カレー", calorie: 285, protein: 8.5, fat: 15.0, carbohydrate: 18.5)
+                    .init(id: UUID(), name: "低糖質カリフラワーライス カレー", calorie: 285, protein: 8.5, fat: 15.0, carbohydrate: 18.5),
+                    .init(id: UUID(), name: "削除済みアイテム", calorie: 0, protein: 0, fat: 0, carbohydrate: 0, deleted: true)
                 ]
+            ),
+            .init(
+                id: UUID(), name: "削除済みショップ", category: "テスト",
+                description: "非表示になるはずのショップ",
+                items: [
+                    .init(id: UUID(), name: "アイテム", calorie: 100, protein: 10, fat: 10, carbohydrate: 10)
+                ],
+                deleted: true
             )
         ])
     }
