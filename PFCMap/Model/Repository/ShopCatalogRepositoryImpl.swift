@@ -14,8 +14,8 @@ actor ShopCatalogRepositoryImpl {
 
 extension ShopCatalogRepositoryImpl: ShopCatalogRepository {
     func sync() async throws {
-        let dtos = try await remoteClient.fetchShops()
-        let shops = dtos.map { dto in
+        let response = try await remoteClient.fetchShops(request: .init(lastFetchDate: nil))
+        let shops = response.catalogs.map { dto in
             ShopCatalog(
                 id: dto.id,
                 name: dto.name,

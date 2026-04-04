@@ -1,5 +1,8 @@
 import Foundation
 
 protocol PFCRemoteClient: Sendable {
-    func fetchShops() async throws -> [ShopCatalogResponseDTO]
+    /// ショップ一覧を取得する
+    /// - Parameter request: リクエストDTO
+    /// - Returns: ショップカタログのレスポンスDTO配列
+    func fetchShops(request: ShopCatalogRequestDTO) async throws -> ShopCatalogResponseDTO
 }

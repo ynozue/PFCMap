@@ -3,8 +3,8 @@ import Foundation
 actor PFCRemoteClientDummy: PFCRemoteClient {
     init() {}
     
-    func fetchShops() async throws -> [ShopCatalogResponseDTO] {
-        await [
+    func fetchShops(request: ShopCatalogRequestDTO) async throws -> ShopCatalogResponseDTO {
+        await .init(catalogs: [
             .init(
                 id: UUID(), name: "ガスト", category: "ファミリーレストラン",
                 description: "低カロリーメニューが豊富で糖質0麺への変更も可能",
@@ -139,6 +139,6 @@ actor PFCRemoteClientDummy: PFCRemoteClient {
                     .init(id: UUID(), name: "低糖質カリフラワーライス カレー", calorie: 285, protein: 8.5, fat: 15.0, carbohydrate: 18.5)
                 ]
             )
-        ]
+        ])
     }
 }
