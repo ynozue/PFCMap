@@ -46,4 +46,12 @@ final class SettingsStore {
     func updateLastFetchedAt(_ date: Date?) {
         self.lastFetchedAt = date
     }
+    
+    func reset() {
+        self.mapDistance = .m500
+        self.proteinThreshold = .g20
+        self.fatThreshold = .g20
+        self.disabledShopIds = []
+        self.lastFetchedAt = nil
+    }
 }

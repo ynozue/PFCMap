@@ -39,4 +39,12 @@ final class PFCMapStore {
     func makeUserDefaultsService() -> any UserDefaultsService {
         factory.makeUserDefaultsService()
     }
+    
+    func clearAllData() {
+        locationStore.clear()
+        shopSearchStore.clear()
+        shopCatalogStore.clear()
+        settingsStore.reset()
+        isInitialized = false
+    }
 }

@@ -21,4 +21,8 @@ final class LocationStore {
             longitudinalMeters: radius
         )
     }
+    
+    func clear() {
+        self.currentLocation = nil
+    }
 }

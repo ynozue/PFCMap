@@ -11,4 +11,8 @@ final class ShopCatalogStore {
     func updateShops(_ shops: [ShopCatalog]) {
         self.shops = shops
     }
+    
+    func clear() {
+        self.shops = []
+    }
 }

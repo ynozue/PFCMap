@@ -41,10 +41,10 @@ extension Factory {
     
     func makePFCRemoteClient() -> any PFCRemoteClient {
         switch env {
-        case .prod, .dev:
-                // TODO: not implements api
-            return PFCRemoteClientDummy()
-//            return PFCRemoteClientImpl()
+        case .prod:
+            return PFCRemoteClientImpl(domain: "pfcmap.noz.app")
+        case .dev:
+            return PFCRemoteClientImpl(domain: "localhost:8080")
         case .preview:
             return PFCRemoteClientDummy()
         }

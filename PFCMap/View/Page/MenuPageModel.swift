@@ -59,8 +59,30 @@ final class MenuPageModel {
     
     func deleteLastSyncDate(store: PFCMapStore) async {
         let service = store.makeUserDefaultsService()
-        await service.save(key: PFCMapUserDefaultsKeys.lastFetchedAt, value: nil)
+        await service.remove(key: PFCMapUserDefaultsKeys.lastFetchedAt)
         store.settingsStore.updateLastFetchedAt(nil)
+    }
+    
+    func clearDB(store: PFCMapStore) async {
+        print("DB クリア開始")
+        do {
+            let repository = store.makeShopCatalogRepository()
+            try await repository.clearAll()
+            
+            let service = store.makeUserDefaultsService()
+            // すべての UserDefaults をデフォルト値に戻す
+            await service.remove(key: PFCMapUserDefaultsKeys.lastFetchedAt)
+            await service.save(key: PFCMapUserDefaultsKeys.mapDistance, value: PFCMapUserDefaultsKeys.mapDistance.defaultValue)
+            await service.save(key: PFCMapUserDefaultsKeys.proteinThreshold, value: PFCMapUserDefaultsKeys.proteinThreshold.defaultValue)
+            await service.save(key: PFCMapUserDefaultsKeys.fatThreshold, value: PFCMapUserDefaultsKeys.fatThreshold.defaultValue)
+            await service.save(key: PFCMapUserDefaultsKeys.disabledShopIds, value: PFCMapUserDefaultsKeys.disabledShopIds.defaultValue)
+            
+            store.clearAllData()
+            
+            print("DB クリア完了")
+        } catch {
+            print("DB クリア失敗: \(error)")
+        }
     }
     
     func triggerCrash() {

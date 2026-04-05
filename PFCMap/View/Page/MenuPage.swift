@@ -66,6 +66,12 @@ struct MenuPage: View {
                     }
                     
                     Button(role: .destructive) {
+                        Task { await model.clearDB(store: store) }
+                    } label: {
+                        Label("DBをクリア", systemImage: "trash.circle")
+                    }
+                    
+                    Button(role: .destructive) {
                         model.triggerCrash()
                     } label: {
                         Label("アプリクラッシュ", systemImage: "exclamationmark.triangle")
