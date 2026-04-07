@@ -44,7 +44,7 @@ extension Factory {
         case .prod:
             return PFCRemoteClientImpl(domain: "pfcmap.noz.app")
         case .dev:
-            return PFCRemoteClientImpl(domain: "localhost:8080")
+            return PFCRemoteClientImpl(domain: "pfcmap-api-196850882055.asia-northeast1.run.app")
         case .preview:
             return PFCRemoteClientDummy()
         }

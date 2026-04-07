@@ -17,23 +17,18 @@ final class SplashPageModel {
         defer { isLoading = false }
         
         do {
-            // カタログデータの取得と保存
+            // カタログデータの同期と取得
             let repository = store.makeShopCatalogRepository()
-            let fetchedShops = try await repository.fetchShops()
+            try await repository.sync()
             
-            if fetchedShops.isEmpty {
-                try await repository.sync()
-                let syncedShops = try await repository.fetchShops()
-                store.shopCatalogStore.updateShops(syncedShops)
-            } else {
-                store.shopCatalogStore.updateShops(fetchedShops)
-            }
+            let fetchedShops = try await repository.fetchShops()
+            store.shopCatalogStore.updateShops(fetchedShops)
             
             // 設定データの読み込み
             let userDefaultsService = store.makeUserDefaultsService()
             let distance: Int = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.mapDistance)
-            let mapDistance = MapDistance(rawValue: distance) ?? .m500
-            
+            let mapDistance = MapDistance(rawValue: distance) ?? .m300
+
             let protein: Int = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.proteinThreshold)
             let proteinThreshold = ProteinThreshold(rawValue: protein) ?? .g20
             

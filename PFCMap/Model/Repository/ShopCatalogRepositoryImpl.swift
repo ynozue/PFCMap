@@ -15,8 +15,14 @@ actor ShopCatalogRepositoryImpl {
 }
 
 extension ShopCatalogRepositoryImpl: ShopCatalogRepository {
-    func sync() async throws {
+    func sync(force: Bool = false) async throws {
         let lastFetchDate: Date? = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.lastFetchedAt)
+        
+        if !force, let lastFetchDate = lastFetchDate, Date().timeIntervalSince(lastFetchDate) < 3600 {
+            print("Skip sync: Last sync was less than 1 hour ago.")
+            return
+        }
+        
         let response = try await remoteClient.fetchShops(request: .init(lastFetchDate: lastFetchDate))
         let shops = response.catalogs.map { dto in
             ShopCatalog(

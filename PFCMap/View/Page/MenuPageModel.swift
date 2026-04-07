@@ -23,7 +23,7 @@ final class MenuPageModel {
         print("API 同期開始")
         do {
             let repository = store.makeShopCatalogRepository()
-            try await repository.sync()
+            try await repository.sync(force: true)
             let synchronizedShops = try await repository.fetchShops()
             store.shopCatalogStore.updateShops(synchronizedShops)
             
@@ -42,7 +42,7 @@ final class MenuPageModel {
         print("DB 情報の生成開始")
         do {
             let repository = store.makeShopCatalogRepository()
-            try await repository.sync()
+            try await repository.sync(force: true)
             let generatedShops = try await repository.fetchShops()
             store.shopCatalogStore.updateShops(generatedShops)
             

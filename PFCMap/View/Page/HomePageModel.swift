@@ -34,9 +34,9 @@ final class HomePageModel {
                     .map { $0.name }
                 
                 if !queries.isEmpty {
-                    // PINは2,000m以内を表示するため、検索範囲を2,000m(+バッファ)にする
-                    let radius = 2100.0
-                    let searchRegion = visibleRegion ?? store.locationStore.currentRegion(radius: radius)
+                    // PINは設定された半径+100m以内を表示するため、検索範囲をそれに合わせる
+                    let radiusWithBuffer = Double(store.settingsStore.mapDistance.rawValue) + 100.0
+                    let searchRegion = visibleRegion ?? store.locationStore.currentRegion(radius: radiusWithBuffer * 2)
                     
                     let shopSearchRepository = store.makeShopSearchRepository()
                     let results = try await shopSearchRepository.search(queries: queries, region: searchRegion)
