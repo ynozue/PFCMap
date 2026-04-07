@@ -4,6 +4,8 @@ import NZData
 
 @Model
 final class ShopItemEntity {
+    #Index<ShopItemEntity>([\.calorie], [\.protein], [\.fat], [\.carbohydrate])
+
     @Attribute(.unique) var id: UUID
     var name: String
     var calorie: Double
