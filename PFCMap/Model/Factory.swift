@@ -86,3 +86,16 @@ extension Factory {
         }
     }
 }
+
+import SwiftUI
+
+private struct FactoryKey: EnvironmentKey {
+    static let defaultValue: Factory = Factory.create(env: .prod)
+}
+
+extension EnvironmentValues {
+    var factory: Factory {
+        get { self[FactoryKey.self] }
+        set { self[FactoryKey.self] = newValue }
+    }
+}

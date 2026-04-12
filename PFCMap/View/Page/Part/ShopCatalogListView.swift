@@ -2,21 +2,21 @@ import SwiftUI
 
 @MainActor
 struct ShopCatalogListView: View {
-    let shops: [ShopCatalog]
+    let homeModel: HomePageModel
     let maxHeight: CGFloat
     var onSelect: (ShopCatalog) -> Void = { _ in }
-    @Environment(PFCMapStore.self) private var store
+    @Environment(\.factory) private var factory
     @State private var model = ShopCatalogListViewModel()
     
     private var sortedItems: [ShopCatalogListViewModel.DisplayItem] {
         model.displayItems(
-            from: shops,
-            proteinThreshold: store.settingsStore.proteinThreshold,
-            fatThreshold: store.settingsStore.fatThreshold,
-            disabledShopIds: store.settingsStore.disabledShopIds,
-            currentLocation: store.locationStore.currentLocation,
-            searchResults: store.shopSearchStore.results,
-            mapDistance: store.settingsStore.mapDistance.rawValue
+            from: homeModel.shops,
+            proteinThreshold: homeModel.proteinThreshold,
+            fatThreshold: homeModel.fatThreshold,
+            disabledShopIds: homeModel.disabledShopIds,
+            currentLocation: homeModel.currentLocation,
+            searchResults: homeModel.searchResults,
+            mapDistance: homeModel.mapDistance.rawValue
         )
     }
     
@@ -58,8 +58,8 @@ struct ShopCatalogListView: View {
                 // Protein Filter Toggle
                 Menu {
                     Picker("Protein 閾値", selection: Binding(
-                        get: { store.settingsStore.proteinThreshold },
-                        set: { model.updateProteinThreshold(threshold: $0, store: store) }
+                        get: { homeModel.proteinThreshold },
+                        set: { homeModel.updateProteinThreshold(threshold: $0, factory: factory) }
                     )) {
                         ForEach(ProteinThreshold.allCases, id: \.self) { threshold in
                             Text(threshold.label).tag(threshold)
@@ -68,7 +68,7 @@ struct ShopCatalogListView: View {
                 } label: {
                     HStack(spacing: 4) {
                         Image(systemName: "line.3.horizontal.decrease.circle")
-                        Text("P≥\(store.settingsStore.proteinThreshold.label)")
+                        Text("P≥\(homeModel.proteinThreshold.label)")
                     }
                     .font(.system(size: 11, weight: .bold))
                     .padding(.horizontal, 10)
@@ -81,8 +81,8 @@ struct ShopCatalogListView: View {
                 // Fat Filter Toggle
                 Menu {
                     Picker("Fat 閾値", selection: Binding(
-                        get: { store.settingsStore.fatThreshold },
-                        set: { model.updateFatThreshold(threshold: $0, store: store) }
+                        get: { homeModel.fatThreshold },
+                        set: { homeModel.updateFatThreshold(threshold: $0, factory: factory) }
                     )) {
                         ForEach(FatThreshold.allCases, id: \.self) { threshold in
                             Text(threshold.label).tag(threshold)
@@ -91,7 +91,7 @@ struct ShopCatalogListView: View {
                 } label: {
                     HStack(spacing: 4) {
                         Image(systemName: "line.3.horizontal.decrease.circle")
-                        Text("F≤\(store.settingsStore.fatThreshold.label)")
+                        Text("F≤\(homeModel.fatThreshold.label)")
                     }
                     .font(.system(size: 11, weight: .bold))
                     .padding(.horizontal, 10)
@@ -135,7 +135,7 @@ struct ShopCatalogListView: View {
             .padding(.top, 8)
             .padding(.bottom, 8)
             
-            if shops.isEmpty {
+            if homeModel.shops.isEmpty {
                 emptyView
             } else {
                 ScrollView {
@@ -177,23 +177,7 @@ struct ShopCatalogListView: View {
 #Preview {
     ZStack(alignment: .bottom) {
         Color.gray.opacity(0.1).ignoresSafeArea()
-        ShopCatalogListView(shops: [
-            ShopCatalog(
-                name: "ガスト",
-                category: .familyRestaurant,
-                items: [
-                    ShopItem(name: "チーズINハンバーグ", calorie: 750, protein: 35.2, fat: 45.1, carbohydrate: 28.5),
-                    ShopItem(name: "蒸し鶏のエコスラッド", calorie: 120, protein: 12.5, fat: 3.2, carbohydrate: 5.1)
-                ]
-            ),
-            ShopCatalog(
-                name: "大戸屋",
-                category: .setMeal,
-                items: [
-                    ShopItem(name: "しまほっけの炭火焼き定食", calorie: 580, protein: 42.1, fat: 12.5, carbohydrate: 65.2)
-                ]
-            )
-        ], maxHeight: 600)
+        ShopCatalogListView(homeModel: HomePageModel(), maxHeight: 600)
         .frame(height: 400)
     }
 }

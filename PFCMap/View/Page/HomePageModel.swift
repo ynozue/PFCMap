@@ -12,36 +12,37 @@ final class HomePageModel {
     var visibleRegion: MKCoordinateRegion?
     var isMenuShowing = false
     var selectedResultID: UUID? = nil
+    var searchResults: [ShopSearchResult] = []
+    
+    // Shared Data normally held by Store
+    var currentLocation: Location? = nil
+    var shops: [ShopCatalog] = []
+    var mapDistance: MapDistance = .m500
+    var proteinThreshold: ProteinThreshold = .g20
+    var fatThreshold: FatThreshold = .g20
+    var disabledShopIds: Set<UUID> = []
     
     init() {}
-    
-    func onAppear(store: PFCMapStore) {
+    func onAppear(factory: Factory) {
         isLoading = true
         Task {
             defer { isLoading = false }
             do {
-                // 現在地の取得
-                let locationRepository = store.makeLocationRepository()
+                // Settings & Shops
+                await fetchSettings(factory: factory)
+                let shopCatalogRepository = factory.makeShopCatalogRepository()
+                self.shops = try await shopCatalogRepository.fetchShops()
+                
+                // Location
+                let locationRepository = factory.makeLocationRepository()
                 let location = try await locationRepository.requestLocation()
-                store.locationStore.updateCurrentLocation(location)
+                self.currentLocation = location
                 
-                // 現在地にカメラを移動
-                updateCameraPosition(distance: store.settingsStore.mapDistance.rawValue, store: store)
+                // Camera
+                updateCameraPosition(distance: self.mapDistance.rawValue)
                 
-                // 全ショップを地図上に検索して表示
-                let queries = store.shopCatalogStore.shops
-                    .filter { !store.settingsStore.disabledShopIds.contains($0.id) }
-                    .map { $0.name }
-                
-                if !queries.isEmpty {
-                    // PINは設定された半径+100m以内を表示するため、検索範囲をそれに合わせる
-                    let radiusWithBuffer = Double(store.settingsStore.mapDistance.rawValue) + 100.0
-                    let searchRegion = visibleRegion ?? store.locationStore.currentRegion(radius: radiusWithBuffer * 2)
-                    
-                    let shopSearchRepository = store.makeShopSearchRepository()
-                    let results = try await shopSearchRepository.search(queries: queries, region: searchRegion)
-                    store.shopSearchStore.updateResults(results)
-                }
+                // Search
+                await executeSearch(factory: factory)
             } catch {
                 print("Initial data acquisition failed: \(error)")
                 errorMessage = "情報の取得に失敗しました。\(error.localizedDescription)"
@@ -49,8 +50,56 @@ final class HomePageModel {
         }
     }
     
-    func updateCameraPosition(distance: Int, store: PFCMapStore) {
-        guard let location = store.locationStore.currentLocation else { return }
+    func onDismissMenu(factory: Factory) {
+        Task {
+            await fetchSettings(factory: factory)
+            let shopCatalogRepository = factory.makeShopCatalogRepository()
+            self.shops = try await shopCatalogRepository.fetchShops()
+            await executeSearch(factory: factory)
+        }
+    }
+    
+    private func fetchSettings(factory: Factory) async {
+        let userDefaultsService = factory.makeUserDefaultsService()
+        
+        let distance: Int = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.mapDistance)
+        self.mapDistance = MapDistance(rawValue: distance) ?? .m500
+
+        let protein: Int = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.proteinThreshold)
+        self.proteinThreshold = ProteinThreshold(rawValue: protein) ?? .g20
+        
+        let fat: Int = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.fatThreshold)
+        self.fatThreshold = FatThreshold(rawValue: fat) ?? .g20
+
+        let ids: [String] = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.disabledShopIds)
+        self.disabledShopIds = Set(ids.compactMap { UUID(uuidString: $0) })
+    }
+
+    private func executeSearch(factory: Factory) async {
+        let queries = self.shops
+            .filter { !self.disabledShopIds.contains($0.id) }
+            .map { $0.name }
+        
+        if !queries.isEmpty {
+            let radiusWithBuffer = Double(self.mapDistance.rawValue) + 100.0
+            
+            let searchCenter = currentLocation?.coordinate ?? CLLocationCoordinate2D(latitude: 35.681236, longitude: 139.767125) // fallback to Tokyo
+            let region = visibleRegion ?? MKCoordinateRegion(center: searchCenter, latitudinalMeters: radiusWithBuffer * 2, longitudinalMeters: radiusWithBuffer * 2)
+            
+            let shopSearchRepository = factory.makeShopSearchRepository()
+            do {
+                let results = try await shopSearchRepository.search(queries: queries, region: region)
+                self.searchResults = results
+            } catch {
+                print("Search error: \(error)")
+            }
+        } else {
+            self.searchResults = []
+        }
+    }
+    
+    func updateCameraPosition(distance: Int) {
+        guard let location = self.currentLocation else { return }
         let distanceDouble = Double(distance)
         let diameter = (distanceDouble + 100) * 2
         
@@ -103,11 +152,25 @@ final class HomePageModel {
         }
     }
     
-    func updateMapDistance(distance: MapDistance, store: PFCMapStore) {
-        store.settingsStore.updateMapDistance(distance)
-        let service = store.makeUserDefaultsService()
+    func updateMapDistance(distance: MapDistance, factory: Factory) {
+        self.mapDistance = distance
+        let service = factory.makeUserDefaultsService()
         Task {
             await service.save(key: PFCMapUserDefaultsKeys.mapDistance, value: distance.rawValue)
+            await executeSearch(factory: factory)
+            updateCameraPosition(distance: distance.rawValue)
         }
+    }
+    
+    func updateProteinThreshold(threshold: ProteinThreshold, factory: Factory) {
+        self.proteinThreshold = threshold
+        let service = factory.makeUserDefaultsService()
+        Task { await service.save(key: PFCMapUserDefaultsKeys.proteinThreshold, value: threshold.rawValue) }
+    }
+    
+    func updateFatThreshold(threshold: FatThreshold, factory: Factory) {
+        self.fatThreshold = threshold
+        let service = factory.makeUserDefaultsService()
+        Task { await service.save(key: PFCMapUserDefaultsKeys.fatThreshold, value: threshold.rawValue) }
     }
 }

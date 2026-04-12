@@ -2,7 +2,8 @@ import SwiftUI
 
 @MainActor
 struct SplashPage: View {
-    @Environment(PFCMapStore.self) private var store
+    @Environment(\.factory) private var factory
+    @Binding var isInitialized: Bool
     @State private var model = SplashPageModel()
     @State private var animationInProgress = false
     
@@ -75,7 +76,7 @@ struct SplashPage: View {
             Task {
                 // 少しだけ意図的に遅延させてロゴを見せる
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
-                await model.onAppear(store: store)
+                await model.onAppear(factory: factory, isInitialized: $isInitialized)
             }
         }
         .alert("エラー", isPresented: Binding(
@@ -84,7 +85,7 @@ struct SplashPage: View {
         )) {
             Button("再試行") {
                 Task {
-                    await model.onAppear(store: store)
+                    await model.onAppear(factory: factory, isInitialized: $isInitialized)
                 }
             }
         } message: {
@@ -96,6 +97,6 @@ struct SplashPage: View {
 }
 
 #Preview {
-    SplashPage()
-        .environment(PFCMapStore(factory: .create(env: .preview)))
+    SplashPage(isInitialized: .constant(false))
+        .environment(\.factory, Factory.create(env: .preview))
 }

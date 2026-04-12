@@ -10,46 +10,17 @@ final class SplashPageModel {
     
     init() {}
     
-    func onAppear(store: PFCMapStore) async {
-        guard !store.isInitialized else { return }
+    func onAppear(factory: Factory, isInitialized: Binding<Bool>) async {
+        guard !isInitialized.wrappedValue else { return }
         
         isLoading = true
         defer { isLoading = false }
         
         do {
-            // カタログデータの同期と取得
-            let repository = store.makeShopCatalogRepository()
+            let repository = factory.makeShopCatalogRepository()
             try await repository.sync()
             
-            let fetchedShops = try await repository.fetchShops()
-            store.shopCatalogStore.updateShops(fetchedShops)
-            
-            // 設定データの読み込み
-            let userDefaultsService = store.makeUserDefaultsService()
-            let distance: Int = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.mapDistance)
-            let mapDistance = MapDistance(rawValue: distance) ?? .m300
-
-            let protein: Int = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.proteinThreshold)
-            let proteinThreshold = ProteinThreshold(rawValue: protein) ?? .g20
-            
-            let fat: Int = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.fatThreshold)
-            let fatThreshold = FatThreshold(rawValue: fat) ?? .g20
-
-            let ids: [UUID] = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.disabledShopIds)
-            let disabledShopIds = Set(ids)
-            
-            let lastFetchedAt: Date? = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.lastFetchedAt)
-            
-            store.settingsStore.updateSettings(
-                mapDistance: mapDistance,
-                proteinThreshold: proteinThreshold,
-                fatThreshold: fatThreshold,
-                disabledShopIds: disabledShopIds,
-                lastFetchedAt: lastFetchedAt
-            )
-            
-            // ロード完了
-            store.isInitialized = true
+            isInitialized.wrappedValue = true
         } catch {
             print("Initialization failed: \(error)")
             errorMessage = "情報の初期化に失敗しました。\(error.localizedDescription)"

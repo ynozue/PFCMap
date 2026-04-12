@@ -7,7 +7,7 @@ trigger: always_on
 - strict concurrency checking を有効にしてください。
 
 ## Data Flow
-- API/DB > Repository/Service > PageModel/ViewModel > Domain > Store > View
+- API/DB > Repository/Service > PageModel/ViewModel > Domain > View
 
 ## ディレクトリ構成
 ```
@@ -30,10 +30,9 @@ trigger: always_on
 │   └── View
 │       ├── Page                     # 画面
 │       │   └── Part                 # 画面内の共通パーツ
-│       ├── Resource
-│       │   ├── Assets.xcassets      # Image関連Assets
-│       │   └── Colors.xcassets      # Color関連Assets
-│       └── Store                    # 状態管理 Store
+│       └── Resource
+│           ├── Assets.xcassets      # Image関連Assets
+│           └── Colors.xcassets      # Color関連Assets
 ├── EatLeftTests                     # ユニットテスト
 └── EatLeftUITests                   # UI テスト
 ```
@@ -122,16 +121,6 @@ trigger: always_on
 - 画面のViewModelを定義する
 - ViewModelの命名規則は「パーツ名」+「ViewModel」とする
 - ViewModelでは画面の状態を管理する
-
-### View/Store
-- 「@MainActor」を必ずつけてください
-- アプリ全体や複数画面で共有する状態（例：現在取得済みのデータなど）を保持する
-- データ保持用のStoreを定義する
-- Storeは「@Observable」で管理する
-- メインのStoreの命名規則は「プロジェクト名」+「Store」とする
-- 保持データ毎にStoreを定義する
-- データ毎のStoreの命名規則は「データ名」+「Store」とする
-- メインのStore内にデータ毎のStoreを保持する
 
 ## 利用ライブラリ
 - https://github.com/ynozue/NZUtils.git

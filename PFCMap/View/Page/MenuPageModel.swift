@@ -9,7 +9,14 @@ final class MenuPageModel {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
     }
     
+    var lastFetchedAt: Date? = nil
+    
     init() {}
+    
+    func onAppear(factory: Factory) async {
+        let service = factory.makeUserDefaultsService()
+        self.lastFetchedAt = await service.value(key: PFCMapUserDefaultsKeys.lastFetchedAt)
+    }
     
     func lastSyncDateString(date: Date?) -> String {
         guard let date = date else { return "未同期" }
@@ -19,18 +26,14 @@ final class MenuPageModel {
     }
 
 #if DEBUG
-    func syncAPI(store: PFCMapStore) async {
+    func syncAPI(factory: Factory) async {
         print("API 同期開始")
         do {
-            let repository = store.makeShopCatalogRepository()
+            let repository = factory.makeShopCatalogRepository()
             try await repository.sync(force: true)
-            let synchronizedShops = try await repository.fetchShops()
-            store.shopCatalogStore.updateShops(synchronizedShops)
             
-            // 最終同期日時を Store に反映
-            let service = store.makeUserDefaultsService()
-            let lastFetchedAt: Date? = await service.value(key: PFCMapUserDefaultsKeys.lastFetchedAt)
-            store.settingsStore.updateLastFetchedAt(lastFetchedAt)
+            let service = factory.makeUserDefaultsService()
+            self.lastFetchedAt = await service.value(key: PFCMapUserDefaultsKeys.lastFetchedAt)
             
             print("API 同期完了")
         } catch {
@@ -38,18 +41,14 @@ final class MenuPageModel {
         }
     }
     
-    func generateDBData(store: PFCMapStore) async {
+    func generateDBData(factory: Factory) async {
         print("DB 情報の生成開始")
         do {
-            let repository = store.makeShopCatalogRepository()
+            let repository = factory.makeShopCatalogRepository()
             try await repository.sync(force: true)
-            let generatedShops = try await repository.fetchShops()
-            store.shopCatalogStore.updateShops(generatedShops)
             
-            // 最終同期日時を Store に反映
-            let service = store.makeUserDefaultsService()
-            let lastFetchedAt: Date? = await service.value(key: PFCMapUserDefaultsKeys.lastFetchedAt)
-            store.settingsStore.updateLastFetchedAt(lastFetchedAt)
+            let service = factory.makeUserDefaultsService()
+            self.lastFetchedAt = await service.value(key: PFCMapUserDefaultsKeys.lastFetchedAt)
             
             print("DB 情報の生成完了")
         } catch {
@@ -57,19 +56,19 @@ final class MenuPageModel {
         }
     }
     
-    func deleteLastSyncDate(store: PFCMapStore) async {
-        let service = store.makeUserDefaultsService()
+    func deleteLastSyncDate(factory: Factory) async {
+        let service = factory.makeUserDefaultsService()
         await service.remove(key: PFCMapUserDefaultsKeys.lastFetchedAt)
-        store.settingsStore.updateLastFetchedAt(nil)
+        self.lastFetchedAt = nil
     }
     
-    func clearDB(store: PFCMapStore) async {
+    func clearDB(factory: Factory) async {
         print("DB クリア開始")
         do {
-            let repository = store.makeShopCatalogRepository()
+            let repository = factory.makeShopCatalogRepository()
             try await repository.clearAll()
             
-            let service = store.makeUserDefaultsService()
+            let service = factory.makeUserDefaultsService()
             // すべての UserDefaults をデフォルト値に戻す
             await service.remove(key: PFCMapUserDefaultsKeys.lastFetchedAt)
             await service.save(key: PFCMapUserDefaultsKeys.mapDistance, value: PFCMapUserDefaultsKeys.mapDistance.defaultValue)
@@ -77,7 +76,7 @@ final class MenuPageModel {
             await service.save(key: PFCMapUserDefaultsKeys.fatThreshold, value: PFCMapUserDefaultsKeys.fatThreshold.defaultValue)
             await service.save(key: PFCMapUserDefaultsKeys.disabledShopIds, value: PFCMapUserDefaultsKeys.disabledShopIds.defaultValue)
             
-            store.clearAllData()
+            self.lastFetchedAt = nil
             
             print("DB クリア完了")
         } catch {

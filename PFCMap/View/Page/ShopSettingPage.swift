@@ -2,16 +2,16 @@ import SwiftUI
 
 @MainActor
 struct ShopSettingPage: View {
-    @Environment(PFCMapStore.self) private var store
+    @Environment(\.factory) private var factory
     @State private var model = ShopSettingPageModel()
     
     var body: some View {
         List {
             Section {
-                ForEach(store.shopCatalogStore.shops) { shop in
+                ForEach(model.shops) { shop in
                     Toggle(isOn: Binding(
-                        get: { model.isShopEnabled(shopId: shop.id, store: store) },
-                        set: { _ in model.toggleShopSetting(shopId: shop.id, store: store) }
+                        get: { model.isShopEnabled(shopId: shop.id) },
+                        set: { _ in model.toggleShopSetting(shopId: shop.id, factory: factory) }
                     )) {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(shop.name)
@@ -30,12 +30,15 @@ struct ShopSettingPage: View {
         }
         .navigationTitle("表示ショップ設定")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            Task { await model.onAppear(factory: factory) }
+        }
     }
 }
 
 #Preview {
     NavigationStack {
         ShopSettingPage()
-            .environment(PFCMapStore(factory: .create(env: .preview)))
+            .environment(\.factory, Factory.create(env: .preview))
     }
 }

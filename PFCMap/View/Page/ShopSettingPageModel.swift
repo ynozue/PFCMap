@@ -5,26 +5,38 @@ import NZData
 @MainActor
 @Observable
 final class ShopSettingPageModel {
-    // 画面固有のUI状態があればここに追加（例：検索バーのテキストなど）
+    var shops: [ShopCatalog] = []
+    var disabledShopIds: Set<UUID> = []
     
     init() {}
     
-    func toggleShopSetting(shopId: UUID, store: PFCMapStore) {
-        var disabledIds = store.settingsStore.disabledShopIds
-        if disabledIds.contains(shopId) {
-            disabledIds.remove(shopId)
-        } else {
-            disabledIds.insert(shopId)
-        }
-        store.settingsStore.updateDisabledShopIds(disabledIds)
-        
-        let service = store.makeUserDefaultsService()
-        Task {
-            await service.save(key: PFCMapUserDefaultsKeys.disabledShopIds, value: Array(disabledIds))
+    func onAppear(factory: Factory) async {
+        do {
+            let shopCatalogRepository = factory.makeShopCatalogRepository()
+            self.shops = try await shopCatalogRepository.fetchShops()
+            
+            let service = factory.makeUserDefaultsService()
+            let ids: [String] = await service.value(key: PFCMapUserDefaultsKeys.disabledShopIds)
+            self.disabledShopIds = Set(ids.compactMap { UUID(uuidString: $0) })
+        } catch {
+            print("Failed to fetch shops or settings in ShopSettingPage: \(error)")
         }
     }
     
-    func isShopEnabled(shopId: UUID, store: PFCMapStore) -> Bool {
-        !store.settingsStore.disabledShopIds.contains(shopId)
+    func toggleShopSetting(shopId: UUID, factory: Factory) {
+        if disabledShopIds.contains(shopId) {
+            disabledShopIds.remove(shopId)
+        } else {
+            disabledShopIds.insert(shopId)
+        }
+        
+        let service = factory.makeUserDefaultsService()
+        Task {
+            await service.save(key: PFCMapUserDefaultsKeys.disabledShopIds, value: self.disabledShopIds.map { $0.uuidString })
+        }
+    }
+    
+    func isShopEnabled(shopId: UUID) -> Bool {
+        !disabledShopIds.contains(shopId)
     }
 }

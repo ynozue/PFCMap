@@ -3,7 +3,7 @@ import MapKit
 
 @MainActor
 struct HomePage: View {
-    @Environment(PFCMapStore.self) private var store
+    @Environment(\.factory) private var factory
     @State private var model = HomePageModel()
 
     var body: some View {
@@ -13,7 +13,7 @@ struct HomePage: View {
                     mapView(height: geometry.size.height)
                     
                     ShopCatalogListView(
-                        shops: store.shopCatalogStore.shops,
+                        homeModel: model,
                         maxHeight: geometry.size.height,
                         onSelect: { shop in
                             // 必要に応じて地図への移動処理などをここに追加可能
@@ -45,7 +45,7 @@ struct HomePage: View {
             }
             .toolbar(.hidden, for: .navigationBar)
             .onAppear {
-                model.onAppear(store: store)
+                model.onAppear(factory: factory)
             }
             .alert("エラー", isPresented: Binding(get: { model.errorMessage != nil }, set: { if !$0 { model.errorMessage = nil } })) {
                 Button("OK", role: .cancel) {}
@@ -54,11 +54,13 @@ struct HomePage: View {
                     Text(errorMessage)
                 }
             }
-            .sheet(isPresented: Binding(get: { model.isMenuShowing }, set: { model.isMenuShowing = $0 })) {
+            .sheet(isPresented: Binding(get: { model.isMenuShowing }, set: { model.isMenuShowing = $0 }), onDismiss: {
+                model.onDismissMenu(factory: factory)
+            }) {
                 MenuPage()
             }
-            .onChange(of: store.settingsStore.mapDistance) { _, newValue in
-                model.updateCameraPosition(distance: newValue.rawValue, store: store)
+            .onChange(of: model.mapDistance) { _, newValue in
+                model.updateCameraPosition(distance: newValue.rawValue)
             }
         }
     }
@@ -69,8 +71,8 @@ struct HomePage: View {
             UserAnnotation()
             
             // 検索範囲の円を描画
-            if let currentLocation = store.locationStore.currentLocation {
-                let radius = Double(store.settingsStore.mapDistance.rawValue)
+            if let currentLocation = model.currentLocation {
+                let radius = Double(model.mapDistance.rawValue)
                 MapCircle(center: currentLocation.coordinate, radius: CLLocationDistance(radius))
                     .foregroundStyle(.blue.opacity(0.15))
                     .stroke(.blue, lineWidth: 1)
@@ -88,15 +90,15 @@ struct HomePage: View {
                 Annotation("", coordinate: upperRight, anchor: .bottomLeading) {
                     Menu {
                         Picker("距離を選択", selection: Binding(
-                            get: { store.settingsStore.mapDistance },
-                            set: { model.updateMapDistance(distance: $0, store: store) }
+                            get: { model.mapDistance },
+                            set: { model.updateMapDistance(distance: $0, factory: factory) }
                         )) {
                             ForEach(MapDistance.allCases, id: \.self) { distance in
                                 Text(distance.label).tag(distance)
                             }
                         }
                     } label: {
-                        Text("\(store.settingsStore.mapDistance.label)")
+                        Text("\(model.mapDistance.label)")
                             .font(.system(size: 12, weight: .bold))
                             .foregroundStyle(.blue)
                             .padding(.horizontal, 9)
@@ -111,9 +113,9 @@ struct HomePage: View {
             }
             
             // Search Results
-            ForEach(store.shopSearchStore.results.filter { result in
-                guard let currentLocation = store.locationStore.currentLocation else { return true }
-                let radius = Double(store.settingsStore.mapDistance.rawValue)
+            ForEach(model.searchResults.filter { result in
+                guard let currentLocation = model.currentLocation else { return true }
+                let radius = Double(model.mapDistance.rawValue)
                 return result.location.distance(to: currentLocation) <= radius + 100
             }) { result in
                 Marker(result.name, coordinate: CLLocationCoordinate2D(
@@ -139,7 +141,7 @@ struct HomePage: View {
                 get: { model.selectedResultID != nil },
                 set: { if !$0 { model.selectedResultID = nil } }
             ),
-            presenting: store.shopSearchStore.results.first(where: { $0.id == model.selectedResultID })
+            presenting: model.searchResults.first(where: { $0.id == model.selectedResultID })
         ) { result in
             if model.canOpenAppleMaps() {
                 Button("Apple マップで表示") {
@@ -184,5 +186,5 @@ struct HomePage: View {
 
 #Preview {
     HomePage()
-        .environment(PFCMapStore(factory: .create(env: .preview)))
+        .environment(\.factory, Factory.create(env: .preview))
 }

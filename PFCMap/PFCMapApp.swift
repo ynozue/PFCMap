@@ -9,7 +9,8 @@ import SwiftUI
 
 @main
 struct PFCMapApp: App {
-    @State private var store: PFCMapStore
+    @State private var isInitialized = false
+    let factory: Factory
     
     init() {
         #if DEBUG
@@ -18,20 +19,19 @@ struct PFCMapApp: App {
         let env: PFCMapEnv = .prod
         #endif
         
-        let factory = Factory.create(env: env)
-        _store = State(wrappedValue: PFCMapStore(factory: factory))
+        self.factory = Factory.create(env: env)
     }
     
     var body: some Scene {
         WindowGroup {
             Group {
-                if store.isInitialized {
+                if isInitialized {
                     HomePage()
                 } else {
-                    SplashPage()
+                    SplashPage(isInitialized: $isInitialized)
                 }
             }
-            .environment(store)
+            .environment(\.factory, factory)
         }
     }
 }

@@ -14,22 +14,6 @@ class ShopCatalogListViewModel {
     var sortType: SortType = .calorie
     var isExpanded: Bool = true
 
-    func updateProteinThreshold(threshold: ProteinThreshold, store: PFCMapStore) {
-        store.settingsStore.updateProteinThreshold(threshold)
-        let service = store.makeUserDefaultsService()
-        Task {
-            await service.save(key: PFCMapUserDefaultsKeys.proteinThreshold, value: threshold.rawValue)
-        }
-    }
-    
-    func updateFatThreshold(threshold: FatThreshold, store: PFCMapStore) {
-        store.settingsStore.updateFatThreshold(threshold)
-        let service = store.makeUserDefaultsService()
-        Task {
-            await service.save(key: PFCMapUserDefaultsKeys.fatThreshold, value: threshold.rawValue)
-        }
-    }
-
     struct DisplayItem: Identifiable, Equatable {
         var id: String { "\(shop.id.uuidString)-\(item.id.uuidString)" }
         let shop: ShopCatalog

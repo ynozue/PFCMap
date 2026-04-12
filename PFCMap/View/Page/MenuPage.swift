@@ -3,7 +3,7 @@ import SwiftUI
 @MainActor
 struct MenuPage: View {
     @Environment(\.dismiss) private var dismiss
-    @Environment(PFCMapStore.self) private var store
+    @Environment(\.factory) private var factory
     @State private var model = MenuPageModel()
     
     var body: some View {
@@ -13,7 +13,7 @@ struct MenuPage: View {
                     HStack {
                         Label("最終同期日時", systemImage: "arrow.clockwise")
                         Spacer()
-                        Text(model.lastSyncDateString(date: store.settingsStore.lastFetchedAt))
+                        Text(model.lastSyncDateString(date: model.lastFetchedAt))
                             .foregroundStyle(.secondary)
                     }
                     
@@ -48,25 +48,25 @@ struct MenuPage: View {
 #if DEBUG
                 Section("デバッグメニュー") {
                     Button {
-                        Task { await model.syncAPI(store: store) }
+                        Task { await model.syncAPI(factory: factory) }
                     } label: {
                         Label("API同期", systemImage: "arrow.triangle.2.circlepath")
                     }
                     
                     Button {
-                        Task { await model.generateDBData(store: store) }
+                        Task { await model.generateDBData(factory: factory) }
                     } label: {
                         Label("DB情報の生成", systemImage: "plus.square.on.square")
                     }
                     
                     Button(role: .destructive) {
-                        Task { await model.deleteLastSyncDate(store: store) }
+                        Task { await model.deleteLastSyncDate(factory: factory) }
                     } label: {
                         Label("最終同期日時を削除", systemImage: "trash")
                     }
                     
                     Button(role: .destructive) {
-                        Task { await model.clearDB(store: store) }
+                        Task { await model.clearDB(factory: factory) }
                     } label: {
                         Label("DBをクリア", systemImage: "trash.circle")
                     }
@@ -88,11 +88,14 @@ struct MenuPage: View {
                     }
                 }
             }
+            .onAppear {
+                Task { await model.onAppear(factory: factory) }
+            }
         }
     }
 }
 
 #Preview {
     MenuPage()
-        .environment(PFCMapStore(factory: .create(env: .preview)))
+        .environment(\.factory, Factory.create(env: .preview))
 }
