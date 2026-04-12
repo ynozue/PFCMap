@@ -158,10 +158,14 @@ private extension DataOperator {
                 }
                 
                 // アイテムの更新/追加
-                // ShopItemEntity にも ID があるのでそれを利用する
-                let currentItems = entity.items
                 for item in shop.items {
-                    if let existingItem = currentItems.first(where: { $0.id == item.id }) {
+                    let itemId = item.id
+                    let itemDescriptor = FetchDescriptor<ShopItemEntity>(
+                        predicate: #Predicate<ShopItemEntity> { $0.id == itemId }
+                    )
+                    let foundItems = try modelContext.fetch(itemDescriptor)
+                    
+                    if let existingItem = foundItems.first {
                         // 更新
                         existingItem.name = item.name
                         existingItem.calorie = item.calorie
@@ -171,6 +175,11 @@ private extension DataOperator {
                         existingItem.photoData = item.photoData
                         existingItem.updatedAt = item.updatedAt
                         existingItem.deleted = item.deleted
+                        
+                        // リレーションに追加されていない場合は追加（基本的には入っているはずだが念のため）
+                        if !entity.items.contains(where: { $0.id == itemId }) {
+                            entity.items.append(existingItem)
+                        }
                     } else {
                         // 新規追加
                         let newItem = ShopItemEntity(

@@ -10,6 +10,7 @@ enum PFCMapEnv {
 
 final class Factory: @unchecked Sendable {
     let env: PFCMapEnv
+    private static var _container: ModelContainer?
     
     private init(env: PFCMapEnv) {
         self.env = env
@@ -18,9 +19,20 @@ final class Factory: @unchecked Sendable {
     static func create(env: PFCMapEnv) -> Factory {
         return Factory(env: env)
     }
+    
+    @MainActor
+    private var container: ModelContainer {
+        if let existing = Self._container {
+            return existing
+        }
+        let newContainer = try! ModelContainer(for: ShopCatalogEntity.self, ShopItemEntity.self)
+        Self._container = newContainer
+        return newContainer
+    }
 }
 
 extension Factory {
+    @MainActor
     func makeLocationRepository() -> any LocationRepository {
         switch env {
         case .prod, .dev:
@@ -30,6 +42,7 @@ extension Factory {
         }
     }
     
+    @MainActor
     func makeShopSearchRepository() -> any ShopSearchRepository {
         switch env {
         case .prod, .dev:
@@ -39,6 +52,7 @@ extension Factory {
         }
     }
     
+    @MainActor
     func makePFCRemoteClient() -> any PFCRemoteClient {
         switch env {
         case .prod:
@@ -50,12 +64,10 @@ extension Factory {
         }
     }
     
+    @MainActor
     func makeShopCatalogRepository() -> any ShopCatalogRepository {
         switch env {
         case .prod, .dev:
-            // SwiftData 用のコンテナ初期化などは本来 App で行うが、ここでは簡易化のため
-            // 実運用上は Factory が保持するか、他から提供するようにする
-            let container = try! ModelContainer(for: ShopCatalogEntity.self, ShopItemEntity.self)
             let remoteClient = makePFCRemoteClient()
             let userDefaultsService = makeUserDefaultsService()
             return ShopCatalogRepositoryImpl(remoteClient: remoteClient, modelContainer: container, userDefaultsService: userDefaultsService)
@@ -64,6 +76,7 @@ extension Factory {
         }
     }
     
+    @MainActor
     func makeUserDefaultsService() -> any UserDefaultsService {
         switch env {
         case .prod, .dev:
