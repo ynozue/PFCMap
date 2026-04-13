@@ -13,6 +13,7 @@ final class HomePageModel {
     var isMenuShowing = false
     var selectedResultID: UUID? = nil
     var searchResults: [ShopSearchResult] = []
+    var loadingMessage: String = ""
     
     // Shared Data normally held by Store
     var currentLocation: Location? = nil
@@ -26,14 +27,16 @@ final class HomePageModel {
     func onAppear(factory: Factory) {
         isLoading = true
         Task {
-            defer { isLoading = false }
+            defer { 
+                isLoading = false 
+                loadingMessage = ""
+            }
             do {
-                // Settings & Shops
+                // Settings
                 await fetchSettings(factory: factory)
-                let shopCatalogRepository = factory.makeShopCatalogRepository()
-                self.shops = try await shopCatalogRepository.fetchShops()
                 
-                // Location
+                // 1. 現在地情報の取得
+                self.loadingMessage = "現在地情報を取得しています..."
                 let locationRepository = factory.makeLocationRepository()
                 let location = try await locationRepository.requestLocation()
                 self.currentLocation = location
@@ -41,8 +44,18 @@ final class HomePageModel {
                 // Camera
                 updateCameraPosition(distance: self.mapDistance.rawValue)
                 
-                // Search
+                // 2. 表示対象のShopリスト一覧の取得
+                self.loadingMessage = "店舗リスト一覧を取得しています..."
+                let shopCatalogRepository = factory.makeShopCatalogRepository()
+                self.shops = try await shopCatalogRepository.fetchShops()
+                
+                // 3. Shopリストから地図上の店舗情報を検索
+                self.loadingMessage = "地図上の店舗情報を検索しています..."
                 await executeSearch(factory: factory)
+                
+                // 4. 検索にヒットした店舗情報のメニューを表示
+                self.loadingMessage = "メニューを表示しています..."
+                try await Task.sleep(nanoseconds: 500_000_000)
             } catch {
                 print("Initial data acquisition failed: \(error)")
                 errorMessage = "情報の取得に失敗しました。\(error.localizedDescription)"

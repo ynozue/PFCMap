@@ -176,10 +176,19 @@ struct HomePage: View {
     @ViewBuilder
     private var loadingOverlay: some View {
         if model.isLoading {
-            ProgressView()
-                .padding()
-                .background(.thinMaterial)
-                .cornerRadius(8)
+            VStack(spacing: 12) {
+                ProgressView()
+                    .scaleEffect(1.2)
+                if !model.loadingMessage.isEmpty {
+                    Text(model.loadingMessage)
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .padding(20)
+            .background(.thinMaterial)
+            .cornerRadius(12)
+            .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
         }
     }
 }
