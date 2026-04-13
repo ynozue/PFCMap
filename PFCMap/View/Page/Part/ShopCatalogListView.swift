@@ -190,8 +190,7 @@ struct ShopCatalogListView: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
-        .frame(maxWidth: .infinity)
-        .frame(height: 200)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
