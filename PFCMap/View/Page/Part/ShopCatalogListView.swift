@@ -97,6 +97,13 @@ struct ShopCatalogListView: View {
                     
                     Spacer()
                     
+                    Text("\(Set(sortedItems.map(\.shop.id)).count)店舗 / \(sortedItems.count)商品")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundStyle(.secondary)
+                        .padding(.top, 6)
+                    
+                    Spacer()
+                    
                     Menu {
                         Picker("ソート順", selection: $model.sortType) {
                             ForEach(ShopCatalogListViewModel.SortType.allCases, id: \.self) { type in
@@ -111,7 +118,8 @@ struct ShopCatalogListView: View {
                         .font(.system(size: 11, weight: .bold))
                         .padding(.horizontal, 10)
                         .padding(.vertical, 6)
-                        .background(Color.blue.opacity(0.1))
+                        .foregroundStyle(.white)
+                        .background(Color.blue)
                         .clipShape(Capsule())
                     }
                 }
@@ -126,11 +134,14 @@ struct ShopCatalogListView: View {
                         dragOffset = value.translation.height
                     }
                     .onEnded { value in
-                        let finalHeight = baseHeight - value.translation.height
-                        let midHeight = maxHeight * 0.575 // (0.85 + 0.3) / 2
+                        let threshold: CGFloat = 50 // スワイプと判定する閾値を小さく設定
                         
                         withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) {
-                            model.isExpanded = finalHeight > midHeight
+                            if model.isExpanded && value.translation.height > threshold {
+                                model.isExpanded = false
+                            } else if !model.isExpanded && value.translation.height < -threshold {
+                                model.isExpanded = true
+                            }
                             dragOffset = 0
                         }
                     }
