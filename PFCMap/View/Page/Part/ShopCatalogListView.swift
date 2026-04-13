@@ -21,6 +21,16 @@ struct ShopCatalogListView: View {
         )
     }
     
+    private var inRangeShops: [ShopCatalog] {
+        model.inRangeShops(
+            from: homeModel.shops,
+            disabledShopIds: homeModel.disabledShopIds,
+            currentLocation: homeModel.currentLocation,
+            searchResults: homeModel.searchResults,
+            mapDistance: homeModel.mapDistance.rawValue
+        )
+    }
+    
     private var baseHeight: CGFloat {
         model.isExpanded ? maxHeight * 0.85 : maxHeight * 0.3
     }
@@ -97,7 +107,7 @@ struct ShopCatalogListView: View {
                     
                     Spacer()
                     
-                    Text("\(Set(sortedItems.map(\.shop.id)).count)店舗 / \(sortedItems.count)商品")
+                    Text("範囲内の店舗 \(inRangeShops.count)件 / メニュー \(sortedItems.count)件")
                         .font(.system(size: 12, weight: .bold))
                         .foregroundStyle(.secondary)
                         .padding(.top, 6)
@@ -147,7 +157,7 @@ struct ShopCatalogListView: View {
                     }
             )
             
-            if homeModel.shops.isEmpty {
+            if sortedItems.isEmpty {
                 emptyView
             } else {
                 ScrollView {
@@ -176,7 +186,7 @@ struct ShopCatalogListView: View {
             Image(systemName: "fork.knife.circle")
                 .font(.largeTitle)
                 .foregroundStyle(.tertiary)
-            Text("店舗情報がありません")
+            Text(inRangeShops.isEmpty ? "範囲内に該当する店舗がありません" : "該当するメニューがありません")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
