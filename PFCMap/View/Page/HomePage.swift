@@ -176,19 +176,24 @@ struct HomePage: View {
     @ViewBuilder
     private var loadingOverlay: some View {
         if model.isLoading {
-            VStack(spacing: 12) {
-                ProgressView()
-                    .scaleEffect(1.2)
-                if !model.loadingMessage.isEmpty {
-                    Text(model.loadingMessage)
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundStyle(.secondary)
+            ZStack {
+                VStack(spacing: 12) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.system(size: 28, weight: .semibold))
+                        .foregroundStyle(.blue)
+                        .symbolEffect(.pulse, options: .repeating)
+                    if !model.loadingMessage.isEmpty {
+                        Text(model.loadingMessage)
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundStyle(.secondary)
+                    }
                 }
+                .padding(20)
+                .background(.thinMaterial)
+                .cornerRadius(12)
+                .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
             }
-            .padding(20)
-            .background(.thinMaterial)
-            .cornerRadius(12)
-            .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
 }
