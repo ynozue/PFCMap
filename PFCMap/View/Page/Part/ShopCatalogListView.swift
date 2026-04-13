@@ -33,16 +33,92 @@ struct ShopCatalogListView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Drag Handle
-            HStack {
-                Spacer()
-                RoundedRectangle(cornerRadius: 3)
-                    .fill(Color.secondary.opacity(0.3))
-                    .frame(width: 40, height: 5)
-                Spacer()
+            VStack(spacing: 0) {
+                // Drag Handle
+                HStack {
+                    Spacer()
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(Color.secondary.opacity(0.3))
+                        .frame(width: 40, height: 5)
+                    Spacer()
+                }
+                .padding(.top, 8)
+                .padding(.bottom, 4)
+                
+                // Header
+                HStack(alignment: .top, spacing: 8) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        // Protein Filter Toggle
+                        Menu {
+                            Picker("Protein 閾値", selection: Binding(
+                                get: { homeModel.proteinThreshold },
+                                set: { homeModel.updateProteinThreshold(threshold: $0, factory: factory) }
+                            )) {
+                                ForEach(ProteinThreshold.allCases, id: \.self) { threshold in
+                                    Text(threshold.label).tag(threshold)
+                                }
+                            }
+                        } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: "line.3.horizontal.decrease.circle")
+                                Text("P≥\(homeModel.proteinThreshold.label)")
+                            }
+                            .font(.system(size: 11, weight: .bold))
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .foregroundStyle(.white)
+                            .background(Color.orange)
+                            .clipShape(Capsule())
+                        }
+                        
+                        // Fat Filter Toggle
+                        Menu {
+                            Picker("Fat 閾値", selection: Binding(
+                                get: { homeModel.fatThreshold },
+                                set: { homeModel.updateFatThreshold(threshold: $0, factory: factory) }
+                            )) {
+                                ForEach(FatThreshold.allCases, id: \.self) { threshold in
+                                    Text(threshold.label).tag(threshold)
+                                }
+                            }
+                        } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: "line.3.horizontal.decrease.circle")
+                                Text("F≤\(homeModel.fatThreshold.label)")
+                            }
+                            .font(.system(size: 11, weight: .bold))
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .foregroundStyle(.white)
+                            .background(Color.yellow)
+                            .clipShape(Capsule())
+                        }
+                    }
+                    
+                    Spacer()
+                    
+                    Menu {
+                        Picker("ソート順", selection: $model.sortType) {
+                            ForEach(ShopCatalogListViewModel.SortType.allCases, id: \.self) { type in
+                                Text(type.rawValue).tag(type)
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "arrow.up.arrow.down.circle")
+                            Text(model.sortType.rawValue)
+                        }
+                        .font(.system(size: 11, weight: .bold))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(Color.blue.opacity(0.1))
+                        .clipShape(Capsule())
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 8)
+                .padding(.bottom, 8)
             }
-            .padding(.top, 8)
-            .padding(.bottom, 4)
             .contentShape(Rectangle())
             .gesture(
                 DragGesture()
@@ -59,80 +135,6 @@ struct ShopCatalogListView: View {
                         }
                     }
             )
-            
-            // Header
-            HStack(spacing: 8) {
-                // Protein Filter Toggle
-                Menu {
-                    Picker("Protein 閾値", selection: Binding(
-                        get: { homeModel.proteinThreshold },
-                        set: { homeModel.updateProteinThreshold(threshold: $0, factory: factory) }
-                    )) {
-                        ForEach(ProteinThreshold.allCases, id: \.self) { threshold in
-                            Text(threshold.label).tag(threshold)
-                        }
-                    }
-                } label: {
-                    HStack(spacing: 4) {
-                        Image(systemName: "line.3.horizontal.decrease.circle")
-                        Text("P≥\(homeModel.proteinThreshold.label)")
-                    }
-                    .font(.system(size: 11, weight: .bold))
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .foregroundStyle(.white)
-                    .background(Color.orange)
-                    .clipShape(Capsule())
-                }
-                
-                // Fat Filter Toggle
-                Menu {
-                    Picker("Fat 閾値", selection: Binding(
-                        get: { homeModel.fatThreshold },
-                        set: { homeModel.updateFatThreshold(threshold: $0, factory: factory) }
-                    )) {
-                        ForEach(FatThreshold.allCases, id: \.self) { threshold in
-                            Text(threshold.label).tag(threshold)
-                        }
-                    }
-                } label: {
-                    HStack(spacing: 4) {
-                        Image(systemName: "line.3.horizontal.decrease.circle")
-                        Text("F≤\(homeModel.fatThreshold.label)")
-                    }
-                    .font(.system(size: 11, weight: .bold))
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .foregroundStyle(.white)
-                    .background(Color.yellow)
-                    .clipShape(Capsule())
-                }
-                
-
-                
-                Spacer()
-                
-                Menu {
-                    Picker("ソート順", selection: $model.sortType) {
-                        ForEach(ShopCatalogListViewModel.SortType.allCases, id: \.self) { type in
-                            Text(type.rawValue).tag(type)
-                        }
-                    }
-                } label: {
-                    HStack(spacing: 4) {
-                        Image(systemName: "arrow.up.arrow.down.circle")
-                        Text(model.sortType.rawValue)
-                    }
-                    .font(.system(size: 11, weight: .bold))
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(Color.blue.opacity(0.1))
-                    .clipShape(Capsule())
-                }
-            }
-            .padding(.horizontal, 16)
-            .padding(.top, 8)
-            .padding(.bottom, 8)
             
             if homeModel.shops.isEmpty {
                 emptyView
