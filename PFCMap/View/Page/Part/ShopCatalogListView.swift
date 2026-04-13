@@ -7,6 +7,7 @@ struct ShopCatalogListView: View {
     var onSelect: (ShopCatalog) -> Void = { _ in }
     @Environment(\.factory) private var factory
     @State private var model = ShopCatalogListViewModel()
+    @State private var dragOffset: CGFloat = 0
     
     private var sortedItems: [ShopCatalogListViewModel.DisplayItem] {
         model.displayItems(
@@ -20,9 +21,14 @@ struct ShopCatalogListView: View {
         )
     }
     
+    private var baseHeight: CGFloat {
+        model.isExpanded ? maxHeight * 0.85 : maxHeight * 0.3
+    }
+    
     // 現在の高さ（計算値）
     private var currentHeight: CGFloat {
-        model.isExpanded ? maxHeight * 0.85 : maxHeight * 0.3
+        let proposed = baseHeight - dragOffset
+        return min(max(proposed, maxHeight * 0.3), maxHeight * 0.85)
     }
     
     var body: some View {
@@ -40,15 +46,16 @@ struct ShopCatalogListView: View {
             .contentShape(Rectangle())
             .gesture(
                 DragGesture()
+                    .onChanged { value in
+                        dragOffset = value.translation.height
+                    }
                     .onEnded { value in
-                        if value.translation.height < -50 {
-                            withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) {
-                                model.isExpanded = true
-                            }
-                        } else if value.translation.height > 50 {
-                            withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) {
-                                model.isExpanded = false
-                            }
+                        let finalHeight = baseHeight - value.translation.height
+                        let midHeight = maxHeight * 0.575 // (0.85 + 0.3) / 2
+                        
+                        withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) {
+                            model.isExpanded = finalHeight > midHeight
+                            dragOffset = 0
                         }
                     }
             )
@@ -101,15 +108,7 @@ struct ShopCatalogListView: View {
                     .clipShape(Capsule())
                 }
                 
-                Button {
-                    withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) {
-                        model.isExpanded.toggle()
-                    }
-                } label: {
-                    Image(systemName: model.isExpanded ? "chevron.down.circle.fill" : "chevron.up.circle.fill")
-                        .font(.title3)
-                        .foregroundStyle(.blue.secondary)
-                }
+
                 
                 Spacer()
                 
