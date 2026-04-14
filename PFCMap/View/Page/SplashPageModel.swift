@@ -10,13 +10,17 @@ final class SplashPageModel {
     
     init() {}
     
-    func onAppear(factory: Factory, isInitialized: Binding<Bool>) async {
+    func onAppear(factory: Factory, isInitialized: Binding<Bool>, isTutorialCompleted: Binding<Bool>) async {
         guard !isInitialized.wrappedValue else { return }
         
         isLoading = true
         defer { isLoading = false }
         
         do {
+            let userDefaults = factory.makeUserDefaultsService()
+            let completed = await userDefaults.value(key: PFCMapUserDefaultsKeys.isTutorialCompleted)
+            isTutorialCompleted.wrappedValue = completed
+            
             let repository = factory.makeShopCatalogRepository()
             try await repository.sync()
             

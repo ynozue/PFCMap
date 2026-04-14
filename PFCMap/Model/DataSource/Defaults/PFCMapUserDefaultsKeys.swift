@@ -7,4 +7,5 @@ enum PFCMapUserDefaultsKeys {
     static let fatThreshold = UserDefaultsKey(name: "fatThreshold", defaultValue: 20)
     static let lastFetchedAt = UserDefaultsKey<Date?>(name: "lastFetchedAt", defaultValue: nil)
     static let disabledShopIds = UserDefaultsKey(name: "disabledShopIds", defaultValue: [String]())
+    static let isTutorialCompleted = UserDefaultsKey(name: "isTutorialCompleted", defaultValue: false)
 }

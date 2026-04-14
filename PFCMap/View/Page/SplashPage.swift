@@ -4,6 +4,7 @@ import SwiftUI
 struct SplashPage: View {
     @Environment(\.factory) private var factory
     @Binding var isInitialized: Bool
+    @Binding var isTutorialCompleted: Bool
     @State private var model = SplashPageModel()
     @State private var animationInProgress = false
     
@@ -76,7 +77,7 @@ struct SplashPage: View {
             Task {
                 // 少しだけ意図的に遅延させてロゴを見せる
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
-                await model.onAppear(factory: factory, isInitialized: $isInitialized)
+                await model.onAppear(factory: factory, isInitialized: $isInitialized, isTutorialCompleted: $isTutorialCompleted)
             }
         }
         .alert("エラー", isPresented: Binding(
@@ -85,7 +86,7 @@ struct SplashPage: View {
         )) {
             Button("再試行") {
                 Task {
-                    await model.onAppear(factory: factory, isInitialized: $isInitialized)
+                    await model.onAppear(factory: factory, isInitialized: $isInitialized, isTutorialCompleted: $isTutorialCompleted)
                 }
             }
         } message: {
@@ -97,6 +98,6 @@ struct SplashPage: View {
 }
 
 #Preview {
-    SplashPage(isInitialized: .constant(false))
+    SplashPage(isInitialized: .constant(false), isTutorialCompleted: .constant(false))
         .environment(\.factory, Factory.create(env: .preview))
 }

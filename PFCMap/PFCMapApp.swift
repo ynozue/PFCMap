@@ -10,6 +10,7 @@ import SwiftUI
 @main
 struct PFCMapApp: App {
     @State private var isInitialized = false
+    @State private var isTutorialCompleted = false
     let factory: Factory
     
     init() {
@@ -26,9 +27,13 @@ struct PFCMapApp: App {
         WindowGroup {
             Group {
                 if isInitialized {
-                    HomePage()
+                    if isTutorialCompleted {
+                        HomePage()
+                    } else {
+                        TutorialPage(isTutorialCompleted: $isTutorialCompleted)
+                    }
                 } else {
-                    SplashPage(isInitialized: $isInitialized)
+                    SplashPage(isInitialized: $isInitialized, isTutorialCompleted: $isTutorialCompleted)
                 }
             }
             .environment(\.factory, factory)
