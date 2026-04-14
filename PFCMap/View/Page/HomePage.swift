@@ -54,6 +54,16 @@ struct HomePage: View {
                     Text(errorMessage)
                 }
             }
+            .alert("位置情報の利用", isPresented: $model.showLocationPermissionAlert) {
+                Button("設定を開く") {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                }
+                Button("キャンセル", role: .cancel) {}
+            } message: {
+                Text("現在地情報が取得できないため東京駅周辺を表示します。現在地を利用するには設定から位置情報の利用を許可してください。")
+            }
             .sheet(isPresented: Binding(get: { model.isMenuShowing }, set: { model.isMenuShowing = $0 }), onDismiss: {
                 model.onDismissMenu(factory: factory)
             }) {

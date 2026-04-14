@@ -14,6 +14,7 @@ final class HomePageModel {
     var selectedResultID: UUID? = nil
     var searchResults: [ShopSearchResult] = []
     var loadingMessage: String = ""
+    var showLocationPermissionAlert = false
     
     // Shared Data normally held by Store
     var currentLocation: Location? = nil
@@ -38,8 +39,15 @@ final class HomePageModel {
                 // 1. 現在地情報の取得
                 self.loadingMessage = "現在地情報を取得しています..."
                 let locationRepository = factory.makeLocationRepository()
-                let location = try await locationRepository.requestLocation()
-                self.currentLocation = location
+                do {
+                    let location = try await locationRepository.requestLocation()
+                    self.currentLocation = location
+                } catch {
+                    print("Location request failed: \(error)")
+                    // 位置情報が取得できない場合、東京駅をセット
+                    self.currentLocation = Location(latitude: 35.681236, longitude: 139.767125)
+                    self.showLocationPermissionAlert = true
+                }
                 
                 // Camera
                 updateCameraPosition(distance: self.mapDistance.rawValue)

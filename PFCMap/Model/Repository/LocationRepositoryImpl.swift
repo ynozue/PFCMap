@@ -22,6 +22,7 @@ private final class LocationManagerHelper: NSObject, CLLocationManagerDelegate {
     
     private let locationManager = CLLocationManager()
     private var continuation: CheckedContinuation<Location, any Error>?
+    private var authContinuation: CheckedContinuation<Void, Never>?
     
     override init() {
         super.init()
@@ -31,12 +32,22 @@ private final class LocationManagerHelper: NSObject, CLLocationManagerDelegate {
     func requestLocation() async throws -> Location {
         let status = locationManager.authorizationStatus
         if status == .notDetermined {
-            locationManager.requestWhenInUseAuthorization()
+            await withCheckedContinuation { continuation in
+                self.authContinuation = continuation
+                locationManager.requestWhenInUseAuthorization()
+            }
         }
         
         return try await withCheckedThrowingContinuation { continuation in
             self.continuation = continuation
             locationManager.requestLocation()
+        }
+    }
+    
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        if manager.authorizationStatus != .notDetermined {
+            authContinuation?.resume()
+            authContinuation = nil
         }
     }
     
