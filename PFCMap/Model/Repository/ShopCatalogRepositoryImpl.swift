@@ -24,31 +24,7 @@ extension ShopCatalogRepositoryImpl: ShopCatalogRepository {
         }
         
         let response = try await remoteClient.fetchShops(request: .init(lastFetchDate: lastFetchDate))
-        let shops = response.catalogs.map { dto in
-            ShopCatalog(
-                id: dto.id,
-                name: dto.name,
-                category: dto.category.flatMap(ShopCategory.init(rawValue:)) ?? .other,
-                description: dto.description ?? "",
-                items: dto.items.map { item in
-                    ShopItem(
-                        id: item.id,
-                        name: item.name,
-                        calorie: item.calorie,
-                        protein: item.protein,
-                        fat: item.fat,
-                        carbohydrate: item.carbohydrate,
-                        photoData: nil,
-                        createdAt: item.createdAt,
-                        updatedAt: item.updatedAt,
-                        deleted: item.deleted
-                    )
-                },
-                createdAt: dto.createdAt,
-                updatedAt: dto.updatedAt,
-                deleted: dto.deleted
-            )
-        }
+        let shops = await response.toDomain()
         try await saveShops(shops)
         
         // 成功したら最終取得日時を更新
