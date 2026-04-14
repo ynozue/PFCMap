@@ -62,6 +62,11 @@ final class MenuPageModel {
         self.lastFetchedAt = nil
     }
     
+    func deleteTutorialFlag(factory: Factory) async {
+        let service = factory.makeUserDefaultsService()
+        await service.remove(key: PFCMapUserDefaultsKeys.isTutorialCompleted)
+    }
+    
     func clearDB(factory: Factory) async {
         print("DB クリア開始")
         do {
@@ -75,6 +80,7 @@ final class MenuPageModel {
             await service.save(key: PFCMapUserDefaultsKeys.proteinThreshold, value: PFCMapUserDefaultsKeys.proteinThreshold.defaultValue)
             await service.save(key: PFCMapUserDefaultsKeys.fatThreshold, value: PFCMapUserDefaultsKeys.fatThreshold.defaultValue)
             await service.save(key: PFCMapUserDefaultsKeys.disabledShopIds, value: PFCMapUserDefaultsKeys.disabledShopIds.defaultValue)
+            await service.remove(key: PFCMapUserDefaultsKeys.isTutorialCompleted)
             
             self.lastFetchedAt = nil
             

@@ -66,6 +66,12 @@ struct MenuPage: View {
                     }
                     
                     Button(role: .destructive) {
+                        Task { await model.deleteTutorialFlag(factory: factory) }
+                    } label: {
+                        Label("チュートリアル完了フラグを削除", systemImage: "flag.slash")
+                    }
+                    
+                    Button(role: .destructive) {
                         Task { await model.clearDB(factory: factory) }
                     } label: {
                         Label("DBをクリア", systemImage: "trash.circle")
