@@ -1,6 +1,6 @@
 import Foundation
 
-struct ShopCatalogResponseDTO: Codable, Sendable {
+actor ShopCatalogResponseDTO: Decodable, Sendable {
     let catalogs: [ShopCatalogDTO]
     
     init(catalogs: [ShopCatalogDTO]) {
@@ -12,7 +12,7 @@ struct ShopCatalogResponseDTO: Codable, Sendable {
     }
 }
 
-struct ShopCatalogDTO: Codable, Sendable {
+actor ShopCatalogDTO: Decodable, Sendable {
     let id: UUID
     let name: String
     let category: String?
@@ -47,7 +47,7 @@ struct ShopCatalogDTO: Codable, Sendable {
     }
 }
 
-struct ShopItemDTO: Codable, Sendable {
+actor ShopItemDTO: Decodable, Sendable {
     let id: UUID
     let name: String
     let calorie: Double

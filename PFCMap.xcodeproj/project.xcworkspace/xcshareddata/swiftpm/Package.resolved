@@ -6,8 +6,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ynozue/NZUtils.git",
       "state" : {
-        "revision" : "1c7d28c65cf19342406d130a33b903adaab819c4",
-        "version" : "1.1.1"
+        "revision" : "dca2c5fc6accaa2eb0592d305982721e84979be6",
+        "version" : "1.1.2"
       }
     },
     {
