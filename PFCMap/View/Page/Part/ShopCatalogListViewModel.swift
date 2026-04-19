@@ -31,6 +31,9 @@ class ShopCatalogListViewModel {
             // 非表示店舗
             guard !disabledShopIds.contains(shop.id) else { return false }
             
+            // 主食メニューがあるか
+            guard shop.items.contains(where: { $0.type == "主食" }) else { return false }
+            
             // 指定された円（mapDistance）の中に店舗があるかチェック
             if let currentLocation {
                 return searchResults.contains { result in
@@ -64,6 +67,8 @@ class ShopCatalogListViewModel {
                     guard item.protein >= Double(proteinThreshold.rawValue) else { return nil }
                     // fが閾値以下
                     guard item.fat <= Double(fatThreshold.rawValue) else { return nil }
+                    // 主食のみ
+                    guard item.type == "主食" else { return nil }
                     
                     return DisplayItem(shop: shop, item: item)
                 }

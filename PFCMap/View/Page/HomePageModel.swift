@@ -98,7 +98,10 @@ final class HomePageModel {
 
     private func executeSearch(factory: Factory) async {
         let queries = self.shops
-            .filter { !self.disabledShopIds.contains($0.id) }
+            .filter { shop in
+                !self.disabledShopIds.contains(shop.id) &&
+                shop.items.contains(where: { $0.type == "主食" })
+            }
             .map { $0.name }
         
         if !queries.isEmpty {
