@@ -8,33 +8,37 @@ actor PFCRemoteClientDummy: PFCRemoteClient {
             .init(
                 id: UUID(), name: "ガスト", category: "ファミリーレストラン",
                 description: "低カロリーメニューが豊富で糖質0麺への変更も可能",
+                type: 1,
                 items: [
-                    .init(id: UUID(), name: "チーズINハンバーグ", calorie: 757, protein: 36.1, fat: 55.0, carbohydrate: 23.7),
-                    .init(id: UUID(), name: "糖質0麺 ほうれん草の和風ジェノベーゼ", calorie: 218, protein: 5.2, fat: 12.1, carbohydrate: 2.4)
+                    .init(id: UUID(), name: "チーズINハンバーグ", calorie: 757, protein: 36.1, fat: 55.0, carbohydrate: 23.7, type: "主食"),
+                    .init(id: UUID(), name: "糖質0麺 ほうれん草の和風ジェノベーゼ", calorie: 218, protein: 5.2, fat: 12.1, carbohydrate: 2.4, type: "主食")
                 ]
             ),
             .init(
                 id: UUID(), name: "サイゼリヤ", category: "ファミリーレストラン",
                 description: "若鶏のグリルやサラダなど高タンパク・低糖質な単品メニューが充実",
+                type: 1,
                 items: [
-                    .init(id: UUID(), name: "ミラノ風ドリア", calorie: 521, protein: 15.3, fat: 22.8, carbohydrate: 59.9),
-                    .init(id: UUID(), name: "若鶏のディアボラ風", calorie: 390, protein: 31.0, fat: 17.7, carbohydrate: 6.0)
+                    .init(id: UUID(), name: "ミラノ風ドリア", calorie: 521, protein: 15.3, fat: 22.8, carbohydrate: 59.9, type: "主食"),
+                    .init(id: UUID(), name: "若鶏のディアボラ風", calorie: 390, protein: 31.0, fat: 17.7, carbohydrate: 6.0, type: "主食")
                 ]
             ),
             .init(
                 id: UUID(), name: "大戸屋", category: "定食",
                 description: "栄養バランスに優れた和定食が多く五穀ごはんも選択できる",
+                type: 1,
                 items: [
-                    .init(id: UUID(), name: "しまほっけの炭火焼き定食", calorie: 588, protein: 45.0, fat: 20.0, carbohydrate: 55.0),
-                    .init(id: UUID(), name: "鶏と野菜の黒酢あん定食", calorie: 979, protein: 31.5, fat: 36.5, carbohydrate: 124.7)
+                    .init(id: UUID(), name: "しまほっけの炭火焼き定食", calorie: 588, protein: 45.0, fat: 20.0, carbohydrate: 55.0, type: "主食"),
+                    .init(id: UUID(), name: "鶏と野菜の黒酢あん定食", calorie: 979, protein: 31.5, fat: 36.5, carbohydrate: 124.7, type: "主食")
                 ]
             ),
             .init(
                 id: UUID(), name: "吉野家", category: "牛丼・丼もの",
                 description: "ライザップ監修の低糖質・高タンパクな「牛サラダ」を提供",
+                type: 1,
                 items: [
-                    .init(id: UUID(), name: "ライザップ牛サラダ", calorie: 414, protein: 30.0, fat: 27.0, carbohydrate: 11.0),
-                    .init(id: UUID(), name: "牛丼（並盛）", calorie: 635, protein: 19.3, fat: 23.3, carbohydrate: 84.7)
+                    .init(id: UUID(), name: "ライザップ牛サラダ", calorie: 414, protein: 30.0, fat: 27.0, carbohydrate: 11.0, type: "主食"),
+                    .init(id: UUID(), name: "牛丼（並盛）", calorie: 635, protein: 19.3, fat: 23.3, carbohydrate: 84.7, type: "主食")
                 ]
             ),
             .init(

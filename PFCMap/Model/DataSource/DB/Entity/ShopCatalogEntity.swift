@@ -8,6 +8,7 @@ final class ShopCatalogEntity {
     var name: String
     var category: ShopCategory
     var descriptionText: String // descriptionはSwift標準にあるので避けるため
+    var type: Int
     @Relationship(deleteRule: .cascade) var items: [ShopItemEntity]
     var createdAt: Date
     var updatedAt: Date
@@ -18,6 +19,7 @@ final class ShopCatalogEntity {
         name: String,
         category: ShopCategory = .other,
         descriptionText: String = "",
+        type: Int = 0,
         items: [ShopItemEntity] = [],
         createdAt: Date = Date(),
         updatedAt: Date = Date(),
@@ -27,6 +29,7 @@ final class ShopCatalogEntity {
         self.name = name
         self.category = category
         self.descriptionText = descriptionText
+        self.type = type
         self.items = items
         self.createdAt = createdAt
         self.updatedAt = updatedAt
@@ -48,6 +51,7 @@ extension ShopCatalogEntity: DomainConvertibleModel {
             name: name,
             category: category,
             description: descriptionText,
+            type: type,
             items: items.map { $0.toDomain() },
             createdAt: createdAt,
             updatedAt: updatedAt,

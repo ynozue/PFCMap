@@ -5,6 +5,7 @@ actor ShopCatalogDTO: Decodable, Sendable {
     let name: String
     let category: String?
     let description: String?
+    let type: Int
     let items: [ShopItemDTO]
     let createdAt: Date
     let updatedAt: Date
@@ -15,6 +16,7 @@ actor ShopCatalogDTO: Decodable, Sendable {
         name: String,
         category: String? = nil,
         description: String? = nil,
+        type: Int = 0,
         items: [ShopItemDTO] = [],
         createdAt: Date = Date(),
         updatedAt: Date = Date(),
@@ -24,6 +26,7 @@ actor ShopCatalogDTO: Decodable, Sendable {
         self.name = name
         self.category = category
         self.description = description
+        self.type = type
         self.items = items
         self.createdAt = createdAt
         self.updatedAt = updatedAt
@@ -31,7 +34,7 @@ actor ShopCatalogDTO: Decodable, Sendable {
     }
     
     enum CodingKeys: String, CodingKey {
-        case id, name, category, description, items, createdAt, updatedAt, deleted
+        case id, name, category, description, type, items, createdAt, updatedAt, deleted
     }
 }
 
@@ -47,6 +50,7 @@ extension ShopCatalogDTO {
             name: name,
             category: category.flatMap(ShopCategory.init(rawValue:)) ?? .other,
             description: description ?? "",
+            type: type,
             items: domainItems,
             createdAt: createdAt,
             updatedAt: updatedAt,

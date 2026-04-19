@@ -62,6 +62,7 @@ private extension DataOperator {
                 name: domain.name,
                 category: domain.category,
                 description: domain.description,
+                type: domain.type,
                 items: domain.items.filter { !$0.deleted },
                 createdAt: domain.createdAt,
                 updatedAt: domain.updatedAt,
@@ -77,6 +78,7 @@ private extension DataOperator {
                 name: shop.name,
                 category: shop.category,
                 descriptionText: shop.description,
+                type: shop.type,
                 items: [],
                 createdAt: shop.createdAt,
                 updatedAt: shop.updatedAt,
@@ -90,6 +92,7 @@ private extension DataOperator {
                     protein: item.protein,
                     fat: item.fat,
                     carbohydrate: item.carbohydrate,
+                    type: item.type,
                     photoData: item.photoData,
                     createdAt: item.createdAt,
                     updatedAt: item.updatedAt,
@@ -117,6 +120,7 @@ private extension DataOperator {
                     entity.name = shop.name
                     entity.category = shop.category
                     entity.descriptionText = shop.description
+                    entity.type = shop.type
                     entity.updatedAt = shop.updatedAt
                     entity.deleted = shop.deleted
                 } else {
@@ -126,6 +130,7 @@ private extension DataOperator {
                         name: shop.name,
                         category: shop.category,
                         descriptionText: shop.description,
+                        type: shop.type,
                         createdAt: shop.createdAt,
                         updatedAt: shop.updatedAt,
                         deleted: shop.deleted
@@ -148,6 +153,7 @@ private extension DataOperator {
                         existingItem.protein = item.protein
                         existingItem.fat = item.fat
                         existingItem.carbohydrate = item.carbohydrate
+                        existingItem.type = item.type
                         existingItem.photoData = item.photoData
                         existingItem.updatedAt = item.updatedAt
                         existingItem.deleted = item.deleted
@@ -165,6 +171,7 @@ private extension DataOperator {
                             protein: item.protein,
                             fat: item.fat,
                             carbohydrate: item.carbohydrate,
+                            type: item.type,
                             photoData: item.photoData,
                             createdAt: item.createdAt,
                             updatedAt: item.updatedAt,
