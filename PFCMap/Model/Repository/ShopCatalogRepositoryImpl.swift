@@ -46,6 +46,11 @@ extension ShopCatalogRepositoryImpl: ShopCatalogRepository {
     func clearAll() async throws {
         try await dataOperator.clearAll()
     }
+
+    func reportItem(shopId: UUID, itemId: UUID, type: ShopItemReportType) async throws {
+        // TODO: Implement report API call
+        print("Reported item: \(itemId) in shop: \(shopId) as \(type.label)")
+    }
 }
 
 private extension DataOperator {

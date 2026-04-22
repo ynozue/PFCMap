@@ -59,4 +59,5 @@ actor ShopCatalogRepositoryDummy: ShopCatalogRepository {
     func addShop(_ shop: ShopCatalog) async throws {}
     func saveShops(_ shops: [ShopCatalog]) async throws {}
     func clearAll() async throws {}
+    func reportItem(shopId: UUID, itemId: UUID, type: ShopItemReportType) async throws {}
 }
