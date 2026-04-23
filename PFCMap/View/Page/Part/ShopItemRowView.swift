@@ -8,6 +8,8 @@ struct ShopItemRowView: View {
     @Environment(\.factory) private var factory
     @State private var model = ShopItemRowViewModel()
     @State private var showSuccessAlert = false
+    @State private var showConfirmAlert = false
+    @State private var selectedReportType: ShopItemReportType?
     
     private var categoryIcon: String {
         shop.category.iconName
@@ -88,17 +90,8 @@ struct ShopItemRowView: View {
             Menu {
                 ForEach(ShopItemReportType.allCases, id: \.self) { type in
                     Button {
-                        Task {
-                            await model.report(
-                                shopId: shop.id,
-                                itemId: item.id,
-                                type: type,
-                                repository: factory.makeShopCatalogRepository()
-                            )
-                            if model.error == nil {
-                                showSuccessAlert = true
-                            }
-                        }
+                        selectedReportType = type
+                        showConfirmAlert = true
                     } label: {
                         Label(type.label, systemImage: type.iconName)
                     }
@@ -116,6 +109,28 @@ struct ShopItemRowView: View {
         .background(Color.white.opacity(0.5))
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .shadow(color: .black.opacity(0.03), radius: 6, x: 0, y: 3)
+        .alert("フィードバックを送りますか？", isPresented: $showConfirmAlert) {
+            Button("キャンセル", role: .cancel) {
+                selectedReportType = nil
+            }
+            Button("報告する") {
+                if let type = selectedReportType {
+                    Task {
+                        await model.report(
+                            shopId: shop.id,
+                            itemId: item.id,
+                            type: type,
+                            repository: factory.makeShopCatalogRepository()
+                        )
+                        if model.error == nil {
+                            showSuccessAlert = true
+                        }
+                    }
+                }
+            }
+        } message: {
+            Text("この内容で管理者に報告を送信します。")
+        }
         .alert("報告を受け付けました", isPresented: $showSuccessAlert) {
             Button("OK", role: .cancel) { }
         } message: {
