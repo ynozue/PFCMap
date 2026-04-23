@@ -69,10 +69,27 @@ extension Factory {
         switch env {
         case .prod, .dev:
             let remoteClient = makePFCRemoteClient()
+            let discordRemoteClient = makeDiscordRemoteClient()
             let userDefaultsService = makeUserDefaultsService()
-            return ShopCatalogRepositoryImpl(remoteClient: remoteClient, modelContainer: container, userDefaultsService: userDefaultsService)
+            return ShopCatalogRepositoryImpl(
+                remoteClient: remoteClient,
+                discordRemoteClient: discordRemoteClient,
+                modelContainer: container,
+                userDefaultsService: userDefaultsService
+            )
         case .preview:
             return ShopCatalogRepositoryDummy()
+        }
+    }
+    
+    @MainActor
+    func makeDiscordRemoteClient() -> any DiscordRemoteClient {
+        switch env {
+        case .prod, .dev:
+            // Discord Webhook URL
+            return DiscordRemoteClientImpl(webhookUrl: "https://discord.com/api/webhooks/1496474470075072536/53NaZ4vmuGcgxmfndHdm6D-Jt8L1bIycNlY7J3JDjecFpI1FRkUah2JvTKyAjaEwpHgc")
+        case .preview:
+            return DiscordRemoteClientDummy()
         }
     }
     

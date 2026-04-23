@@ -1,6 +1,6 @@
 import Foundation
 
-public enum ShopItemReportType: String, CaseIterable {
+public enum ShopItemReportType: String, Sendable, CaseIterable {
     case photoUpload = "写真のアップロード"
     case menuNotExists = "メニューが存在しない"
     case pfcError = "メニューのカロリーPFCに誤りがある"

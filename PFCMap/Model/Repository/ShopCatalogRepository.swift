@@ -6,7 +6,13 @@ protocol ShopCatalogRepository: Sendable {
     func addShop(_ shop: ShopCatalog) async throws
     func saveShops(_ shops: [ShopCatalog]) async throws
     func clearAll() async throws
-    func reportItem(shopId: UUID, itemId: UUID, type: ShopItemReportType) async throws
+    func reportItem(shopId: UUID, itemId: UUID, type: ShopItemReportType, imageData: Data?) async throws
+}
+
+extension ShopCatalogRepository {
+    func reportItem(shopId: UUID, itemId: UUID, type: ShopItemReportType) async throws {
+        try await reportItem(shopId: shopId, itemId: itemId, type: type, imageData: nil)
+    }
 }
 
 extension ShopCatalogRepository {

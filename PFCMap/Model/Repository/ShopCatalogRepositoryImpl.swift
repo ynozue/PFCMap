@@ -4,11 +4,13 @@ import NZData
 
 actor ShopCatalogRepositoryImpl {
     private let remoteClient: any PFCRemoteClient
+    private let discordRemoteClient: any DiscordRemoteClient
     private let dataOperator: DataOperator
     private let userDefaultsService: any UserDefaultsService
     
-    init(remoteClient: any PFCRemoteClient, modelContainer: ModelContainer, userDefaultsService: any UserDefaultsService) {
+    init(remoteClient: any PFCRemoteClient, discordRemoteClient: any DiscordRemoteClient, modelContainer: ModelContainer, userDefaultsService: any UserDefaultsService) {
         self.remoteClient = remoteClient
+        self.discordRemoteClient = discordRemoteClient
         self.dataOperator = DataOperator(modelContainer: modelContainer)
         self.userDefaultsService = userDefaultsService
     }
@@ -47,9 +49,27 @@ extension ShopCatalogRepositoryImpl: ShopCatalogRepository {
         try await dataOperator.clearAll()
     }
 
-    func reportItem(shopId: UUID, itemId: UUID, type: ShopItemReportType) async throws {
-        // TODO: Implement report API call
-        print("Reported item: \(itemId) in shop: \(shopId) as \(type.label)")
+    func reportItem(shopId: UUID, itemId: UUID, type: ShopItemReportType, imageData: Data?) async throws {
+        // ショップ情報を取得
+        let shops = try await fetchShops()
+        guard let shop = shops.first(where: { $0.id == shopId }),
+              let item = shop.items.first(where: { $0.id == itemId }) else {
+            return
+        }
+        
+        let message = """
+        🚨 **フィードバックが届きました**
+        
+        **報告種別**: \(await type.label)
+        **店舗名**: \(shop.name)
+        **メニュー名**: \(item.name)
+        
+        ---
+        **Shop ID**: `\(shopId.uuidString)`
+        **Item ID**: `\(itemId.uuidString)`
+        """
+        
+        try await discordRemoteClient.sendNotification(content: message, imageData: imageData)
     }
 }
 
