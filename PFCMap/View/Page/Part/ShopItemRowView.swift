@@ -1,4 +1,5 @@
 import SwiftUI
+import PhotosUI
 
 @MainActor
 struct ShopItemRowView: View {
@@ -10,6 +11,13 @@ struct ShopItemRowView: View {
     @State private var showSuccessAlert = false
     @State private var showConfirmAlert = false
     @State private var selectedReportType: ShopItemReportType?
+    
+    // Photo selection states
+    @State private var showSourceSelection = false
+    @State private var showPhotoPicker = false
+    @State private var showCamera = false
+    @State private var selectedPhotosItem: PhotosPickerItem?
+    @State private var selectedImage: UIImage?
     
     private var categoryIcon: String {
         shop.category.iconName
@@ -90,8 +98,12 @@ struct ShopItemRowView: View {
             Menu {
                 ForEach(ShopItemReportType.allCases, id: \.self) { type in
                     Button {
-                        selectedReportType = type
-                        showConfirmAlert = true
+                        if type == .photoUpload {
+                            showSourceSelection = true
+                        } else {
+                            selectedReportType = type
+                            showConfirmAlert = true
+                        }
                     } label: {
                         Label(type.label, systemImage: type.iconName)
                     }
@@ -112,24 +124,69 @@ struct ShopItemRowView: View {
         .alert("フィードバックを送りますか？", isPresented: $showConfirmAlert) {
             Button("キャンセル", role: .cancel) {
                 selectedReportType = nil
+                selectedImage = nil
+                selectedPhotosItem = nil
             }
             Button("報告する") {
                 if let type = selectedReportType {
                     Task {
+                        let imageData = selectedImage?.jpegData(compressionQuality: 0.8)
                         await model.report(
                             shopId: shop.id,
                             itemId: item.id,
                             type: type,
+                            imageData: imageData,
                             repository: factory.makeShopCatalogRepository()
                         )
                         if model.error == nil {
                             showSuccessAlert = true
+                            selectedImage = nil
+                            selectedPhotosItem = nil
                         }
                     }
                 }
             }
         } message: {
-            Text("この内容で管理者に報告を送信します。")
+            VStack(spacing: 12) {
+                if let image = selectedImage {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxHeight: 120)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                }
+                Text("この内容で管理者に報告を送信します。")
+            }
+        }
+        .confirmationDialog("写真の選択方法", isPresented: $showSourceSelection, titleVisibility: .visible) {
+            Button("カメラで撮影") {
+                showCamera = true
+            }
+            Button("ライブラリから選択") {
+                showPhotoPicker = true
+            }
+            Button("キャンセル", role: .cancel) { }
+        }
+        .photosPicker(isPresented: $showPhotoPicker, selection: $selectedPhotosItem, matching: .images)
+        .onChange(of: selectedPhotosItem) { _, newValue in
+            Task {
+                if let data = try? await newValue?.loadTransferable(type: Data.self),
+                   let image = UIImage(data: data) {
+                    selectedImage = image
+                    selectedReportType = .photoUpload
+                    showConfirmAlert = true
+                }
+            }
+        }
+        .sheet(isPresented: $showCamera) {
+            ImagePickerView(isPresented: $showCamera, selectedImage: $selectedImage, sourceType: .camera)
+                .ignoresSafeArea()
+                .onDisappear {
+                    if selectedImage != nil {
+                        selectedReportType = .photoUpload
+                        showConfirmAlert = true
+                    }
+                }
         }
         .alert("報告を受け付けました", isPresented: $showSuccessAlert) {
             Button("OK", role: .cancel) { }
