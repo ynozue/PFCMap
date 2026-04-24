@@ -1,8 +1,10 @@
 import Foundation
 
-struct DiscordWebhookRequest: Encodable {
+struct DiscordWebhookRequest: Sendable {
     let content: String
-    
+}
+
+extension DiscordWebhookRequest: Encodable {
     enum CodingKeys: String, CodingKey {
         case content
     }

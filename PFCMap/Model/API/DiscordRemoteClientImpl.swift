@@ -11,6 +11,7 @@ actor DiscordRemoteClientImpl: DiscordRemoteClient {
         self.webhookUrl = url
     }
 
+    // TODO: IFを変更し、他のアプリでも利用可能にする
     func sendNotification(content: String, imageData: Data?) async throws {
         var request = URLRequest(url: webhookUrl)
         request.httpMethod = "POST"
@@ -24,7 +25,9 @@ actor DiscordRemoteClientImpl: DiscordRemoteClient {
             
             // payload_json
             let payload = DiscordWebhookRequest(content: content)
-            let jsonData = try JSONEncoder().encode(payload)
+            let jsonData = try await MainActor.run {
+                try JSONEncoder().encode(payload)
+            }
             body.append("--\(boundary)\r\n".data(using: .utf8)!)
             body.append("Content-Disposition: form-data; name=\"payload_json\"\r\n".data(using: .utf8)!)
             body.append("Content-Type: application/json\r\n\r\n".data(using: .utf8)!)
@@ -44,7 +47,9 @@ actor DiscordRemoteClientImpl: DiscordRemoteClient {
             // 画像がない場合は通常の JSON で送信
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             let payload = DiscordWebhookRequest(content: content)
-            request.httpBody = try JSONEncoder().encode(payload)
+            request.httpBody = try await MainActor.run {
+                try JSONEncoder().encode(payload)
+            }
         }
         
         let (_, response) = try await URLSession.shared.data(for: request)
