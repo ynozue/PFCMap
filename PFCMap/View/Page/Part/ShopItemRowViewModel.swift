@@ -25,11 +25,47 @@ final class ShopItemRowViewModel {
         }
     }
     var selectedImage: UIImage?
+    
+    // Image loading states
+    var itemImageData: Data?
+    var isLoadingImage = false
+    var imageError: Error?
 
     private let repository: any ShopCatalogRepository
+    private let imageRepository: any ImageRepository
     
-    init(repository: any ShopCatalogRepository) {
+    init(repository: any ShopCatalogRepository, imageRepository: any ImageRepository) {
         self.repository = repository
+        self.imageRepository = imageRepository
+    }
+    
+    func loadImage(item: ShopItem) async {
+        // すでにデータがある場合はそれを使う
+        if let data = item.photoData {
+            self.itemImageData = data
+            return
+        }
+        
+        // URLがない場合は終了
+        guard let urlString = item.photoURL, let url = URL(string: urlString) else {
+            return
+        }
+        
+        // すでに読み込み済み、または読み込み中の場合は終了
+        if itemImageData != nil || isLoadingImage {
+            return
+        }
+        
+        isLoadingImage = true
+        defer { isLoadingImage = false }
+        
+        do {
+            let data = try await imageRepository.fetchImage(url: url)
+            self.itemImageData = data
+        } catch {
+            self.imageError = error
+            print("Failed to load image: \(error)")
+        }
     }
     
     func report(shopId: UUID, itemId: UUID) async {

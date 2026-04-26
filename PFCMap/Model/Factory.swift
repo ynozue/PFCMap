@@ -25,7 +25,7 @@ final class Factory: @unchecked Sendable {
         if let existing = Self._container {
             return existing
         }
-        let newContainer = try! ModelContainer(for: ShopCatalogEntity.self, ShopItemEntity.self)
+        let newContainer = try! ModelContainer(for: ShopCatalogEntity.self, ShopItemEntity.self, ImageCacheEntity.self)
         Self._container = newContainer
         return newContainer
     }
@@ -102,6 +102,16 @@ extension Factory {
             return UserDefaultsServiceDummy()
         }
     }
+    
+    @MainActor
+    func makeImageRepository() -> any ImageRepository {
+        switch env {
+        case .prod, .dev:
+            return ImageRepositoryImpl(modelContainer: container)
+        case .preview:
+            return ImageRepositoryDummy()
+        }
+    }
 }
 
 extension Factory {
@@ -150,7 +160,10 @@ extension Factory {
     
     @MainActor
     func makeShopItemRowViewModel() -> ShopItemRowViewModel {
-        ShopItemRowViewModel(repository: makeShopCatalogRepository())
+        ShopItemRowViewModel(
+            repository: makeShopCatalogRepository(),
+            imageRepository: makeImageRepository()
+        )
     }
 }
 

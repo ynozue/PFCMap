@@ -8,6 +8,7 @@ actor ShopItemDTO: Decodable, Sendable {
     let fat: Double
     let carbohydrate: Double
     let type: String
+    let photoURL: String?
     let createdAt: Date
     let updatedAt: Date
     let deleted: Bool
@@ -20,6 +21,7 @@ actor ShopItemDTO: Decodable, Sendable {
         fat: Double,
         carbohydrate: Double,
         type: String = "",
+        photoURL: String? = nil,
         createdAt: Date = Date(),
         updatedAt: Date = Date(),
         deleted: Bool = false
@@ -31,13 +33,14 @@ actor ShopItemDTO: Decodable, Sendable {
         self.fat = fat
         self.carbohydrate = carbohydrate
         self.type = type
+        self.photoURL = photoURL
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.deleted = deleted
     }
     
     enum CodingKeys: String, CodingKey {
-        case id, name, calorie, protein, fat, carbohydrate, type, createdAt, updatedAt, deleted
+        case id, name, calorie, protein, fat, carbohydrate, type, photoURL, createdAt, updatedAt, deleted
     }
 }
 
@@ -51,6 +54,7 @@ extension ShopItemDTO {
             fat: fat,
             carbohydrate: carbohydrate,
             type: type,
+            photoURL: photoURL,
             photoData: nil,
             createdAt: createdAt,
             updatedAt: updatedAt,

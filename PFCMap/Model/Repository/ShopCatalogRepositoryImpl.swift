@@ -118,6 +118,7 @@ private extension DataOperator {
                     fat: item.fat,
                     carbohydrate: item.carbohydrate,
                     type: item.type,
+                    photoURL: item.photoURL,
                     photoData: item.photoData,
                     createdAt: item.createdAt,
                     updatedAt: item.updatedAt,
@@ -179,6 +180,7 @@ private extension DataOperator {
                         existingItem.fat = item.fat
                         existingItem.carbohydrate = item.carbohydrate
                         existingItem.type = item.type
+                        existingItem.photoURL = item.photoURL
                         existingItem.photoData = item.photoData
                         existingItem.updatedAt = item.updatedAt
                         existingItem.deleted = item.deleted
@@ -197,6 +199,7 @@ private extension DataOperator {
                             fat: item.fat,
                             carbohydrate: item.carbohydrate,
                             type: item.type,
+                            photoURL: item.photoURL,
                             photoData: item.photoData,
                             createdAt: item.createdAt,
                             updatedAt: item.updatedAt,

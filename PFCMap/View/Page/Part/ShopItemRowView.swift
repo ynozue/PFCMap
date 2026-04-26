@@ -22,21 +22,34 @@ struct ShopItemRowView: View {
     var body: some View {
         HStack(alignment: .center, spacing: 10) {
             // Menu Photo
-            if let photoData = item.photoData, let image = UIImage(data: photoData) {
-                Image(uiImage: image)
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: 52, height: 52)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-            } else {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.gray.opacity(0.1))
-                    .frame(width: 52, height: 52)
-                    .overlay {
-                        Image(systemName: "fork.knife")
-                            .font(.system(size: 18))
-                            .foregroundStyle(.tertiary)
-                    }
+            Group {
+                if let photoData = model.itemImageData, let image = UIImage(data: photoData) {
+                    Image(uiImage: image)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 52, height: 52)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                } else if model.isLoadingImage {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.gray.opacity(0.1))
+                        .frame(width: 52, height: 52)
+                        .overlay {
+                            ProgressView()
+                                .controlSize(.small)
+                        }
+                } else {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.gray.opacity(0.1))
+                        .frame(width: 52, height: 52)
+                        .overlay {
+                            Image(systemName: "fork.knife")
+                                .font(.system(size: 18))
+                                .foregroundStyle(.tertiary)
+                        }
+                }
+            }
+            .task {
+                await model.loadImage(item: item)
             }
             
             VStack(alignment: .leading, spacing: 2) {

@@ -10,8 +10,8 @@ actor PFCRemoteClientDummy: PFCRemoteClient {
                 description: "低カロリーメニューが豊富で糖質0麺への変更も可能",
                 type: 1,
                 items: [
-                    .init(id: UUID(), name: "チーズINハンバーグ", calorie: 757, protein: 36.1, fat: 55.0, carbohydrate: 23.7, type: "主食"),
-                    .init(id: UUID(), name: "糖質0麺 ほうれん草の和風ジェノベーゼ", calorie: 218, protein: 5.2, fat: 12.1, carbohydrate: 2.4, type: "主食")
+                    .init(id: UUID(), name: "チーズINハンバーグ", calorie: 757, protein: 36.1, fat: 55.0, carbohydrate: 23.7, type: "主食", photoURL: "https://example.com/hamburg.jpg"),
+                    .init(id: UUID(), name: "糖質0麺 ほうれん草の和風ジェノベーゼ", calorie: 218, protein: 5.2, fat: 12.1, carbohydrate: 2.4, type: "主食", photoURL: "https://example.com/pasta.jpg")
                 ]
             ),
             .init(
@@ -19,8 +19,8 @@ actor PFCRemoteClientDummy: PFCRemoteClient {
                 description: "若鶏のグリルやサラダなど高タンパク・低糖質な単品メニューが充実",
                 type: 1,
                 items: [
-                    .init(id: UUID(), name: "ミラノ風ドリア", calorie: 521, protein: 15.3, fat: 22.8, carbohydrate: 59.9, type: "主食"),
-                    .init(id: UUID(), name: "若鶏のディアボラ風", calorie: 390, protein: 31.0, fat: 17.7, carbohydrate: 6.0, type: "主食")
+                    .init(id: UUID(), name: "ミラノ風ドリア", calorie: 521, protein: 15.3, fat: 22.8, carbohydrate: 59.9, type: "主食", photoURL: "https://example.com/doria.jpg"),
+                    .init(id: UUID(), name: "若鶏のディアボラ風", calorie: 390, protein: 31.0, fat: 17.7, carbohydrate: 6.0, type: "主食", photoURL: "https://example.com/chicken.jpg")
                 ]
             ),
             .init(
