@@ -9,21 +9,21 @@ struct ShopCatalogListView: View {
     @State private var model = ShopCatalogListViewModel()
     @State private var dragOffset: CGFloat = 0
     
-    private var sortedItems: [ShopCatalogListViewModel.DisplayItem] {
-        model.displayItems(
+    private var inRangeShops: [ShopCatalog] {
+        model.inRangeShops(
             from: homeModel.shops,
-            proteinThreshold: homeModel.proteinThreshold,
-            fatThreshold: homeModel.fatThreshold,
             disabledShopIds: homeModel.disabledShopIds,
             currentLocation: homeModel.currentLocation,
             searchResults: homeModel.searchResults,
             mapDistance: homeModel.mapDistance.rawValue
         )
     }
-    
-    private var inRangeShops: [ShopCatalog] {
-        model.inRangeShops(
+
+    private var tabs: [ShopCatalogListViewModel.TabItem] {
+        model.tabItems(
             from: homeModel.shops,
+            proteinThreshold: homeModel.proteinThreshold,
+            fatThreshold: homeModel.fatThreshold,
             disabledShopIds: homeModel.disabledShopIds,
             currentLocation: homeModel.currentLocation,
             searchResults: homeModel.searchResults,
@@ -107,7 +107,7 @@ struct ShopCatalogListView: View {
                     
                     Spacer()
                     
-                    Text("範囲内の店舗 \(inRangeShops.count)件 / メニュー \(sortedItems.count)件")
+                    Text("範囲内の店舗 \(inRangeShops.count)件")
                         .font(.system(size: 12, weight: .bold))
                         .foregroundStyle(.secondary)
                         .padding(.top, 6)
@@ -157,21 +157,72 @@ struct ShopCatalogListView: View {
                     }
             )
             
-            if sortedItems.isEmpty {
-                emptyView
-            } else {
-                ScrollView {
-                    LazyVStack(spacing: 12) {
-                        ForEach(sortedItems) { displayItem in
-                            ShopItemRowView(shop: displayItem.shop, item: displayItem.item)
-                                .onTapGesture {
-                                    onSelect(displayItem.shop)
+            // Tab Bar
+            ScrollView(.horizontal, showsIndicators: false) {
+                ScrollViewReader { proxy in
+                    HStack(spacing: 8) {
+                        ForEach(tabs) { tab in
+                            Button {
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                    model.selectedShopId = tab.id
                                 }
+                            } label: {
+                                Text("\(tab.name) (\(tab.count))")
+                                    .font(.system(size: 12, weight: model.selectedShopId == tab.id ? .bold : .medium))
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(model.selectedShopId == tab.id ? Color.blue.opacity(0.1) : Color.clear)
+                                    .overlay(
+                                        Capsule()
+                                            .stroke(model.selectedShopId == tab.id ? Color.blue : Color.secondary.opacity(0.3), lineWidth: 1)
+                                    )
+                                    .clipShape(Capsule())
+                            }
+                            .foregroundColor(model.selectedShopId == tab.id ? .blue : .primary)
+                            .id(tab.id)
                         }
                     }
                     .padding(.horizontal, 16)
-                    .padding(.bottom, 24)
+                    .padding(.bottom, 8)
+                    .onChange(of: model.selectedShopId) { _, newValue in
+                        withAnimation {
+                            proxy.scrollTo(newValue, anchor: .center)
+                        }
+                    }
                 }
+            }
+
+            if tabs.isEmpty || (tabs.count == 1 && tabs[0].id == nil && tabs[0].count == 0) {
+                emptyView
+            } else {
+                TabView(selection: $model.selectedShopId) {
+                    ForEach(tabs) { tab in
+                        ScrollView {
+                            LazyVStack(spacing: 12) {
+                                let items = model.displayItemsForTab(
+                                    tab: tab,
+                                    from: homeModel.shops,
+                                    proteinThreshold: homeModel.proteinThreshold,
+                                    fatThreshold: homeModel.fatThreshold,
+                                    disabledShopIds: homeModel.disabledShopIds,
+                                    currentLocation: homeModel.currentLocation,
+                                    searchResults: homeModel.searchResults,
+                                    mapDistance: homeModel.mapDistance.rawValue
+                                )
+                                ForEach(items) { displayItem in
+                                    ShopItemRowView(shop: displayItem.shop, item: displayItem.item)
+                                        .onTapGesture {
+                                            onSelect(displayItem.shop)
+                                        }
+                                }
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.bottom, 24)
+                        }
+                        .tag(tab.id)
+                    }
+                }
+                .tabViewStyle(.page(indexDisplayMode: .never))
             }
         }
         .frame(height: currentHeight, alignment: .top)

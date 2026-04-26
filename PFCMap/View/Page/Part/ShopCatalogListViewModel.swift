@@ -13,11 +13,18 @@ class ShopCatalogListViewModel {
     
     var sortType: SortType = .calorie
     var isExpanded: Bool = true
+    var selectedShopId: UUID? = nil
 
     struct DisplayItem: Identifiable, Equatable {
         var id: String { "\(shop.id.uuidString)-\(item.id.uuidString)" }
         let shop: ShopCatalog
         let item: ShopItem
+    }
+    
+    struct TabItem: Identifiable, Equatable {
+        let id: UUID? // nil for ALL
+        let name: String
+        let count: Int
     }
     
     func inRangeShops(
@@ -45,7 +52,49 @@ class ShopCatalogListViewModel {
         }
     }
     
-    func displayItems(
+    func tabItems(
+        from shops: [ShopCatalog],
+        proteinThreshold: ProteinThreshold,
+        fatThreshold: FatThreshold,
+        disabledShopIds: Set<UUID>,
+        currentLocation: Location?,
+        searchResults: [ShopSearchResult],
+        mapDistance: Int
+    ) -> [TabItem] {
+        let inRange = inRangeShops(
+            from: shops,
+            disabledShopIds: disabledShopIds,
+            currentLocation: currentLocation,
+            searchResults: searchResults,
+            mapDistance: mapDistance
+        )
+        
+        var tabs: [TabItem] = []
+        
+        // Calculate ALL count
+        var allCount = 0
+        for shop in inRange {
+            let shopItemCount = shop.items.filter { item in
+                item.type == "主食" &&
+                item.protein >= Double(proteinThreshold.rawValue) &&
+                item.fat <= Double(fatThreshold.rawValue)
+            }.count
+            
+            if shopItemCount > 0 {
+                tabs.append(TabItem(id: shop.id, name: shop.name, count: shopItemCount))
+                allCount += shopItemCount
+            }
+        }
+        
+        // Add ALL at the beginning
+        tabs.insert(TabItem(id: nil, name: "ALL", count: allCount), at: 0)
+        
+        return tabs
+    }
+    
+    
+    func displayItemsForTab(
+        tab: TabItem,
         from shops: [ShopCatalog],
         proteinThreshold: ProteinThreshold,
         fatThreshold: FatThreshold,
@@ -61,15 +110,14 @@ class ShopCatalogListViewModel {
             searchResults: searchResults,
             mapDistance: mapDistance
         )
+            .filter { shop in
+                tab.id == nil || shop.id == tab.id
+            }
             .flatMap { shop in
                 shop.items.compactMap { item -> DisplayItem? in
-                    // pが閾値以上
                     guard item.protein >= Double(proteinThreshold.rawValue) else { return nil }
-                    // fが閾値以下
                     guard item.fat <= Double(fatThreshold.rawValue) else { return nil }
-                    // 主食のみ
                     guard item.type == "主食" else { return nil }
-                    
                     return DisplayItem(shop: shop, item: item)
                 }
             }
