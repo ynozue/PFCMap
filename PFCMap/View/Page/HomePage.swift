@@ -191,29 +191,77 @@ struct HomePage: View {
     private var loadingOverlay: some View {
         if model.isLoading {
             ZStack {
-                VStack(spacing: 12) {
-                    Image(systemName: "magnifyingglass")
-                        .font(.system(size: 28, weight: .semibold))
-                        .foregroundStyle(.blue)
-                        .symbolEffect(.pulse, options: .repeating)
+                // 背景を薄く暗くしてインジケーターを際立たせる
+                Color.black.opacity(0.05)
+                    .ignoresSafeArea()
+                
+                VStack(spacing: 16) {
+                    ZStack {
+                        // 索敵しているような波紋エフェクト
+                        Circle()
+                            .stroke(Color.blue.opacity(0.2), lineWidth: 2)
+                            .frame(width: 40, height: 40)
+                            .phaseAnimator([1.0, 2.5]) { content, phase in
+                                content
+                                    .scaleEffect(phase)
+                                    .opacity(phase == 1.0 ? 0.4 : 0)
+                            } animation: { phase in
+                                .linear(duration: 1.2).repeatForever(autoreverses: false)
+                            }
+
+                        Image(systemName: "magnifyingglass")
+                            .font(.system(size: 32, weight: .bold))
+                            .foregroundStyle(.blue)
+                            // 覗き込んで探しているようなアニメーション
+                            .phaseAnimator([0, 1, 2, 3]) { content, phase in
+                                content
+                                    .offset(
+                                        x: phase == 1 ? 12 : (phase == 3 ? -12 : 0),
+                                        y: phase == 0 ? -6 : (phase == 2 ? 6 : 0)
+                                    )
+                                    .rotationEffect(.degrees(phase == 1 ? 20 : (phase == 3 ? -10 : 5)))
+                            } animation: { phase in
+                                .easeInOut(duration: 0.8)
+                            }
+                    }
+                    .frame(width: 80, height: 80)
+                    
                     if !model.loadingMessage.isEmpty {
                         Text(model.loadingMessage)
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundStyle(.secondary)
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundStyle(.blue.opacity(0.9))
+                            .multilineTextAlignment(.center)
                     }
                 }
-                .padding(20)
-                .background(.thinMaterial)
-                .cornerRadius(12)
-                .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
+                .padding(28)
+                .background {
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .fill(.ultraThinMaterial)
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                                .stroke(.white.opacity(0.5), lineWidth: 1)
+                        }
+                        .shadow(color: .black.opacity(0.12), radius: 20, x: 0, y: 10)
+                }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .transition(.opacity.combined(with: .scale(scale: 0.95)))
+            .zIndex(100)
         }
     }
 }
 
-#Preview {
+#Preview("通常時") {
     let factory = Factory.create(env: .preview)
     return HomePage(model: factory.makeHomePageModel())
         .environment(\.factory, factory)
 }
+
+#Preview("ローディング中") {
+    let factory = Factory.create(env: .preview)
+    let model = factory.makeHomePageModel()
+    model.isLoading = true
+    model.loadingMessage = "周辺の店舗を探索しています..."
+    return HomePage(model: model)
+        .environment(\.factory, factory)
+}
+
