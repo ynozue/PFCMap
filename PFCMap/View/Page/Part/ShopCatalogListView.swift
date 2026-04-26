@@ -57,8 +57,8 @@ struct ShopCatalogListView: View {
                 .padding(.bottom, 4)
                 
                 // Header
-                HStack(alignment: .top, spacing: 8) {
-                    VStack(alignment: .leading, spacing: 8) {
+                HStack(alignment: .center, spacing: 8) {
+                    HStack(spacing: 8) {
                         // Protein Filter Toggle
                         Menu {
                             Picker("Protein 閾値", selection: Binding(
@@ -105,13 +105,6 @@ struct ShopCatalogListView: View {
                             .clipShape(Capsule())
                         }
                     }
-                    
-                    Spacer()
-                    
-                    Text("範囲内の店舗 \(inRangeShops.count)件")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundStyle(.secondary)
-                        .padding(.top, 6)
                     
                     Spacer()
                     
