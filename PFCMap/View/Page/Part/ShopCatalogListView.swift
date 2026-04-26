@@ -1,4 +1,5 @@
 import SwiftUI
+import NZData
 
 @MainActor
 struct ShopCatalogListView: View {
@@ -62,7 +63,7 @@ struct ShopCatalogListView: View {
                         Menu {
                             Picker("Protein 閾値", selection: Binding(
                                 get: { homeModel.proteinThreshold },
-                                set: { homeModel.updateProteinThreshold(threshold: $0, factory: factory) }
+                                set: { homeModel.updateProteinThreshold(threshold: $0) }
                             )) {
                                 ForEach(ProteinThreshold.allCases, id: \.self) { threshold in
                                     Text(threshold.label).tag(threshold)
@@ -85,7 +86,7 @@ struct ShopCatalogListView: View {
                         Menu {
                             Picker("Fat 閾値", selection: Binding(
                                 get: { homeModel.fatThreshold },
-                                set: { homeModel.updateFatThreshold(threshold: $0, factory: factory) }
+                                set: { homeModel.updateFatThreshold(threshold: $0) }
                             )) {
                                 ForEach(FatThreshold.allCases, id: \.self) { threshold in
                                     Text(threshold.label).tag(threshold)
@@ -249,13 +250,12 @@ struct ShopCatalogListView: View {
     }
 }
 
-
 #Preview {
-    ZStack(alignment: .bottom) {
+    let factory = Factory.create(env: .preview)
+    return ZStack(alignment: .bottom) {
         Color.gray.opacity(0.1).ignoresSafeArea()
-        ShopCatalogListView(homeModel: HomePageModel(), maxHeight: 600)
-        .frame(height: 400)
+        ShopCatalogListView(homeModel: factory.makeHomePageModel(), maxHeight: 600)
+            .frame(height: 400)
     }
+    .environment(\.factory, factory)
 }
-
-
