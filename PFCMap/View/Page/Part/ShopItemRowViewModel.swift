@@ -25,8 +25,14 @@ final class ShopItemRowViewModel {
         }
     }
     var selectedImage: UIImage?
+
+    private let repository: any ShopCatalogRepository
     
-    func report(shopId: UUID, itemId: UUID, repository: any ShopCatalogRepository) async {
+    init(repository: any ShopCatalogRepository) {
+        self.repository = repository
+    }
+    
+    func report(shopId: UUID, itemId: UUID) async {
         guard let type = selectedReportType else { return }
         
         isReporting = true

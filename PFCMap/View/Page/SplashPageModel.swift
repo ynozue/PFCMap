@@ -8,21 +8,25 @@ final class SplashPageModel {
     var isLoading = false
     var errorMessage: String?
     
-    init() {}
+    private let shopCatalogRepository: any ShopCatalogRepository
+    private let userDefaultsService: any UserDefaultsService
     
-    func onAppear(factory: Factory, isInitialized: Binding<Bool>, isTutorialCompleted: Binding<Bool>) async {
+    init(shopCatalogRepository: any ShopCatalogRepository, userDefaultsService: any UserDefaultsService) {
+        self.shopCatalogRepository = shopCatalogRepository
+        self.userDefaultsService = userDefaultsService
+    }
+    
+    func onAppear(isInitialized: Binding<Bool>, isTutorialCompleted: Binding<Bool>) async {
         guard !isInitialized.wrappedValue else { return }
         
         isLoading = true
         defer { isLoading = false }
         
         do {
-            let userDefaults = factory.makeUserDefaultsService()
-            let completed = await userDefaults.value(key: PFCMapUserDefaultsKeys.isTutorialCompleted)
+            let completed = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.isTutorialCompleted)
             isTutorialCompleted.wrappedValue = completed
             
-            let repository = factory.makeShopCatalogRepository()
-            try await repository.sync()
+            try await shopCatalogRepository.sync()
             
             isInitialized.wrappedValue = true
         } catch {

@@ -7,7 +7,13 @@ struct ShopItemRowView: View {
     let item: ShopItem
     
     @Environment(\.factory) private var factory
-    @State private var model = ShopItemRowViewModel()
+    @State private var model: ShopItemRowViewModel
+    
+    init(shop: ShopCatalog, item: ShopItem, factory: Factory) {
+        self.shop = shop
+        self.item = item
+        self._model = State(wrappedValue: factory.makeShopItemRowViewModel())
+    }
     
     private var categoryIcon: String {
         shop.category.iconName
@@ -114,8 +120,7 @@ struct ShopItemRowView: View {
                 Task {
                     await model.report(
                         shopId: shop.id,
-                        itemId: item.id,
-                        repository: factory.makeShopCatalogRepository()
+                        itemId: item.id
                     )
                 }
             }
@@ -190,8 +195,12 @@ struct ShopItemRowView: View {
         category: .beefBowl,
         items: [item]
     )
-    
-    return ShopItemRowView(shop: shop, item: item)
-        .environment(\.factory, .create(env: .preview))
-        .padding()
+    let factory = Factory.create(env: .preview)
+    return ShopItemRowView(
+        shop: shop,
+        item: item,
+        factory: factory
+    )
+    .environment(\.factory, factory)
+    .padding()
 }

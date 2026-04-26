@@ -28,12 +28,12 @@ struct PFCMapApp: App {
             Group {
                 if isInitialized {
                     if isTutorialCompleted {
-                        HomePage()
+                        HomePage(factory: factory)
                     } else {
-                        TutorialPage(isTutorialCompleted: $isTutorialCompleted)
+                        TutorialPage(factory: factory, isTutorialCompleted: $isTutorialCompleted)
                     }
                 } else {
-                    SplashPage(isInitialized: $isInitialized, isTutorialCompleted: $isTutorialCompleted)
+                    SplashPage(factory: factory, isInitialized: $isInitialized, isTutorialCompleted: $isTutorialCompleted)
                 }
             }
             .environment(\.factory, factory)

@@ -10,32 +10,42 @@ final class TutorialPageModel {
     var isFetchingShops = false
     var locationPermissionStatus: String = "未設定"
     
-    init() {}
+    private let shopCatalogRepository: any ShopCatalogRepository
+    private let userDefaultsService: any UserDefaultsService
+    private let locationRepository: any LocationRepository
     
-    func onAppear(factory: Factory) async {
-        await fetchShops(factory: factory)
-        await loadDisabledShopIds(factory: factory)
+    init(
+        shopCatalogRepository: any ShopCatalogRepository,
+        userDefaultsService: any UserDefaultsService,
+        locationRepository: any LocationRepository
+    ) {
+        self.shopCatalogRepository = shopCatalogRepository
+        self.userDefaultsService = userDefaultsService
+        self.locationRepository = locationRepository
     }
     
-    private func fetchShops(factory: Factory) async {
+    func onAppear() async {
+        await fetchShops()
+        await loadDisabledShopIds()
+    }
+    
+    private func fetchShops() async {
         isFetchingShops = true
         defer { isFetchingShops = false }
         
         do {
-            let repository = factory.makeShopCatalogRepository()
-            self.shops = try await repository.fetchShops()
+            self.shops = try await shopCatalogRepository.fetchShops()
         } catch {
             print("Failed to fetch shops: \(error)")
         }
     }
     
-    private func loadDisabledShopIds(factory: Factory) async {
-        let defaultsService = factory.makeUserDefaultsService()
-        let disabledIds = await defaultsService.value(key: PFCMapUserDefaultsKeys.disabledShopIds)
+    private func loadDisabledShopIds() async {
+        let disabledIds = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.disabledShopIds)
         self.disabledShopIds = Set(disabledIds.compactMap { UUID(uuidString: $0) })
     }
     
-    func toggleShop(_ shop: ShopCatalog, factory: Factory) {
+    func toggleShop(_ shop: ShopCatalog) {
         if disabledShopIds.contains(shop.id) {
             disabledShopIds.remove(shop.id)
         } else {
@@ -43,15 +53,13 @@ final class TutorialPageModel {
         }
     }
     
-    func saveDisabledShops(factory: Factory) async {
-        let defaultsService = factory.makeUserDefaultsService()
-        await defaultsService.save(key: PFCMapUserDefaultsKeys.disabledShopIds, value: disabledShopIds.map { $0.uuidString })
+    func saveDisabledShops() async {
+        await userDefaultsService.save(key: PFCMapUserDefaultsKeys.disabledShopIds, value: disabledShopIds.map { $0.uuidString })
     }
     
-    func requestLocationPermission(factory: Factory) async {
+    func requestLocationPermission() async {
         do {
-            let locationRepo = factory.makeLocationRepository()
-            _ = try await locationRepo.requestLocation()
+            _ = try await locationRepository.requestLocation()
             locationPermissionStatus = "許可済み"
         } catch {
             print("Failed to request location: \(error)")
@@ -59,9 +67,8 @@ final class TutorialPageModel {
         }
     }
     
-    func completeTutorial(factory: Factory, isTutorialCompleted: Binding<Bool>) async {
-        let defaultsService = factory.makeUserDefaultsService()
-        await defaultsService.save(key: PFCMapUserDefaultsKeys.isTutorialCompleted, value: true)
+    func completeTutorial(isTutorialCompleted: Binding<Bool>) async {
+        await userDefaultsService.save(key: PFCMapUserDefaultsKeys.isTutorialCompleted, value: true)
         isTutorialCompleted.wrappedValue = true
     }
 }

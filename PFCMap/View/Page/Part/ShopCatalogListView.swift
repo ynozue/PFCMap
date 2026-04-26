@@ -210,10 +210,14 @@ struct ShopCatalogListView: View {
                                     mapDistance: homeModel.mapDistance.rawValue
                                 )
                                 ForEach(items) { displayItem in
-                                    ShopItemRowView(shop: displayItem.shop, item: displayItem.item)
-                                        .onTapGesture {
-                                            onSelect(displayItem.shop)
-                                        }
+                                    ShopItemRowView(
+                                        shop: displayItem.shop,
+                                        item: displayItem.item,
+                                        factory: factory
+                                    )
+                                    .onTapGesture {
+                                        onSelect(displayItem.shop)
+                                    }
                                 }
                             }
                             .padding(.horizontal, 16)

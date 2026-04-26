@@ -4,8 +4,13 @@ import SwiftUI
 struct TutorialPage: View {
     @Environment(\.factory) private var factory
     @Binding var isTutorialCompleted: Bool
-    @State private var model = TutorialPageModel()
+    @State private var model: TutorialPageModel
     @State private var selectedTab = 0
+    
+    init(factory: Factory, isTutorialCompleted: Binding<Bool>) {
+        self._isTutorialCompleted = isTutorialCompleted
+        self._model = State(wrappedValue: factory.makeTutorialPageModel())
+    }
     
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -23,7 +28,7 @@ struct TutorialPage: View {
         .background(Color(.systemGroupedBackground))
         .onAppear {
             Task {
-                await model.onAppear(factory: factory)
+                await model.onAppear()
             }
         }
     }
@@ -76,7 +81,6 @@ private struct TutorialStep1View: View {
 
 @MainActor
 private struct TutorialStep2View: View {
-    @Environment(\.factory) private var factory
     var model: TutorialPageModel
     @Binding var selectedTab: Int
     
@@ -101,7 +105,7 @@ private struct TutorialStep2View: View {
                 List {
                     ForEach(model.shops, id: \.id) { shop in
                         Button(action: {
-                            model.toggleShop(shop, factory: factory)
+                            model.toggleShop(shop)
                         }) {
                             HStack {
                                 Text(shop.name)
@@ -123,7 +127,7 @@ private struct TutorialStep2View: View {
             
             Button(action: {
                 Task {
-                    await model.saveDisabledShops(factory: factory)
+                    await model.saveDisabledShops()
                     withAnimation {
                         selectedTab = 2
                     }
@@ -146,7 +150,6 @@ private struct TutorialStep2View: View {
 
 @MainActor
 private struct TutorialStep3View: View {
-    @Environment(\.factory) private var factory
     var model: TutorialPageModel
     @Binding var isTutorialCompleted: Bool
     
@@ -171,7 +174,7 @@ private struct TutorialStep3View: View {
             
             Button(action: {
                 Task {
-                    await model.requestLocationPermission(factory: factory)
+                    await model.requestLocationPermission()
                 }
             }) {
                 Text("位置情報を許可する")
@@ -188,7 +191,7 @@ private struct TutorialStep3View: View {
             
             Button(action: {
                 Task {
-                    await model.completeTutorial(factory: factory, isTutorialCompleted: $isTutorialCompleted)
+                    await model.completeTutorial(isTutorialCompleted: $isTutorialCompleted)
                 }
             }) {
                 Text("はじめる")
@@ -207,6 +210,7 @@ private struct TutorialStep3View: View {
 }
 
 #Preview {
-    TutorialPage(isTutorialCompleted: .constant(false))
-        .environment(\.factory, Factory.create(env: .preview))
+    let factory = Factory.create(env: .preview)
+    return TutorialPage(factory: factory, isTutorialCompleted: .constant(false))
+        .environment(\.factory, factory)
 }

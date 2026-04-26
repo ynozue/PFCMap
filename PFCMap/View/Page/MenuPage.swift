@@ -4,7 +4,11 @@ import SwiftUI
 struct MenuPage: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.factory) private var factory
-    @State private var model = MenuPageModel()
+    @State private var model: MenuPageModel
+    
+    init(factory: Factory) {
+        self._model = State(wrappedValue: factory.makeMenuPageModel())
+    }
     
     var body: some View {
         NavigationStack {
@@ -18,7 +22,7 @@ struct MenuPage: View {
                     }
                     
                     NavigationLink {
-                        ShopSettingPage()
+                        ShopSettingPage(factory: factory)
                     } label: {
                         Label("表示ショップ設定", systemImage: "list.bullet.rectangle")
                     }
@@ -48,31 +52,31 @@ struct MenuPage: View {
 #if DEBUG
                 Section("デバッグメニュー") {
                     Button {
-                        Task { await model.syncAPI(factory: factory) }
+                        Task { await model.syncAPI() }
                     } label: {
                         Label("API同期", systemImage: "arrow.triangle.2.circlepath")
                     }
                     
                     Button {
-                        Task { await model.generateDBData(factory: factory) }
+                        Task { await model.generateDBData() }
                     } label: {
                         Label("DB情報の生成", systemImage: "plus.square.on.square")
                     }
                     
                     Button(role: .destructive) {
-                        Task { await model.deleteLastSyncDate(factory: factory) }
+                        Task { await model.deleteLastSyncDate() }
                     } label: {
                         Label("最終同期日時を削除", systemImage: "trash")
                     }
                     
                     Button(role: .destructive) {
-                        Task { await model.deleteTutorialFlag(factory: factory) }
+                        Task { await model.deleteTutorialFlag() }
                     } label: {
                         Label("チュートリアル完了フラグを削除", systemImage: "flag.slash")
                     }
                     
                     Button(role: .destructive) {
-                        Task { await model.clearDB(factory: factory) }
+                        Task { await model.clearDB() }
                     } label: {
                         Label("DBをクリア", systemImage: "trash.circle")
                     }
@@ -95,13 +99,14 @@ struct MenuPage: View {
                 }
             }
             .onAppear {
-                Task { await model.onAppear(factory: factory) }
+                Task { await model.onAppear() }
             }
         }
     }
 }
 
 #Preview {
-    MenuPage()
-        .environment(\.factory, Factory.create(env: .preview))
+    let factory = Factory.create(env: .preview)
+    return MenuPage(factory: factory)
+        .environment(\.factory, factory)
 }

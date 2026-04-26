@@ -104,6 +104,56 @@ extension Factory {
     }
 }
 
+extension Factory {
+    @MainActor
+    func makeHomePageModel() -> HomePageModel {
+        HomePageModel(
+            locationRepository: makeLocationRepository(),
+            shopCatalogRepository: makeShopCatalogRepository(),
+            shopSearchRepository: makeShopSearchRepository(),
+            userDefaultsService: makeUserDefaultsService()
+        )
+    }
+    
+    @MainActor
+    func makeSplashPageModel() -> SplashPageModel {
+        SplashPageModel(
+            shopCatalogRepository: makeShopCatalogRepository(),
+            userDefaultsService: makeUserDefaultsService()
+        )
+    }
+    
+    @MainActor
+    func makeTutorialPageModel() -> TutorialPageModel {
+        TutorialPageModel(
+            shopCatalogRepository: makeShopCatalogRepository(),
+            userDefaultsService: makeUserDefaultsService(),
+            locationRepository: makeLocationRepository()
+        )
+    }
+    
+    @MainActor
+    func makeShopSettingPageModel() -> ShopSettingPageModel {
+        ShopSettingPageModel(
+            shopCatalogRepository: makeShopCatalogRepository(),
+            userDefaultsService: makeUserDefaultsService()
+        )
+    }
+    
+    @MainActor
+    func makeMenuPageModel() -> MenuPageModel {
+        MenuPageModel(
+            shopCatalogRepository: makeShopCatalogRepository(),
+            userDefaultsService: makeUserDefaultsService()
+        )
+    }
+    
+    @MainActor
+    func makeShopItemRowViewModel() -> ShopItemRowViewModel {
+        ShopItemRowViewModel(repository: makeShopCatalogRepository())
+    }
+}
+
 import SwiftUI
 
 private struct FactoryKey: EnvironmentKey {

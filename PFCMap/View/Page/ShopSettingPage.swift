@@ -3,7 +3,11 @@ import SwiftUI
 @MainActor
 struct ShopSettingPage: View {
     @Environment(\.factory) private var factory
-    @State private var model = ShopSettingPageModel()
+    @State private var model: ShopSettingPageModel
+    
+    init(factory: Factory) {
+        self._model = State(wrappedValue: factory.makeShopSettingPageModel())
+    }
     
     var body: some View {
         List {
@@ -11,7 +15,7 @@ struct ShopSettingPage: View {
                 ForEach(model.shops) { shop in
                     Toggle(isOn: Binding(
                         get: { model.isShopEnabled(shopId: shop.id) },
-                        set: { _ in model.toggleShopSetting(shopId: shop.id, factory: factory) }
+                        set: { _ in model.toggleShopSetting(shopId: shop.id) }
                     )) {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(shop.name)
@@ -31,14 +35,15 @@ struct ShopSettingPage: View {
         .navigationTitle("表示ショップ設定")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
-            Task { await model.onAppear(factory: factory) }
+            Task { await model.onAppear() }
         }
     }
 }
 
 #Preview {
-    NavigationStack {
-        ShopSettingPage()
-            .environment(\.factory, Factory.create(env: .preview))
+    let factory = Factory.create(env: .preview)
+    return NavigationStack {
+        ShopSettingPage(factory: factory)
+            .environment(\.factory, factory)
     }
 }

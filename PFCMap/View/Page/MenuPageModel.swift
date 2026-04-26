@@ -11,11 +11,16 @@ final class MenuPageModel {
     
     var lastFetchedAt: Date? = nil
     
-    init() {}
+    private let shopCatalogRepository: any ShopCatalogRepository
+    private let userDefaultsService: any UserDefaultsService
     
-    func onAppear(factory: Factory) async {
-        let service = factory.makeUserDefaultsService()
-        self.lastFetchedAt = await service.value(key: PFCMapUserDefaultsKeys.lastFetchedAt)
+    init(shopCatalogRepository: any ShopCatalogRepository, userDefaultsService: any UserDefaultsService) {
+        self.shopCatalogRepository = shopCatalogRepository
+        self.userDefaultsService = userDefaultsService
+    }
+    
+    func onAppear() async {
+        self.lastFetchedAt = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.lastFetchedAt)
     }
     
     func lastSyncDateString(date: Date?) -> String {
@@ -26,61 +31,49 @@ final class MenuPageModel {
     }
 
 #if DEBUG
-    func syncAPI(factory: Factory) async {
+    func syncAPI() async {
         print("API 同期開始")
         do {
-            let repository = factory.makeShopCatalogRepository()
-            try await repository.sync(force: true)
-            
-            let service = factory.makeUserDefaultsService()
-            self.lastFetchedAt = await service.value(key: PFCMapUserDefaultsKeys.lastFetchedAt)
-            
+            try await shopCatalogRepository.sync(force: true)
+            self.lastFetchedAt = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.lastFetchedAt)
             print("API 同期完了")
         } catch {
             print("API 同期失敗: \(error)")
         }
     }
     
-    func generateDBData(factory: Factory) async {
+    func generateDBData() async {
         print("DB 情報の生成開始")
         do {
-            let repository = factory.makeShopCatalogRepository()
-            try await repository.sync(force: true)
-            
-            let service = factory.makeUserDefaultsService()
-            self.lastFetchedAt = await service.value(key: PFCMapUserDefaultsKeys.lastFetchedAt)
-            
+            try await shopCatalogRepository.sync(force: true)
+            self.lastFetchedAt = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.lastFetchedAt)
             print("DB 情報の生成完了")
         } catch {
             print("DB 情報の生成失敗: \(error)")
         }
     }
     
-    func deleteLastSyncDate(factory: Factory) async {
-        let service = factory.makeUserDefaultsService()
-        await service.remove(key: PFCMapUserDefaultsKeys.lastFetchedAt)
+    func deleteLastSyncDate() async {
+        await userDefaultsService.remove(key: PFCMapUserDefaultsKeys.lastFetchedAt)
         self.lastFetchedAt = nil
     }
     
-    func deleteTutorialFlag(factory: Factory) async {
-        let service = factory.makeUserDefaultsService()
-        await service.remove(key: PFCMapUserDefaultsKeys.isTutorialCompleted)
+    func deleteTutorialFlag() async {
+        await userDefaultsService.remove(key: PFCMapUserDefaultsKeys.isTutorialCompleted)
     }
     
-    func clearDB(factory: Factory) async {
+    func clearDB() async {
         print("DB クリア開始")
         do {
-            let repository = factory.makeShopCatalogRepository()
-            try await repository.clearAll()
+            try await shopCatalogRepository.clearAll()
             
-            let service = factory.makeUserDefaultsService()
             // すべての UserDefaults をデフォルト値に戻す
-            await service.remove(key: PFCMapUserDefaultsKeys.lastFetchedAt)
-            await service.save(key: PFCMapUserDefaultsKeys.mapDistance, value: PFCMapUserDefaultsKeys.mapDistance.defaultValue)
-            await service.save(key: PFCMapUserDefaultsKeys.proteinThreshold, value: PFCMapUserDefaultsKeys.proteinThreshold.defaultValue)
-            await service.save(key: PFCMapUserDefaultsKeys.fatThreshold, value: PFCMapUserDefaultsKeys.fatThreshold.defaultValue)
-            await service.save(key: PFCMapUserDefaultsKeys.disabledShopIds, value: PFCMapUserDefaultsKeys.disabledShopIds.defaultValue)
-            await service.remove(key: PFCMapUserDefaultsKeys.isTutorialCompleted)
+            await userDefaultsService.remove(key: PFCMapUserDefaultsKeys.lastFetchedAt)
+            await userDefaultsService.save(key: PFCMapUserDefaultsKeys.mapDistance, value: PFCMapUserDefaultsKeys.mapDistance.defaultValue)
+            await userDefaultsService.save(key: PFCMapUserDefaultsKeys.proteinThreshold, value: PFCMapUserDefaultsKeys.proteinThreshold.defaultValue)
+            await userDefaultsService.save(key: PFCMapUserDefaultsKeys.fatThreshold, value: PFCMapUserDefaultsKeys.fatThreshold.defaultValue)
+            await userDefaultsService.save(key: PFCMapUserDefaultsKeys.disabledShopIds, value: PFCMapUserDefaultsKeys.disabledShopIds.defaultValue)
+            await userDefaultsService.remove(key: PFCMapUserDefaultsKeys.isTutorialCompleted)
             
             self.lastFetchedAt = nil
             

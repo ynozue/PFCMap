@@ -4,7 +4,11 @@ import MapKit
 @MainActor
 struct HomePage: View {
     @Environment(\.factory) private var factory
-    @State private var model = HomePageModel()
+    @State private var model: HomePageModel
+
+    init(factory: Factory) {
+        self._model = State(wrappedValue: factory.makeHomePageModel())
+    }
 
     var body: some View {
         NavigationStack {
@@ -45,7 +49,7 @@ struct HomePage: View {
             }
             .toolbar(.hidden, for: .navigationBar)
             .onAppear {
-                model.onAppear(factory: factory)
+                model.onAppear()
             }
             .alert("エラー", isPresented: Binding(get: { model.errorMessage != nil }, set: { if !$0 { model.errorMessage = nil } })) {
                 Button("OK", role: .cancel) {}
@@ -65,9 +69,9 @@ struct HomePage: View {
                 Text("現在地情報が取得できないため東京駅周辺を表示します。現在地を利用するには設定から位置情報の利用を許可してください。")
             }
             .sheet(isPresented: Binding(get: { model.isMenuShowing }, set: { model.isMenuShowing = $0 }), onDismiss: {
-                model.onDismissMenu(factory: factory)
+                model.onDismissMenu()
             }) {
-                MenuPage()
+                MenuPage(factory: factory)
             }
             .onChange(of: model.mapDistance) { _, newValue in
                 model.updateCameraPosition(distance: newValue.rawValue)
@@ -101,7 +105,7 @@ struct HomePage: View {
                     Menu {
                         Picker("距離を選択", selection: Binding(
                             get: { model.mapDistance },
-                            set: { model.updateMapDistance(distance: $0, factory: factory) }
+                            set: { model.updateMapDistance(distance: $0) }
                         )) {
                             ForEach(MapDistance.allCases, id: \.self) { distance in
                                 Text(distance.label).tag(distance)
@@ -209,6 +213,7 @@ struct HomePage: View {
 }
 
 #Preview {
-    HomePage()
-        .environment(\.factory, Factory.create(env: .preview))
+    let factory = Factory.create(env: .preview)
+    return HomePage(factory: factory)
+        .environment(\.factory, factory)
 }

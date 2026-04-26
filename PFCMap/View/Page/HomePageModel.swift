@@ -24,8 +24,24 @@ final class HomePageModel {
     var fatThreshold: FatThreshold = .g20
     var disabledShopIds: Set<UUID> = []
     
-    init() {}
-    func onAppear(factory: Factory) {
+    private let locationRepository: any LocationRepository
+    private let shopCatalogRepository: any ShopCatalogRepository
+    private let shopSearchRepository: any ShopSearchRepository
+    private let userDefaultsService: any UserDefaultsService
+    
+    init(
+        locationRepository: any LocationRepository,
+        shopCatalogRepository: any ShopCatalogRepository,
+        shopSearchRepository: any ShopSearchRepository,
+        userDefaultsService: any UserDefaultsService
+    ) {
+        self.locationRepository = locationRepository
+        self.shopCatalogRepository = shopCatalogRepository
+        self.shopSearchRepository = shopSearchRepository
+        self.userDefaultsService = userDefaultsService
+    }
+    
+    func onAppear() {
         isLoading = true
         Task {
             defer { 
@@ -34,11 +50,10 @@ final class HomePageModel {
             }
             do {
                 // Settings
-                await fetchSettings(factory: factory)
+                await fetchSettings()
                 
                 // 1. 現在地情報の取得
                 self.loadingMessage = "現在地情報を取得しています..."
-                let locationRepository = factory.makeLocationRepository()
                 do {
                     let location = try await locationRepository.requestLocation()
                     self.currentLocation = location
@@ -54,12 +69,11 @@ final class HomePageModel {
                 
                 // 2. 表示対象のShopリスト一覧の取得
                 self.loadingMessage = "店舗リスト一覧を取得しています..."
-                let shopCatalogRepository = factory.makeShopCatalogRepository()
                 self.shops = try await shopCatalogRepository.fetchShops()
                 
                 // 3. Shopリストから地図上の店舗情報を検索
                 self.loadingMessage = "地図上の店舗情報を検索しています..."
-                await executeSearch(factory: factory)
+                await executeSearch()
                 
                 // 4. 検索にヒットした店舗情報のメニューを表示
                 self.loadingMessage = "メニューを表示しています..."
@@ -71,18 +85,15 @@ final class HomePageModel {
         }
     }
     
-    func onDismissMenu(factory: Factory) {
+    func onDismissMenu() {
         Task {
-            await fetchSettings(factory: factory)
-            let shopCatalogRepository = factory.makeShopCatalogRepository()
+            await fetchSettings()
             self.shops = try await shopCatalogRepository.fetchShops()
-            await executeSearch(factory: factory)
+            await executeSearch()
         }
     }
     
-    private func fetchSettings(factory: Factory) async {
-        let userDefaultsService = factory.makeUserDefaultsService()
-        
+    private func fetchSettings() async {
         let distance: Int = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.mapDistance)
         self.mapDistance = MapDistance(rawValue: distance) ?? .m500
 
@@ -96,7 +107,7 @@ final class HomePageModel {
         self.disabledShopIds = Set(ids.compactMap { UUID(uuidString: $0) })
     }
 
-    private func executeSearch(factory: Factory) async {
+    private func executeSearch() async {
         let queries = self.shops
             .filter { shop in
                 !self.disabledShopIds.contains(shop.id) &&
@@ -110,7 +121,6 @@ final class HomePageModel {
             let searchCenter = currentLocation?.coordinate ?? CLLocationCoordinate2D(latitude: 35.681236, longitude: 139.767125) // fallback to Tokyo
             let region = visibleRegion ?? MKCoordinateRegion(center: searchCenter, latitudinalMeters: radiusWithBuffer * 2, longitudinalMeters: radiusWithBuffer * 2)
             
-            let shopSearchRepository = factory.makeShopSearchRepository()
             do {
                 let results = try await shopSearchRepository.search(queries: queries, region: region)
                 self.searchResults = results
@@ -176,25 +186,22 @@ final class HomePageModel {
         }
     }
     
-    func updateMapDistance(distance: MapDistance, factory: Factory) {
+    func updateMapDistance(distance: MapDistance) {
         self.mapDistance = distance
-        let service = factory.makeUserDefaultsService()
         Task {
-            await service.save(key: PFCMapUserDefaultsKeys.mapDistance, value: distance.rawValue)
-            await executeSearch(factory: factory)
+            await userDefaultsService.save(key: PFCMapUserDefaultsKeys.mapDistance, value: distance.rawValue)
+            await executeSearch()
             updateCameraPosition(distance: distance.rawValue)
         }
     }
     
-    func updateProteinThreshold(threshold: ProteinThreshold, factory: Factory) {
+    func updateProteinThreshold(threshold: ProteinThreshold) {
         self.proteinThreshold = threshold
-        let service = factory.makeUserDefaultsService()
-        Task { await service.save(key: PFCMapUserDefaultsKeys.proteinThreshold, value: threshold.rawValue) }
+        Task { await userDefaultsService.save(key: PFCMapUserDefaultsKeys.proteinThreshold, value: threshold.rawValue) }
     }
     
-    func updateFatThreshold(threshold: FatThreshold, factory: Factory) {
+    func updateFatThreshold(threshold: FatThreshold) {
         self.fatThreshold = threshold
-        let service = factory.makeUserDefaultsService()
-        Task { await service.save(key: PFCMapUserDefaultsKeys.fatThreshold, value: threshold.rawValue) }
+        Task { await userDefaultsService.save(key: PFCMapUserDefaultsKeys.fatThreshold, value: threshold.rawValue) }
     }
 }
