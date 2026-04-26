@@ -6,8 +6,8 @@ struct MenuPage: View {
     @Environment(\.factory) private var factory
     @State private var model: MenuPageModel
     
-    init(factory: Factory) {
-        self._model = State(wrappedValue: factory.makeMenuPageModel())
+    init(model: MenuPageModel) {
+        self._model = State(wrappedValue: model)
     }
     
     var body: some View {
@@ -22,7 +22,7 @@ struct MenuPage: View {
                     }
                     
                     NavigationLink {
-                        ShopSettingPage(factory: factory)
+                        ShopSettingPage(model: factory.makeShopSettingPageModel())
                     } label: {
                         Label("表示ショップ設定", systemImage: "list.bullet.rectangle")
                     }
@@ -107,6 +107,6 @@ struct MenuPage: View {
 
 #Preview {
     let factory = Factory.create(env: .preview)
-    return MenuPage(factory: factory)
+    return MenuPage(model: factory.makeMenuPageModel())
         .environment(\.factory, factory)
 }

@@ -8,10 +8,10 @@ struct SplashPage: View {
     @State private var model: SplashPageModel
     @State private var animationInProgress = false
     
-    init(factory: Factory, isInitialized: Binding<Bool>, isTutorialCompleted: Binding<Bool>) {
+    init(model: SplashPageModel, isInitialized: Binding<Bool>, isTutorialCompleted: Binding<Bool>) {
         self._isInitialized = isInitialized
         self._isTutorialCompleted = isTutorialCompleted
-        self._model = State(wrappedValue: factory.makeSplashPageModel())
+        self._model = State(wrappedValue: model)
     }
     
     var body: some View {
@@ -105,6 +105,6 @@ struct SplashPage: View {
 
 #Preview {
     let factory = Factory.create(env: .preview)
-    return SplashPage(factory: factory, isInitialized: .constant(false), isTutorialCompleted: .constant(false))
+    return SplashPage(model: factory.makeSplashPageModel(), isInitialized: .constant(false), isTutorialCompleted: .constant(false))
         .environment(\.factory, factory)
 }

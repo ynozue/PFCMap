@@ -7,9 +7,9 @@ struct TutorialPage: View {
     @State private var model: TutorialPageModel
     @State private var selectedTab = 0
     
-    init(factory: Factory, isTutorialCompleted: Binding<Bool>) {
+    init(model: TutorialPageModel, isTutorialCompleted: Binding<Bool>) {
         self._isTutorialCompleted = isTutorialCompleted
-        self._model = State(wrappedValue: factory.makeTutorialPageModel())
+        self._model = State(wrappedValue: model)
     }
     
     var body: some View {
@@ -211,6 +211,6 @@ private struct TutorialStep3View: View {
 
 #Preview {
     let factory = Factory.create(env: .preview)
-    return TutorialPage(factory: factory, isTutorialCompleted: .constant(false))
+    return TutorialPage(model: factory.makeTutorialPageModel(), isTutorialCompleted: .constant(false))
         .environment(\.factory, factory)
 }

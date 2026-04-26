@@ -220,7 +220,7 @@ struct ShopCatalogListView: View {
                                     ShopItemRowView(
                                         shop: displayItem.shop,
                                         item: displayItem.item,
-                                        factory: factory
+                                        model: factory.makeShopItemRowViewModel()
                                     )
                                     .onTapGesture {
                                         onSelect(displayItem.shop)

@@ -9,10 +9,10 @@ struct ShopItemRowView: View {
     @Environment(\.factory) private var factory
     @State private var model: ShopItemRowViewModel
     
-    init(shop: ShopCatalog, item: ShopItem, factory: Factory) {
+    init(shop: ShopCatalog, item: ShopItem, model: ShopItemRowViewModel) {
         self.shop = shop
         self.item = item
-        self._model = State(wrappedValue: factory.makeShopItemRowViewModel())
+        self._model = State(wrappedValue: model)
     }
     
     private var categoryIcon: String {
@@ -199,7 +199,7 @@ struct ShopItemRowView: View {
     return ShopItemRowView(
         shop: shop,
         item: item,
-        factory: factory
+        model: factory.makeShopItemRowViewModel()
     )
     .environment(\.factory, factory)
     .padding()

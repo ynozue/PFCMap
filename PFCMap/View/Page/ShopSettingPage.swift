@@ -5,8 +5,8 @@ struct ShopSettingPage: View {
     @Environment(\.factory) private var factory
     @State private var model: ShopSettingPageModel
     
-    init(factory: Factory) {
-        self._model = State(wrappedValue: factory.makeShopSettingPageModel())
+    init(model: ShopSettingPageModel) {
+        self._model = State(wrappedValue: model)
     }
     
     var body: some View {
@@ -43,7 +43,7 @@ struct ShopSettingPage: View {
 #Preview {
     let factory = Factory.create(env: .preview)
     return NavigationStack {
-        ShopSettingPage(factory: factory)
+        ShopSettingPage(model: factory.makeShopSettingPageModel())
             .environment(\.factory, factory)
     }
 }

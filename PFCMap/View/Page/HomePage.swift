@@ -6,8 +6,8 @@ struct HomePage: View {
     @Environment(\.factory) private var factory
     @State private var model: HomePageModel
 
-    init(factory: Factory) {
-        self._model = State(wrappedValue: factory.makeHomePageModel())
+    init(model: HomePageModel) {
+        self._model = State(wrappedValue: model)
     }
 
     var body: some View {
@@ -71,7 +71,7 @@ struct HomePage: View {
             .sheet(isPresented: Binding(get: { model.isMenuShowing }, set: { model.isMenuShowing = $0 }), onDismiss: {
                 model.onDismissMenu()
             }) {
-                MenuPage(factory: factory)
+                MenuPage(model: factory.makeMenuPageModel())
             }
             .onChange(of: model.mapDistance) { _, newValue in
                 model.updateCameraPosition(distance: newValue.rawValue)
@@ -214,6 +214,6 @@ struct HomePage: View {
 
 #Preview {
     let factory = Factory.create(env: .preview)
-    return HomePage(factory: factory)
+    return HomePage(model: factory.makeHomePageModel())
         .environment(\.factory, factory)
 }
