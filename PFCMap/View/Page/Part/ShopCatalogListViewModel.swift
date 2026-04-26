@@ -13,7 +13,7 @@ class ShopCatalogListViewModel {
     }
     
     var sortType: SortType = .calorie
-    var isExpanded: Bool = true
+    var isExpanded: Bool = false
     var selectedShopId: UUID? = nil
 
     struct DisplayItem: Identifiable, Equatable {
