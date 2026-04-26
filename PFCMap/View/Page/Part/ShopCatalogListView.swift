@@ -168,18 +168,18 @@ struct ShopCatalogListView: View {
                                     model.selectedShopId = tab.id
                                 }
                             } label: {
-                                Text("\(tab.name) (\(tab.count))")
-                                    .font(.system(size: 12, weight: model.selectedShopId == tab.id ? .bold : .medium))
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 6)
-                                    .background(model.selectedShopId == tab.id ? Color.blue.opacity(0.1) : Color.clear)
-                                    .overlay(
-                                        Capsule()
-                                            .stroke(model.selectedShopId == tab.id ? Color.blue : Color.secondary.opacity(0.3), lineWidth: 1)
-                                    )
-                                    .clipShape(Capsule())
+                                VStack(spacing: 2) {
+                                    Text("\(tab.name) (\(tab.count))")
+                                        .font(.system(size: 13, weight: model.selectedShopId == tab.id ? .bold : .medium))
+                                        .foregroundStyle(model.selectedShopId == tab.id ? Color.primary : Color.secondary)
+                                    
+                                    Rectangle()
+                                        .fill(model.selectedShopId == tab.id ? Color.blue : Color.clear)
+                                        .frame(height: 3)
+                                        .cornerRadius(1.5)
+                                }
+                                .padding(.horizontal, 4)
                             }
-                            .foregroundColor(model.selectedShopId == tab.id ? .blue : .primary)
                             .id(tab.id)
                         }
                     }
@@ -190,10 +190,16 @@ struct ShopCatalogListView: View {
                             proxy.scrollTo(newValue, anchor: .center)
                         }
                     }
+                    .onChange(of: tabs) { _, newValue in
+                        // 現在の選択が新しいタブ一覧にない場合、最初のタブを選択する
+                        if !newValue.isEmpty && !newValue.contains(where: { $0.id == model.selectedShopId }) {
+                            model.selectedShopId = newValue.first?.id
+                        }
+                    }
                 }
             }
 
-            if tabs.isEmpty || (tabs.count == 1 && tabs[0].id == nil && tabs[0].count == 0) {
+            if tabs.isEmpty {
                 emptyView
             } else {
                 TabView(selection: $model.selectedShopId) {
@@ -250,7 +256,7 @@ struct ShopCatalogListView: View {
     }
 }
 
-#Preview {
+#Preview("0件") {
     let factory = Factory.create(env: .preview)
     return ZStack(alignment: .bottom) {
         Color.gray.opacity(0.1).ignoresSafeArea()
@@ -259,3 +265,41 @@ struct ShopCatalogListView: View {
     }
     .environment(\.factory, factory)
 }
+
+#Preview("複数件") {
+    let factory = Factory.create(env: .preview)
+    let homeModel = factory.makeHomePageModel()
+    
+    // プレビュー用にデータをセット
+    let shop1 = ShopCatalog(
+        name: "ガスト",
+        items: [
+            ShopItem(name: "チーズINハンバーグ", calorie: 757, protein: 36.1, fat: 25.0, carbohydrate: 23.7, type: "主食"),
+            ShopItem(name: "糖質0麺 ほうれん草の和風ジェノベーゼ", calorie: 218, protein: 20.0, fat: 12.1, carbohydrate: 2.4, type: "主食")
+        ]
+    )
+    let shop2 = ShopCatalog(
+        name: "サイゼリヤ",
+        items: [
+            ShopItem(name: "若鶏のディアボラ風", calorie: 390, protein: 31.0, fat: 17.7, carbohydrate: 6.0, type: "主食")
+        ]
+    )
+    homeModel.shops = [shop1, shop2]
+    homeModel.currentLocation = Location(latitude: 35.681236, longitude: 139.767125)
+    homeModel.searchResults = [
+        ShopSearchResult(name: "ガスト", query: "ガスト", location: homeModel.currentLocation!),
+        ShopSearchResult(name: "サイゼリヤ", query: "サイゼリヤ", location: homeModel.currentLocation!)
+    ]
+    homeModel.proteinThreshold = .g15
+    homeModel.fatThreshold = .g30
+    homeModel.mapDistance = .m500
+    
+    return ZStack(alignment: .bottom) {
+        Color.gray.opacity(0.1).ignoresSafeArea()
+        ShopCatalogListView(homeModel: homeModel, maxHeight: 600)
+            .frame(height: 400)
+    }
+    .environment(\.factory, factory)
+}
+
+

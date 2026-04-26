@@ -88,7 +88,9 @@ class ShopCatalogListViewModel {
         }
         
         // Add ALL at the beginning
-        tabs.insert(TabItem(id: nil, name: "ALL", count: allCount), at: 0)
+        if allCount > 0 {
+            tabs.insert(TabItem(id: nil, name: "ALL", count: allCount), at: 0)
+        }
         
         return tabs
     }
