@@ -20,7 +20,7 @@ struct ShopItemRowView: View {
     }
     
     var body: some View {
-        HStack(alignment: .top, spacing: 10) {
+        HStack(alignment: .center, spacing: 10) {
             // Menu Photo
             if let photoData = item.photoData, let image = UIImage(data: photoData) {
                 Image(uiImage: image)
@@ -56,7 +56,7 @@ struct ShopItemRowView: View {
                 Text(item.name)
                     .font(.system(size: 13, weight: .bold, design: .rounded))
                     .foregroundStyle(.primary)
-                    .lineLimit(1)
+                    .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
                 
                 Spacer(minLength: 0)
@@ -171,36 +171,80 @@ struct ShopItemRowView: View {
     }
     
     private func nutrientView(name: String, value: Double, color: Color) -> some View {
-        HStack(spacing: 1) {
+        HStack(alignment: .bottom, spacing: 2) {
             Text(name)
-                .font(.system(size: 9, weight: .bold))
+                .font(.system(size: 12, weight: .bold))
                 .foregroundStyle(color)
-            Text(String(format: "%.1fg", value))
-                .font(.system(size: 11.5, weight: .medium, design: .rounded))
-                .foregroundStyle(.primary)
+                .padding(.bottom, 0.5)
+            
+            HStack(alignment: .bottom, spacing: 0.5) {
+                Text(String(format: "%.1f", value))
+                    .font(.system(size: 13, weight: .bold, design: .rounded))
+                    .foregroundStyle(.primary)
+                
+                Text("g")
+                    .font(.system(size: 8, weight: .bold))
+                    .foregroundStyle(.secondary)
+                    .padding(.bottom, 0.5)
+            }
         }
     }
 }
 
 #Preview {
-    let item = ShopItem(
+    let factory = Factory.create(env: .preview)
+    let shop = ShopCatalog(
+        name: "吉野家",
+        category: .beefBowl,
+        items: []
+    )
+    
+    let item1 = ShopItem(
         name: "牛丼 並盛",
         calorie: 632,
         protein: 20.2,
         fat: 25.1,
         carbohydrate: 77.4
     )
-    let shop = ShopCatalog(
-        name: "吉野家",
-        category: .beefBowl,
-        items: [item]
+    
+    let item2 = ShopItem(
+        name: "【期間限定】ねぎ玉牛丼 ギガ盛（たまご・お新香・味噌汁セット付き）",
+        calorie: 911,
+        protein: 34.5,
+        fat: 53.2,
+        carbohydrate: 73.1
     )
-    let factory = Factory.create(env: .preview)
-    return ShopItemRowView(
-        shop: shop,
-        item: item,
-        model: factory.makeShopItemRowViewModel()
+    
+    let item3 = ShopItem(
+        name: "非常に長い商品名テスト用のメニュー名です。3行以上になるように調整しています。この部分は表示されないはずです。",
+        calorie: 500,
+        protein: 20.0,
+        fat: 10.0,
+        carbohydrate: 80.0
     )
+    
+    return ScrollView {
+        VStack(spacing: 12) {
+            ShopItemRowView(
+                shop: shop,
+                item: item1,
+                model: factory.makeShopItemRowViewModel()
+            )
+            
+            ShopItemRowView(
+                shop: shop,
+                item: item2,
+                model: factory.makeShopItemRowViewModel()
+            )
+            
+            ShopItemRowView(
+                shop: shop,
+                item: item3,
+                model: factory.makeShopItemRowViewModel()
+            )
+        }
+        .padding()
+    }
+    .background(Color.gray.opacity(0.1))
     .environment(\.factory, factory)
-    .padding()
 }
