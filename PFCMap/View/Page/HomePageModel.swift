@@ -108,12 +108,16 @@ final class HomePageModel {
     }
 
     private func executeSearch() async {
-        let queries = self.shops
-            .filter { shop in
-                !self.disabledShopIds.contains(shop.id) &&
-                shop.items.contains(where: { $0.type == "主食" })
-            }
-            .map { $0.name }
+        let disabledIds = self.disabledShopIds
+        let shopsData = self.shops
+        let queries = await Task.detached {
+            shopsData
+                .filter { shop in
+                    !disabledIds.contains(shop.id) &&
+                    shop.items.contains(where: { $0.type == "主食" })
+                }
+                .map { $0.name }
+        }.value
         
         if !queries.isEmpty {
             let radiusWithBuffer = Double(self.mapDistance.rawValue) + 100.0

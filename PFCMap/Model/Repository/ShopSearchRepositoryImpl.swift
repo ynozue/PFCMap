@@ -20,17 +20,15 @@ actor ShopSearchRepositoryImpl: ShopSearchRepository {
                     let search = MKLocalSearch(request: request)
                     do {
                         let response = try await search.start()
-                        return await MainActor.run {
-                            response.mapItems.map { item in
-                                ShopSearchResult(
-                                    name: item.name ?? "不明な店",
-                                    query: query,
-                                    location: Location(
-                                        latitude: item.location.coordinate.latitude,
-                                        longitude: item.location.coordinate.longitude
-                                    )
+                        return response.mapItems.map { item in
+                            ShopSearchResult(
+                                name: item.name ?? "不明な店",
+                                query: query,
+                                location: Location(
+                                    latitude: item.location.coordinate.latitude,
+                                    longitude: item.location.coordinate.longitude
                                 )
-                            }
+                            )
                         }
                     } catch {
                         print("Search error for query '\(query)': \(error.localizedDescription)")
