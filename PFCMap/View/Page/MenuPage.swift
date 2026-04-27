@@ -13,11 +13,27 @@ struct MenuPage: View {
     var body: some View {
         NavigationStack {
             List {
+                Section {
+                    VStack(spacing: 12) {
+                        AppLogoView(size: 80)
+                            .padding(.top, 10)
+                        
+                        Text("PFCMap")
+                            .font(.system(.headline, design: .rounded))
+                            .foregroundStyle(.secondary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .listRowBackground(Color.clear)
+                }
+
                 Section("設定") {
                     HStack {
                         Label("最終同期日時", systemImage: "arrow.clockwise")
                         Spacer()
                         Text(model.lastSyncDateString(date: model.lastFetchedAt))
+                            .font(.system(.footnote, design: .monospaced))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.5)
                             .foregroundStyle(.secondary)
                     }
                     
@@ -89,12 +105,16 @@ struct MenuPage: View {
                 }
 #endif
             }
-            .navigationTitle("メニュー")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("閉じる") {
+                    Button {
                         dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 14, weight: .bold))
+                            .padding(8)
+                            .background(.quaternary, in: Circle())
                     }
                 }
             }

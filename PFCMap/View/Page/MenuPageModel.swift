@@ -26,7 +26,9 @@ final class MenuPageModel {
     func lastSyncDateString(date: Date?) -> String {
         guard let date = date else { return "未同期" }
         let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy年MM月dd日 HH時mm分ss秒"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.dateFormat = "yyyy/MM/dd HH:mm:ss"
         return formatter.string(from: date)
     }
 

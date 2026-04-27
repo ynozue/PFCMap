@@ -297,40 +297,6 @@ private struct MapGridView: View {
 
 // MARK: - AppMapPinShape（マップピン形状）
 
-struct AppMapPinShape: Shape {
-    func path(in rect: CGRect) -> Path {
-        // アイコンのピンの比率：高さ = 幅 × 1.3 程度、
-        // 円部分の直径 ≒ 幅の 80%、下の尖りが残り
-        let w = rect.width
-        let h = rect.height
-        let r = w / 2          // 円の半径
-        let cx = w / 2         // 円の中心 X
-        let cy = r             // 円の中心 Y（上から半径分）
-
-        var path = Path()
-        // 上部：円弧（左下 → 時計回り → 右下 になるよう clockwise = false で 180°分）
-        path.addArc(
-            center: CGPoint(x: cx, y: cy),
-            radius: r,
-            startAngle: .degrees(150),
-            endAngle: .degrees(30),
-            clockwise: false
-        )
-        // 右下 → 先端 → 左下 のベジェ曲線
-        path.addCurve(
-            to: CGPoint(x: cx, y: h),
-            control1: CGPoint(x: w * 0.92, y: h * 0.58),
-            control2: CGPoint(x: cx + r * 0.3, y: h * 0.88)
-        )
-        path.addCurve(
-            to: CGPoint(x: cx - r * cos(.pi / 6), y: cy + r * sin(.pi / 6)),
-            control1: CGPoint(x: cx - r * 0.3, y: h * 0.88),
-            control2: CGPoint(x: w * 0.08, y: h * 0.58)
-        )
-        path.closeSubpath()
-        return path
-    }
-}
 
 // MARK: - SplashBarView（PFC バー）
 
