@@ -7,10 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		446612FF2F9F2FFF0024E7BC /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 446612FE2F9F2FFF0024E7BC /* PrivacyInfo.xcprivacy */; };
 		44B0A2432F7A5D6900B46ED6 /* NZUtils in Frameworks */ = {isa = PBXBuildFile; productRef = 44B0A2422F7A5D6900B46ED6 /* NZUtils */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		446612FE2F9F2FFF0024E7BC /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		44B0A2332F7A5CA600B46ED6 /* PFCMap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PFCMap.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -50,6 +52,7 @@
 		44B0A22A2F7A5CA600B46ED6 = {
 			isa = PBXGroup;
 			children = (
+				446612FE2F9F2FFF0024E7BC /* PrivacyInfo.xcprivacy */,
 				44B0A2352F7A5CA600B46ED6 /* PFCMap */,
 				44B0A2342F7A5CA600B46ED6 /* Products */,
 			);
@@ -131,6 +134,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				446612FF2F9F2FFF0024E7BC /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

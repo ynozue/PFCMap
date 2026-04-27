@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+   PrivacyInfo.xcprivacy
+   PFCMap
+
+   Privacy Manifest
+   https://developer.apple.com/documentation/bundleresources/privacy-manifest-files
+
+   ── 使用 API / データ収集の根拠 ──────────────────────────────────────
+   1. 位置情報 (CoreLocation)
+      - LocationRepositoryImpl が CLLocationManager.requestWhenInUseAuthorization() を使用
+      - 現在地周辺の飲食店をマップ上に表示する目的（アプリの主要機能）
+      - Info.plist: NSLocationWhenInUseUsageDescription 設定済み
+
+   2. カメラ (UIImagePickerController / .camera)
+      - ShopCatalogRepositoryImpl.reportItem() でメニュー写真を Discord へ報告する目的
+      - Info.plist: NSCameraUsageDescription 設定済み
+
+   3. フォトライブラリ (UIImagePickerController / .photoLibrary)
+      - 同上（ライブラリから写真を選択して報告する目的）
+      - Info.plist: NSPhotoLibraryUsageDescription 設定済み
+
+   4. UserDefaults (NZData.UserDefaultsServiceImpl 経由)
+      - 設定値（地図距離・PFC 閾値・最終取得日時・無効ショップ ID・チュートリアル完了フラグ）の保存
+      - アプリ自身のみがアクセス → CA92.1 を使用
+
+   5. ネットワーク
+      - PFCRemoteClientImpl: 店舗データ取得 API（HTTP GET /shops）
+      - DiscordRemoteClientImpl: メニュー報告 Webhook（ユーザー操作によるもの）
+      - ImageRepositoryImpl: メニュー写真の URL 取得
+
+   6. SwiftData (ローカル DB)
+      - ShopCatalogEntity / ShopItemEntity: 店舗・メニューのキャッシュ
+      - ImageCacheEntity: 取得済み画像のキャッシュ
+
+   7. MapKit (MKLocalSearch / MKMapItem)
+      - 店舗名で周辺検索 / Apple マップへのルート案内連携
+
+   ── トラッキング・第三者提供 ────────────────────────────────────────
+   - 広告トラッキングは一切行わない（NSPrivacyTrackingEnabled = false）
+   - 収集した位置情報・写真はサードパーティへ販売・共有しない
+   - Discord Webhook への送信はユーザーが明示的に「報告」操作を行った場合のみ
+-->
+<plist version="1.0">
+<dict>
+    <!-- ══════════════════════════════════════════════════════════════
+         トラッキング
+         アプリはユーザーをトラッキングしない。
+         ══════════════════════════════════════════════════════════════ -->
+    <key>NSPrivacyTracking</key>
+    <false/>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         Rquired Reason API: 利用する特定 API とその理由
+         ══════════════════════════════════════════════════════════════ -->
+    <key>NSPrivacyAccessedAPITypes</key>
+    <array>
+        <!-- UserDefaults
+             理由: CA92.1 — アプリ自身のみがアクセスする設定値の読み書きのため
+             該当コード: PFCMapUserDefaultsKeys / UserDefaultsServiceImpl (NZData) -->
+        <dict>
+            <key>NSPrivacyAccessedAPIType</key>
+            <string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+            <key>NSPrivacyAccessedAPITypeReasons</key>
+            <array>
+                <string>CA92.1</string>
+            </array>
+        </dict>
+    </array>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         収集データの申告
+         ══════════════════════════════════════════════════════════════ -->
+    <key>NSPrivacyCollectedDataTypes</key>
+    <array>
+
+        <!-- 1. 正確な位置情報 ─────────────────────────────────────── -->
+        <dict>
+            <!-- データ種別: 正確な位置情報 -->
+            <key>NSPrivacyCollectedDataType</key>
+            <string>NSPrivacyCollectedDataTypePreciseLocation</string>
+
+            <!-- 第三者へのリンク: しない -->
+            <key>NSPrivacyCollectedDataTypeLinked</key>
+            <false/>
+
+            <!-- トラッキング目的: しない -->
+            <key>NSPrivacyCollectedDataTypeTracking</key>
+            <false/>
+
+            <!-- 収集目的 -->
+            <key>NSPrivacyCollectedDataTypePurposes</key>
+            <array>
+                <!-- AppFunctionality: 現在地周辺の飲食店をマップ上に表示するための中心位置として使用 -->
+                <string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+            </array>
+        </dict>
+
+        <!-- 2. 写真またはビデオ ────────────────────────────────────── -->
+        <dict>
+            <!-- データ種別: 写真・ビデオ -->
+            <key>NSPrivacyCollectedDataType</key>
+            <string>NSPrivacyCollectedDataTypePhotosOrVideos</string>
+
+            <!-- 第三者へのリンク: しない
+                 ※ Discord Webhook で送信するが、ユーザーの明示的な操作によるものであり
+                    個人識別情報とは紐付けない -->
+            <key>NSPrivacyCollectedDataTypeLinked</key>
+            <false/>
+
+            <!-- トラッキング目的: しない -->
+            <key>NSPrivacyCollectedDataTypeTracking</key>
+            <false/>
+
+            <!-- 収集目的 -->
+            <key>NSPrivacyCollectedDataTypePurposes</key>
+            <array>
+                <!-- AppFunctionality: メニュー情報に誤りがある場合に写真付きで報告する機能 -->
+                <string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+            </array>
+        </dict>
+
+    </array>
+
+</dict>
+</plist>
