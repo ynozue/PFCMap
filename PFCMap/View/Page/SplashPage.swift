@@ -1,89 +1,74 @@
 import SwiftUI
 
+// MARK: - SplashPage
+
 @MainActor
 struct SplashPage: View {
     @Environment(\.factory) private var factory
     @Binding var isInitialized: Bool
     @Binding var isTutorialCompleted: Bool
     @State private var model: SplashPageModel
-    @State private var animationInProgress = false
-    
+
+    // ── アニメーション状態 ─────────────────────
+    /// ピンが画面上部から落ちてくる初期オフセット
+    @State private var pinDropOffset: CGFloat = -300
+    /// ピン全体のスケール（バウンド表現）
+    @State private var pinScale: CGFloat = 1.0
+    /// ピンのオパシティ
+    @State private var pinOpacity: Double = 0
+    /// PFC バーそれぞれの高さ
+    @State private var barHeightP: CGFloat = 0
+    @State private var barHeightF: CGFloat = 0
+    @State private var barHeightC: CGFloat = 0
+    /// テキストセクションの表示
+    @State private var showText = false
+
     init(model: SplashPageModel, isInitialized: Binding<Bool>, isTutorialCompleted: Binding<Bool>) {
         self._isInitialized = isInitialized
         self._isTutorialCompleted = isTutorialCompleted
         self._model = State(wrappedValue: model)
     }
-    
+
     var body: some View {
         ZStack {
-            // 背景のグラデーション
-            LinearGradient(
-                gradient: Gradient(colors: [
-                    Color(red: 0.1, green: 0.1, blue: 0.2),
-                    Color(red: 0.2, green: 0.3, blue: 0.5)
-                ]),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
-            
-            VStack(spacing: 20) {
-                // ロゴアイコン
-                ZStack {
-                    Circle()
-                        .fill(.ultraThinMaterial)
-                        .frame(width: 120, height: 120)
-                        .scaleEffect(animationInProgress ? 1.0 : 0.8)
-                        .opacity(animationInProgress ? 1.0 : 0.0)
-                    
-                    Image(systemName: "fork.knife.circle.fill")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 80, height: 80)
-                        .foregroundStyle(.white)
-                        .scaleEffect(animationInProgress ? 1.0 : 0.5)
-                        .opacity(animationInProgress ? 1.0 : 0.0)
-                }
-                
-                // アプリタイトル
-                VStack(spacing: 8) {
-                    Text("PFCMap")
-                        .font(.system(size: 40, weight: .bold, design: .rounded))
-                        .foregroundStyle(.white)
-                    
-                    Text("Macro Balanced Map")
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundStyle(.white.opacity(0.8))
-                        .offset(y: animationInProgress ? 0 : 20)
-                        .opacity(animationInProgress ? 1.0 : 0.0)
-                }
-                
+            // ── 背景（アイコン背景色に合わせた薄いグレー）────────
+            Color(red: 0.92, green: 0.93, blue: 0.94)
+                .ignoresSafeArea()
+
+            // ── マップ風グリッド ────────────────────────
+            MapGridView()
+                .ignoresSafeArea()
+
+            // ── メインコンテンツ ────────────────────────
+            VStack(spacing: 0) {
                 Spacer()
-                    .frame(height: 50)
-                
-                // 読み込み中表示
-                VStack {
-                    ProgressView()
-                        .tint(.white)
-                        .scaleEffect(1.2)
-                    
-                    Text("Loading initial data...")
-                        .font(.system(size: 14))
-                        .foregroundStyle(.white.opacity(0.7))
-                        .padding(.top, 10)
-                }
-                .opacity(animationInProgress ? 1.0 : 0.0)
+
+                // ロゴ（アイコンの再現）
+                appIconView
+
+                // アプリ名・サブタイトル
+                textSection
+                    .padding(.top, 36)
+
+                Spacer()
+
+                // ローディング インジケータ
+                loadingSection
+                    .frame(height: 60)
+
+                Spacer()
+                    .frame(height: 56)
             }
         }
         .onAppear {
-            withAnimation(.spring(duration: 1.0, bounce: 0.4)) {
-                animationInProgress = true
-            }
-            
+            Task { await runAnimations() }
             Task {
-                // 少しだけ意図的に遅延させてロゴを見せる
-                try? await Task.sleep(nanoseconds: 1_000_000_000)
-                await model.onAppear(isInitialized: $isInitialized, isTutorialCompleted: $isTutorialCompleted)
+                // アニメーションを十分に魅せた後に初期化を開始
+                try? await Task.sleep(nanoseconds: 2_800_000_000)
+                await model.onAppear(
+                    isInitialized: $isInitialized,
+                    isTutorialCompleted: $isTutorialCompleted
+                )
             }
         }
         .alert("エラー", isPresented: Binding(
@@ -92,19 +77,285 @@ struct SplashPage: View {
         )) {
             Button("再試行") {
                 Task {
-                    await model.onAppear(isInitialized: $isInitialized, isTutorialCompleted: $isTutorialCompleted)
+                    await model.onAppear(
+                        isInitialized: $isInitialized,
+                        isTutorialCompleted: $isTutorialCompleted
+                    )
                 }
             }
         } message: {
-            if let errorMessage = model.errorMessage {
-                Text(errorMessage)
+            if let message = model.errorMessage { Text(message) }
+        }
+    }
+
+    // MARK: - Sub Views
+
+    /// アプリアイコンを SwiftUI で忠実に再現したロゴ
+    private var appIconView: some View {
+        ZStack(alignment: .center) {
+            // ドロップシャドウ用
+            AppMapPinShape()
+                .fill(Color.black.opacity(0.1))
+                .frame(width: 180, height: 234)
+                .offset(y: 14)
+                .blur(radius: 14)
+
+            // ピン本体（白）
+            AppMapPinShape()
+                .fill(Color.white)
+                .frame(width: 180, height: 234)
+                .overlay {
+                    AppMapPinShape()
+                        .stroke(Color.gray.opacity(0.18), lineWidth: 1.5)
+                }
+
+            // ピン内のグロス（光沢）
+            AppMapPinShape()
+                .fill(
+                    LinearGradient(
+                        colors: [.white.opacity(0.6), .clear],
+                        startPoint: .topLeading,
+                        endPoint: .center
+                    )
+                )
+                .frame(width: 180, height: 234)
+
+            // PFC バー（アイコンの中央部分）
+            // アイコン上部（円の中心）に配置し、ピン全体の上 40 % あたりに位置させる
+            HStack(alignment: .bottom, spacing: 14) {
+                // P：赤
+                SplashBarView(
+                    color: Color(red: 0.90, green: 0.18, blue: 0.18),
+                    shadowColor: Color(red: 0.90, green: 0.18, blue: 0.18).opacity(0.35),
+                    height: barHeightP
+                )
+                // F：黄
+                SplashBarView(
+                    color: Color(red: 0.96, green: 0.72, blue: 0.08),
+                    shadowColor: Color(red: 0.96, green: 0.72, blue: 0.08).opacity(0.35),
+                    height: barHeightF
+                )
+                // C：緑
+                SplashBarView(
+                    color: Color(red: 0.15, green: 0.68, blue: 0.22),
+                    shadowColor: Color(red: 0.15, green: 0.68, blue: 0.22).opacity(0.35),
+                    height: barHeightC
+                )
             }
+            // ピンの円形部分の中央（上から約 45%）に配置
+            .offset(y: -32)
+        }
+        .offset(y: pinDropOffset)
+        .scaleEffect(pinScale)
+        .opacity(pinOpacity)
+    }
+
+    private var textSection: some View {
+        VStack(spacing: 10) {
+            Text("PFCMap")
+                .font(.system(size: 50, weight: .black, design: .rounded))
+                .foregroundStyle(Color(white: 0.15))
+                .tracking(1.0)
+
+            Text("Macro Balanced Map")
+                .font(.system(size: 17, weight: .semibold, design: .rounded))
+                .foregroundStyle(Color(white: 0.45))
+                .tracking(1.8)
+        }
+        .opacity(showText ? 1 : 0)
+        .offset(y: showText ? 0 : 16)
+    }
+
+    @ViewBuilder
+    private var loadingSection: some View {
+        if model.isLoading {
+            VStack(spacing: 10) {
+                ProgressView()
+                    .tint(Color(white: 0.45))
+                Text("データを読み込み中...")
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
+                    .foregroundStyle(Color(white: 0.55))
+            }
+            .transition(.opacity)
+        }
+    }
+
+    // MARK: - Animation
+
+    private func runAnimations() async {
+        // 1. ピンが上から落下
+        withAnimation(.spring(response: 0.65, dampingFraction: 0.62)) {
+            pinDropOffset = 0
+            pinOpacity = 1
+        }
+
+        // 少し待ってからバウンド強調
+        try? await Task.sleep(nanoseconds: 50_000_000) // 50ms
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.45)) {
+            pinScale = 0.93
+        }
+        try? await Task.sleep(nanoseconds: 200_000_000) // 200ms
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.55)) {
+            pinScale = 1.0
+        }
+
+        // 2. PFC バーを順番に伸ばす（アイコンで左が P・中が F・右が C）
+        try? await Task.sleep(nanoseconds: 500_000_000) // 0.5s
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
+            barHeightP = 72 // P（赤）は中程度
+        }
+
+        try? await Task.sleep(nanoseconds: 180_000_000) // 0.18s
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
+            barHeightF = 48 // F（黄）は低め
+        }
+
+        try? await Task.sleep(nanoseconds: 180_000_000) // 0.18s
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
+            barHeightC = 84 // C（緑）は最も高い
+        }
+
+        // 3. テキストをフェードイン
+        try? await Task.sleep(nanoseconds: 300_000_000) // 0.3s
+        withAnimation(.easeOut(duration: 0.6)) {
+            showText = true
         }
     }
 }
 
+// MARK: - MapGridView（背景のマップ風グリッド）
+
+private struct MapGridView: View {
+    var body: some View {
+        Canvas { context, size in
+            // 道路に見立てた白い幹線
+            let roads: [(CGFloat, Bool)] = [
+                (size.height * 0.25, false),
+                (size.height * 0.55, false),
+                (size.height * 0.78, false),
+                (size.width  * 0.20, true),
+                (size.width  * 0.55, true),
+                (size.width  * 0.80, true),
+            ]
+            for (pos, isVertical) in roads {
+                context.stroke(
+                    Path { p in
+                        if isVertical {
+                            p.move(to: CGPoint(x: pos, y: 0))
+                            p.addLine(to: CGPoint(x: pos, y: size.height))
+                        } else {
+                            p.move(to: CGPoint(x: 0, y: pos))
+                            p.addLine(to: CGPoint(x: size.width, y: pos))
+                        }
+                    },
+                    with: .color(.white.opacity(0.75)),
+                    lineWidth: 10
+                )
+            }
+
+            // 細い格子線
+            let gridStep: CGFloat = 44
+            let lineColor = Color.white.opacity(0.5)
+            for x in stride(from: 0, through: size.width, by: gridStep) {
+                context.stroke(
+                    Path { p in
+                        p.move(to: CGPoint(x: x, y: 0))
+                        p.addLine(to: CGPoint(x: x, y: size.height))
+                    },
+                    with: .color(lineColor),
+                    lineWidth: 0.6
+                )
+            }
+            for y in stride(from: 0, through: size.height, by: gridStep) {
+                context.stroke(
+                    Path { p in
+                        p.move(to: CGPoint(x: 0, y: y))
+                        p.addLine(to: CGPoint(x: size.width, y: y))
+                    },
+                    with: .color(lineColor),
+                    lineWidth: 0.6
+                )
+            }
+
+            // 緑ブロック（公園）
+            context.fill(
+                Path(CGRect(x: 0, y: 0, width: size.width * 0.18, height: size.height * 0.22)),
+                with: .color(Color(red: 0.72, green: 0.83, blue: 0.74).opacity(0.8))
+            )
+            context.fill(
+                Path(CGRect(x: size.width * 0.57, y: size.height * 0.57, width: size.width * 0.43, height: size.height * 0.20)),
+                with: .color(Color(red: 0.72, green: 0.83, blue: 0.74).opacity(0.7))
+            )
+
+            // 青ブロック（水域）
+            context.fill(
+                Path(CGRect(x: size.width * 0.62, y: 0, width: size.width * 0.38, height: size.height * 0.22)),
+                with: .color(Color(red: 0.73, green: 0.83, blue: 0.91).opacity(0.8))
+            )
+        }
+    }
+}
+
+// MARK: - AppMapPinShape（マップピン形状）
+
+struct AppMapPinShape: Shape {
+    func path(in rect: CGRect) -> Path {
+        // アイコンのピンの比率：高さ = 幅 × 1.3 程度、
+        // 円部分の直径 ≒ 幅の 80%、下の尖りが残り
+        let w = rect.width
+        let h = rect.height
+        let r = w / 2          // 円の半径
+        let cx = w / 2         // 円の中心 X
+        let cy = r             // 円の中心 Y（上から半径分）
+
+        var path = Path()
+        // 上部：円弧（左下 → 時計回り → 右下 になるよう clockwise = false で 180°分）
+        path.addArc(
+            center: CGPoint(x: cx, y: cy),
+            radius: r,
+            startAngle: .degrees(150),
+            endAngle: .degrees(30),
+            clockwise: false
+        )
+        // 右下 → 先端 → 左下 のベジェ曲線
+        path.addCurve(
+            to: CGPoint(x: cx, y: h),
+            control1: CGPoint(x: w * 0.92, y: h * 0.58),
+            control2: CGPoint(x: cx + r * 0.3, y: h * 0.88)
+        )
+        path.addCurve(
+            to: CGPoint(x: cx - r * cos(.pi / 6), y: cy + r * sin(.pi / 6)),
+            control1: CGPoint(x: cx - r * 0.3, y: h * 0.88),
+            control2: CGPoint(x: w * 0.08, y: h * 0.58)
+        )
+        path.closeSubpath()
+        return path
+    }
+}
+
+// MARK: - SplashBarView（PFC バー）
+
+private struct SplashBarView: View {
+    let color: Color
+    let shadowColor: Color
+    let height: CGFloat
+
+    var body: some View {
+        Capsule()
+            .fill(color)
+            .frame(width: 20, height: height)
+            .shadow(color: shadowColor, radius: 4, x: 0, y: 3)
+    }
+}
+
+// MARK: - Preview
+
 #Preview {
     let factory = Factory.create(env: .preview)
-    return SplashPage(model: factory.makeSplashPageModel(), isInitialized: .constant(false), isTutorialCompleted: .constant(false))
-        .environment(\.factory, factory)
+    return SplashPage(
+        model: factory.makeSplashPageModel(),
+        isInitialized: .constant(false),
+        isTutorialCompleted: .constant(false)
+    )
+    .environment(\.factory, factory)
 }
