@@ -78,7 +78,7 @@ struct ShopCatalogListView: View {
                             .padding(.horizontal, 10)
                             .padding(.vertical, 6)
                             .foregroundStyle(.white)
-                            .background(Color.orange)
+                            .background(Color.pColor)
                             .clipShape(Capsule())
                         }
                         
@@ -101,7 +101,7 @@ struct ShopCatalogListView: View {
                             .padding(.horizontal, 10)
                             .padding(.vertical, 6)
                             .foregroundStyle(.white)
-                            .background(Color.yellow)
+                            .background(Color.fColor)
                             .clipShape(Capsule())
                         }
                     }

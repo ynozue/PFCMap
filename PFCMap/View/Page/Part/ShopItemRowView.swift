@@ -93,9 +93,9 @@ struct ShopItemRowView: View {
                     
                     // PFC
                     HStack(spacing: 5) {
-                        nutrientView(name: "P", value: item.protein, color: .orange)
-                        nutrientView(name: "F", value: item.fat, color: .yellow)
-                        nutrientView(name: "C", value: item.carbohydrate, color: .green)
+                        nutrientView(name: "P", value: item.protein, color: .pColor)
+                        nutrientView(name: "F", value: item.fat, color: .fColor)
+                        nutrientView(name: "C", value: item.carbohydrate, color: .cColor)
                     }
                 }
                 .fixedSize(horizontal: true, vertical: false)

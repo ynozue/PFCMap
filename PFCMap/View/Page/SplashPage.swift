@@ -125,20 +125,20 @@ struct SplashPage: View {
             HStack(alignment: .bottom, spacing: 14) {
                 // P：赤
                 SplashBarView(
-                    color: Color(red: 0.90, green: 0.18, blue: 0.18),
-                    shadowColor: Color(red: 0.90, green: 0.18, blue: 0.18).opacity(0.35),
+                    color: .pColor,
+                    shadowColor: Color.pColor.opacity(0.35),
                     height: barHeightP
                 )
                 // F：黄
                 SplashBarView(
-                    color: Color(red: 0.96, green: 0.72, blue: 0.08),
-                    shadowColor: Color(red: 0.96, green: 0.72, blue: 0.08).opacity(0.35),
+                    color: .fColor,
+                    shadowColor: Color.fColor.opacity(0.35),
                     height: barHeightF
                 )
                 // C：緑
                 SplashBarView(
-                    color: Color(red: 0.15, green: 0.68, blue: 0.22),
-                    shadowColor: Color(red: 0.15, green: 0.68, blue: 0.22).opacity(0.35),
+                    color: .cColor,
+                    shadowColor: Color.cColor.opacity(0.35),
                     height: barHeightC
                 )
             }
