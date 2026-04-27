@@ -59,6 +59,7 @@ struct SplashPage: View {
                 Spacer()
                     .frame(height: 56)
             }
+            .frame(maxWidth: .infinity)
         }
         .onAppear {
             Task { await runAnimations() }
@@ -166,18 +167,16 @@ struct SplashPage: View {
         .offset(y: showText ? 0 : 16)
     }
 
-    @ViewBuilder
     private var loadingSection: some View {
-        if model.isLoading {
-            VStack(spacing: 10) {
-                ProgressView()
-                    .tint(Color(white: 0.45))
-                Text("データを読み込み中...")
-                    .font(.system(size: 13, weight: .medium, design: .rounded))
-                    .foregroundStyle(Color(white: 0.55))
-            }
-            .transition(.opacity)
+        VStack(spacing: 10) {
+            ProgressView()
+                .tint(Color(white: 0.45))
+            Text("データを読み込み中...")
+                .font(.system(size: 13, weight: .medium, design: .rounded))
+                .foregroundStyle(Color(white: 0.55))
         }
+        .opacity(model.isLoading ? 1 : 0)
+        .animation(.easeInOut(duration: 0.3), value: model.isLoading)
     }
 
     // MARK: - Animation
