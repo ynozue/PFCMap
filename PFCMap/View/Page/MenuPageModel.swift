@@ -10,6 +10,7 @@ final class MenuPageModel {
     }
     
     var lastFetchedAt: Date? = nil
+    var privacyPolicyURL: URL? = nil
     
     private let shopCatalogRepository: any ShopCatalogRepository
     private let userDefaultsService: any UserDefaultsService

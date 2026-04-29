@@ -6,9 +6,12 @@
 //
 
 import SwiftUI
+import FirebaseCore
+import FirebaseAnalytics
 
 @main
 struct PFCMapApp: App {
+
     @State private var isInitialized = false
     @State private var isTutorialCompleted = false
     let factory: Factory
@@ -21,6 +24,10 @@ struct PFCMapApp: App {
         #endif
         
         self.factory = Factory.create(env: env)
+
+        // Firebase の初期化
+        FirebaseApp.configure()
+        Analytics.logEvent(AnalyticsEventScreenView, parameters: nil)
     }
     
     var body: some Scene {

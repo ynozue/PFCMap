@@ -52,16 +52,16 @@ struct MenuPage: View {
                             .foregroundStyle(.secondary)
                     }
                     
-                    NavigationLink {
-                        Text("利用規約（未実装）")
+                    Button {
+                        model.privacyPolicyURL = URL(string: "https://noz.app/pfcmap/privacy.html")
                     } label: {
-                        Label("利用規約", systemImage: "doc.text")
-                    }
-                    
-                    NavigationLink {
-                        Text("プライバシーポリシー（未実装）")
-                    } label: {
-                        Label("プライバシーポリシー", systemImage: "hand.raised")
+                        HStack {
+                            Label("プライバシーポリシー", systemImage: "hand.raised")
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(.quaternary)
+                        }
                     }
                 }
                 
@@ -121,8 +121,20 @@ struct MenuPage: View {
             .onAppear {
                 Task { await model.onAppear() }
             }
+            .fullScreenCover(item: Binding(
+                get: { model.privacyPolicyURL.map { IdentifiableURL(url: $0) } },
+                set: { model.privacyPolicyURL = $0?.url }
+            )) { identifiableURL in
+                SafariView(url: identifiableURL.url)
+                    .ignoresSafeArea()
+            }
         }
     }
+}
+
+struct IdentifiableURL: Identifiable {
+    let id = UUID()
+    let url: URL
 }
 
 #Preview {

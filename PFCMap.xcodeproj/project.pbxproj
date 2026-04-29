@@ -8,11 +8,15 @@
 
 /* Begin PBXBuildFile section */
 		446612FF2F9F2FFF0024E7BC /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 446612FE2F9F2FFF0024E7BC /* PrivacyInfo.xcprivacy */; };
+		446613022FA103000024E7BC /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 446613012FA103000024E7BC /* FirebaseAnalytics */; };
+		446613042FA103000024E7BC /* FirebaseAnalyticsIdentitySupport in Frameworks */ = {isa = PBXBuildFile; productRef = 446613032FA103000024E7BC /* FirebaseAnalyticsIdentitySupport */; };
+		446613062FA1BDF10024E7BC /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 446613052FA1BDF10024E7BC /* GoogleService-Info.plist */; };
 		44B0A2432F7A5D6900B46ED6 /* NZUtils in Frameworks */ = {isa = PBXBuildFile; productRef = 44B0A2422F7A5D6900B46ED6 /* NZUtils */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		446612FE2F9F2FFF0024E7BC /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		446613052FA1BDF10024E7BC /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		44B0A2332F7A5CA600B46ED6 /* PFCMap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PFCMap.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -42,7 +46,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				446613022FA103000024E7BC /* FirebaseAnalytics in Frameworks */,
 				44B0A2432F7A5D6900B46ED6 /* NZUtils in Frameworks */,
+				446613042FA103000024E7BC /* FirebaseAnalyticsIdentitySupport in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -52,6 +58,7 @@
 		44B0A22A2F7A5CA600B46ED6 = {
 			isa = PBXGroup;
 			children = (
+				446613052FA1BDF10024E7BC /* GoogleService-Info.plist */,
 				446612FE2F9F2FFF0024E7BC /* PrivacyInfo.xcprivacy */,
 				44B0A2352F7A5CA600B46ED6 /* PFCMap */,
 				44B0A2342F7A5CA600B46ED6 /* Products */,
@@ -76,6 +83,7 @@
 				44B0A22F2F7A5CA600B46ED6 /* Sources */,
 				44B0A2302F7A5CA600B46ED6 /* Frameworks */,
 				44B0A2312F7A5CA600B46ED6 /* Resources */,
+				446613892FA1C06A0024E7BC /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -87,6 +95,8 @@
 			name = PFCMap;
 			packageProductDependencies = (
 				44B0A2422F7A5D6900B46ED6 /* NZUtils */,
+				446613012FA103000024E7BC /* FirebaseAnalytics */,
+				446613032FA103000024E7BC /* FirebaseAnalyticsIdentitySupport */,
 			);
 			productName = PFCMap;
 			productReference = 44B0A2332F7A5CA600B46ED6 /* PFCMap.app */;
@@ -118,6 +128,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				44B0A2412F7A5D6900B46ED6 /* XCRemoteSwiftPackageReference "NZUtils" */,
+				446613002FA103000024E7BC /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 44B0A2342F7A5CA600B46ED6 /* Products */;
@@ -135,10 +146,37 @@
 			buildActionMask = 2147483647;
 			files = (
 				446612FF2F9F2FFF0024E7BC /* PrivacyInfo.xcprivacy in Resources */,
+				446613062FA1BDF10024E7BC /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		446613892FA1C06A0024E7BC /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${PRODUCT_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Info.plist",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/GoogleService-Info.plist",
+				"$(TARGET_BUILD_DIR)/$(EXECUTABLE_PATH)",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${PRODUCT_NAME}.debug.dylib",
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		44B0A22F2F7A5CA600B46ED6 /* Sources */ = {
@@ -274,6 +312,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1.0.0.0;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 4XR9TBE78W;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -389,6 +428,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		446613002FA103000024E7BC /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.12.1;
+			};
+		};
 		44B0A2412F7A5D6900B46ED6 /* XCRemoteSwiftPackageReference "NZUtils" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/ynozue/NZUtils.git";
@@ -400,6 +447,16 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		446613012FA103000024E7BC /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 446613002FA103000024E7BC /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		446613032FA103000024E7BC /* FirebaseAnalyticsIdentitySupport */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 446613002FA103000024E7BC /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsIdentitySupport;
+		};
 		44B0A2422F7A5D6900B46ED6 /* NZUtils */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 44B0A2412F7A5D6900B46ED6 /* XCRemoteSwiftPackageReference "NZUtils" */;
