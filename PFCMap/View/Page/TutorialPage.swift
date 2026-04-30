@@ -178,7 +178,7 @@ private struct TutorialStep3View: View {
                     .font(.system(size: 26, weight: .bold, design: .rounded))
                     .foregroundStyle(Color(white: 0.15))
 
-                Text("現在地の周辺にあるお店を検索するため、\n位置情報の利用を許可してください。")
+                Text("現在地の周辺にあるお店を検索するために、\n位置情報を利用します。")
                     .font(.system(size: 15, weight: .regular, design: .rounded))
                     .foregroundStyle(Color(white: 0.45))
                     .multilineTextAlignment(.center)
@@ -200,7 +200,7 @@ private struct TutorialStep3View: View {
                 HStack(spacing: 8) {
                     Image(systemName: didRequestPermission ? "checkmark" : "location.fill")
                         .font(.system(size: 15, weight: .semibold))
-                    Text(didRequestPermission ? "許可済み" : "位置情報を許可する")
+                    Text(didRequestPermission ? "連携完了" : "次へ")
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
                 }
                 .foregroundColor(didRequestPermission ? Color(white: 0.55) : .white)
