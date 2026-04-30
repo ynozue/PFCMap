@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>現在地周辺の店舗や情報をマップ上に表示するために使用します。</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>comgooglemaps</string>
+		<string>maps</string>
+	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>メニュー写真を撮影して報告するために使用します。</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>ライブラリからメニュー写真を選択して報告するために使用します。</string>
+</dict>
+</plist>
