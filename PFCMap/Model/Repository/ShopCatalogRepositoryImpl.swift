@@ -20,8 +20,8 @@ extension ShopCatalogRepositoryImpl: ShopCatalogRepository {
     func sync(force: Bool = false) async throws {
         let lastFetchDate: Date? = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.lastFetchedAt)
         
-        if !force, let lastFetchDate = lastFetchDate, Date().timeIntervalSince(lastFetchDate) < 3600 {
-            print("Skip sync: Last sync was less than 1 hour ago.")
+        if !force, let lastFetchDate = lastFetchDate, Date().timeIntervalSince(lastFetchDate) < 72000 {
+            print("Skip sync: Last sync was less than 20 hours ago.")
             return
         }
         
