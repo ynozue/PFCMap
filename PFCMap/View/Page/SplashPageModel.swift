@@ -16,9 +16,7 @@ final class SplashPageModel {
         self.userDefaultsService = userDefaultsService
     }
     
-    func onAppear(isInitialized: Binding<Bool>, isTutorialCompleted: Binding<Bool>) async {
-        guard !isInitialized.wrappedValue else { return }
-        
+    func initialize(isTutorialCompleted: Binding<Bool>) async -> Bool {
         isLoading = true
         defer { isLoading = false }
         
@@ -26,12 +24,25 @@ final class SplashPageModel {
             let completed = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.isTutorialCompleted)
             isTutorialCompleted.wrappedValue = completed
             
-            try await shopCatalogRepository.sync()
-            
-            isInitialized.wrappedValue = true
+            let localShops = try await shopCatalogRepository.fetchShops()
+            if !localShops.isEmpty {
+                // キャッシュがある場合は同期処理をバックグラウンドで行う
+                Task {
+                    do {
+                        try await shopCatalogRepository.sync()
+                    } catch {
+                        print("Background sync failed: \(error)")
+                    }
+                }
+            } else {
+                // キャッシュがない場合は同期的に完了を待つ
+                try await shopCatalogRepository.sync()
+            }
+            return true
         } catch {
             print("Initialization failed: \(error)")
             errorMessage = "情報の初期化に失敗しました。\(error.localizedDescription)"
+            return false
         }
     }
 }

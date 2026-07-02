@@ -62,14 +62,17 @@ struct SplashPage: View {
             .frame(maxWidth: .infinity)
         }
         .onAppear {
-            Task { await runAnimations() }
             Task {
-                // アニメーションを十分に魅せた後に初期化を開始
-                try? await Task.sleep(nanoseconds: 2_800_000_000)
-                await model.onAppear(
-                    isInitialized: $isInitialized,
-                    isTutorialCompleted: $isTutorialCompleted
-                )
+                async let runAnim: () = runAnimations()
+                async let isSuccess = model.initialize(isTutorialCompleted: $isTutorialCompleted)
+                
+                // アニメーション完了とデータ初期化を並行して待ち、初期化が成功した場合のみ遷移
+                let (_, success) = await (runAnim, isSuccess)
+                if success {
+                    withAnimation {
+                        isInitialized = true
+                    }
+                }
             }
         }
         .alert("エラー", isPresented: Binding(
@@ -78,10 +81,12 @@ struct SplashPage: View {
         )) {
             Button("再試行") {
                 Task {
-                    await model.onAppear(
-                        isInitialized: $isInitialized,
-                        isTutorialCompleted: $isTutorialCompleted
-                    )
+                    let success = await model.initialize(isTutorialCompleted: $isTutorialCompleted)
+                    if success {
+                        withAnimation {
+                            isInitialized = true
+                        }
+                    }
                 }
             }
         } message: {
