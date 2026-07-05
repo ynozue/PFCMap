@@ -14,6 +14,12 @@ final class HomePageModel {
     var selectedResultID: UUID? = nil
     var searchResults: [ShopSearchResult] = []
     var loadingMessage: String = ""
+    
+    // Route variables
+    var selectedRoute: MKRoute? = nil
+    var selectedRouteDuration: TimeInterval? = nil
+    var selectedRouteDistance: CLLocationDistance? = nil
+    var isCalculatingRoute = false
     var showLocationPermissionAlert = false
     
     // Shared Data normally held by Store
@@ -230,5 +236,77 @@ final class HomePageModel {
     
     func logViewShopDetail(shopName: String) {
         analyticsService.logViewShopDetail(shopName: shopName)
+    }
+    
+    func calculateRouteToSelectedResult() {
+        guard let currentLocation else {
+            self.selectedRoute = nil
+            return
+        }
+        guard let selectedResultID,
+              let destinationResult = searchResults.first(where: { $0.id == selectedResultID }) else {
+            self.selectedRoute = nil
+            self.selectedRouteDuration = nil
+            self.selectedRouteDistance = nil
+            return
+        }
+        
+        isCalculatingRoute = true
+        
+        let start = currentLocation.coordinate
+        let end = CLLocationCoordinate2D(
+            latitude: destinationResult.location.latitude,
+            longitude: destinationResult.location.longitude
+        )
+        
+        Task {
+            let request = MKDirections.Request()
+            request.source = MKMapItem(placemark: MKPlacemark(coordinate: start))
+            request.destination = MKMapItem(placemark: MKPlacemark(coordinate: end))
+            request.transportType = .walking
+            
+            let directions = MKDirections(request: request)
+            do {
+                let response = try await directions.calculate()
+                if let route = response.routes.first {
+                    self.selectedRoute = route
+                    self.selectedRouteDuration = route.expectedTravelTime
+                    self.selectedRouteDistance = route.distance
+                    
+                    updateCameraPositionToFitRoute(route: route)
+                }
+            } catch {
+                print("Failed to calculate route: \(error)")
+                self.selectedRoute = nil
+                self.selectedRouteDuration = nil
+                self.selectedRouteDistance = nil
+            }
+            isCalculatingRoute = false
+        }
+    }
+    
+    private func updateCameraPositionToFitRoute(route: MKRoute) {
+        let rect = route.polyline.boundingMapRect
+        var region = MKCoordinateRegion(rect)
+        
+        // 全体が綺麗に収まるように1.4倍に拡大
+        region.span.latitudeDelta *= 1.4
+        region.span.longitudeDelta *= 1.4
+        
+        // 下部の詳細カードと重ならないように、中心を少し南（緯度を下げる）にシフトして
+        // 経路全体を画面上部に寄せる
+        region.center.latitude -= region.span.latitudeDelta * 0.15
+        
+        withAnimation {
+            cameraPosition = MapCameraPosition.region(region)
+        }
+    }
+    
+    func distanceString(_ distance: CLLocationDistance) -> String {
+        if distance < 1000 {
+            return "\(Int(distance))m"
+        } else {
+            return String(format: "%.1fkm", distance / 1000.0)
+        }
     }
 }
