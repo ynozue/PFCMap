@@ -190,16 +190,16 @@ struct HomePage: View {
                    let midCoordinate = model.routeMidCoordinate {
                     Annotation("", coordinate: midCoordinate, anchor: .center) {
                         Text("徒歩 \(Int(ceil(duration / 60)))分")
-                            .font(.system(size: 11, weight: .bold))
+                            .font(.system(size: 16, weight: .bold))
                             .foregroundStyle(.white)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
                             .background(Color.blue)
                             .clipShape(Capsule())
                             .overlay {
-                                Capsule().stroke(.white, lineWidth: 1)
+                                Capsule().stroke(.white, lineWidth: 1.5)
                             }
-                            .shadow(color: .black.opacity(0.15), radius: 4, x: 0, y: 2)
+                            .shadow(color: .black.opacity(0.15), radius: 6, x: 0, y: 3)
                     }
                 }
             }
