@@ -184,6 +184,24 @@ struct HomePage: View {
             if let route = model.selectedRoute {
                 MapPolyline(route.polyline)
                     .stroke(.blue, lineWidth: 6)
+                
+                // ルート上の吹き出し表示 (徒歩時間)
+                if let duration = model.selectedRouteDuration,
+                   let midCoordinate = model.routeMidCoordinate {
+                    Annotation("", coordinate: midCoordinate, anchor: .center) {
+                        Text("徒歩 \(Int(ceil(duration / 60)))分")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.blue)
+                            .clipShape(Capsule())
+                            .overlay {
+                                Capsule().stroke(.white, lineWidth: 1)
+                            }
+                            .shadow(color: .black.opacity(0.15), radius: 4, x: 0, y: 2)
+                    }
+                }
             }
         }
         .onMapCameraChange { context in

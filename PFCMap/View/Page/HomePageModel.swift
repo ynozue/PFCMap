@@ -325,4 +325,13 @@ final class HomePageModel {
         self.selectedMapApp = app
         self.showMapAppAlert = true
     }
+    
+    var routeMidCoordinate: CLLocationCoordinate2D? {
+        guard let route = selectedRoute else { return nil }
+        let pointCount = route.polyline.pointCount
+        guard pointCount > 0 else { return nil }
+        let midIndex = pointCount / 2
+        let midPoint = route.polyline.points()[midIndex]
+        return midPoint.coordinate
+    }
 }
