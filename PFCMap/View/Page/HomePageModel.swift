@@ -28,17 +28,20 @@ final class HomePageModel {
     private let shopCatalogRepository: any ShopCatalogRepository
     private let shopSearchRepository: any ShopSearchRepository
     private let userDefaultsService: any UserDefaultsService
+    private let analyticsService: any AnalyticsService
     
     init(
         locationRepository: any LocationRepository,
         shopCatalogRepository: any ShopCatalogRepository,
         shopSearchRepository: any ShopSearchRepository,
-        userDefaultsService: any UserDefaultsService
+        userDefaultsService: any UserDefaultsService,
+        analyticsService: any AnalyticsService
     ) {
         self.locationRepository = locationRepository
         self.shopCatalogRepository = shopCatalogRepository
         self.shopSearchRepository = shopSearchRepository
         self.userDefaultsService = userDefaultsService
+        self.analyticsService = analyticsService
     }
     
     func onAppear() {
@@ -129,6 +132,7 @@ final class HomePageModel {
             do {
                 let results = try await shopSearchRepository.search(queries: queries, region: region)
                 self.searchResults = results
+                logSearch()
             } catch {
                 print("Search error: \(error)")
             }
@@ -202,11 +206,29 @@ final class HomePageModel {
     
     func updateProteinThreshold(threshold: ProteinThreshold) {
         self.proteinThreshold = threshold
-        Task { await userDefaultsService.save(key: PFCMapUserDefaultsKeys.proteinThreshold, value: threshold.rawValue) }
+        Task {
+            await userDefaultsService.save(key: PFCMapUserDefaultsKeys.proteinThreshold, value: threshold.rawValue)
+            logSearch()
+        }
     }
     
     func updateFatThreshold(threshold: FatThreshold) {
         self.fatThreshold = threshold
-        Task { await userDefaultsService.save(key: PFCMapUserDefaultsKeys.fatThreshold, value: threshold.rawValue) }
+        Task {
+            await userDefaultsService.save(key: PFCMapUserDefaultsKeys.fatThreshold, value: threshold.rawValue)
+            logSearch()
+        }
+    }
+    
+    func logSearch() {
+        analyticsService.logSearch(
+            proteinThreshold: proteinThreshold.rawValue,
+            fatThreshold: fatThreshold.rawValue,
+            mapDistance: mapDistance.rawValue
+        )
+    }
+    
+    func logViewShopDetail(shopName: String) {
+        analyticsService.logViewShopDetail(shopName: shopName)
     }
 }

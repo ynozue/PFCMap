@@ -121,6 +121,16 @@ extension Factory {
             return ImageRepositoryDummy()
         }
     }
+    
+    @MainActor
+    func makeAnalyticsService() -> any AnalyticsService {
+        switch env {
+        case .prod, .dev:
+            return AnalyticsServiceImpl()
+        case .preview:
+            return AnalyticsServiceDummy()
+        }
+    }
 }
 
 extension Factory {
@@ -130,7 +140,8 @@ extension Factory {
             locationRepository: makeLocationRepository(),
             shopCatalogRepository: makeShopCatalogRepository(),
             shopSearchRepository: makeShopSearchRepository(),
-            userDefaultsService: makeUserDefaultsService()
+            userDefaultsService: makeUserDefaultsService(),
+            analyticsService: makeAnalyticsService()
         )
     }
     
@@ -148,7 +159,8 @@ extension Factory {
         TutorialPageModel(
             shopCatalogRepository: makeShopCatalogRepository(),
             userDefaultsService: makeUserDefaultsService(),
-            locationRepository: makeLocationRepository()
+            locationRepository: makeLocationRepository(),
+            analyticsService: makeAnalyticsService()
         )
     }
     

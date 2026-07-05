@@ -20,7 +20,9 @@ struct HomePage: View {
                         homeModel: model,
                         maxHeight: geometry.size.height,
                         onSelect: { shop in
-                            // 必要に応じて地図への移動処理などをここに追加可能
+                            if let result = model.searchResults.first(where: { $0.query == shop.name }) {
+                                model.selectedResultID = result.id
+                            }
                         }
                     )
                     
@@ -75,6 +77,11 @@ struct HomePage: View {
             }
             .onChange(of: model.mapDistance) { _, newValue in
                 model.updateCameraPosition(distance: newValue.rawValue)
+            }
+            .onChange(of: model.selectedResultID) { _, newValue in
+                if let newValue, let result = model.searchResults.first(where: { $0.id == newValue }) {
+                    model.logViewShopDetail(shopName: result.name)
+                }
             }
         }
     }

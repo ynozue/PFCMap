@@ -101,3 +101,6 @@ Temporary Items
 *.moved-aside
 *.xccheckout
 *.xcresult
+
+# temp
+.temp

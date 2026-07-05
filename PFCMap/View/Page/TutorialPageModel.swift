@@ -13,15 +13,18 @@ final class TutorialPageModel {
     private let shopCatalogRepository: any ShopCatalogRepository
     private let userDefaultsService: any UserDefaultsService
     private let locationRepository: any LocationRepository
+    private let analyticsService: any AnalyticsService
     
     init(
         shopCatalogRepository: any ShopCatalogRepository,
         userDefaultsService: any UserDefaultsService,
-        locationRepository: any LocationRepository
+        locationRepository: any LocationRepository,
+        analyticsService: any AnalyticsService
     ) {
         self.shopCatalogRepository = shopCatalogRepository
         self.userDefaultsService = userDefaultsService
         self.locationRepository = locationRepository
+        self.analyticsService = analyticsService
     }
     
     func onAppear() async {
@@ -69,6 +72,7 @@ final class TutorialPageModel {
     
     func completeTutorial(isTutorialCompleted: Binding<Bool>) async {
         await userDefaultsService.save(key: PFCMapUserDefaultsKeys.isTutorialCompleted, value: true)
+        analyticsService.logTutorialComplete()
         isTutorialCompleted.wrappedValue = true
     }
 }
