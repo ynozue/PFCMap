@@ -3,6 +3,13 @@ import MapKit
 import Observation
 import NZData
 
+enum ActiveMapApp: String, Sendable, Identifiable {
+    case apple = "Apple マップ"
+    case google = "Google マップ"
+    
+    var id: String { self.rawValue }
+}
+
 @MainActor
 @Observable
 final class HomePageModel {
@@ -20,6 +27,10 @@ final class HomePageModel {
     var selectedRouteDuration: TimeInterval? = nil
     var selectedRouteDistance: CLLocationDistance? = nil
     var isCalculatingRoute = false
+    
+    // Map launching state
+    var showMapAppAlert = false
+    var selectedMapApp: ActiveMapApp? = nil
     var showLocationPermissionAlert = false
     
     // Shared Data normally held by Store
@@ -308,5 +319,10 @@ final class HomePageModel {
         } else {
             return String(format: "%.1fkm", distance / 1000.0)
         }
+    }
+    
+    func triggerMapAppAlert(app: ActiveMapApp) {
+        self.selectedMapApp = app
+        self.showMapAppAlert = true
     }
 }

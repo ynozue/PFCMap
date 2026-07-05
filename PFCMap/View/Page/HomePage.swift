@@ -83,6 +83,25 @@ struct HomePage: View {
             }) {
                 MenuPage(model: factory.makeMenuPageModel())
             }
+            .alert("マップアプリの起動", isPresented: $model.showMapAppAlert, presenting: model.selectedMapApp) { app in
+                Button("開く") {
+                    if let selectedResultID = model.selectedResultID,
+                       let result = model.searchResults.first(where: { $0.id == selectedResultID }) {
+                        switch app {
+                        case .apple:
+                            model.openInMaps(result: result)
+                        case .google:
+                            model.openInGoogleMaps(result: result)
+                        }
+                    }
+                    model.selectedMapApp = nil
+                }
+                Button("キャンセル", role: .cancel) {
+                    model.selectedMapApp = nil
+                }
+            } message: { app in
+                Text("\(app.rawValue)を起動して経路案内を表示しますか？")
+            }
             .onChange(of: model.mapDistance) { _, newValue in
                 model.updateCameraPosition(distance: newValue.rawValue)
             }
@@ -286,7 +305,7 @@ struct HomePage: View {
                 HStack(spacing: 12) {
                     if model.canOpenAppleMaps() {
                         Button {
-                            model.openInMaps(result: result)
+                            model.triggerMapAppAlert(app: .apple)
                         } label: {
                             HStack {
                                 Image(systemName: "map")
@@ -303,7 +322,7 @@ struct HomePage: View {
                     
                     if model.canOpenGoogleMaps() {
                         Button {
-                            model.openInGoogleMaps(result: result)
+                            model.triggerMapAppAlert(app: .google)
                         } label: {
                             HStack {
                                 Image(systemName: "location.circle")
