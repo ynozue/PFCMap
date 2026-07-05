@@ -99,24 +99,75 @@
 
         <!-- 2. 写真またはビデオ ────────────────────────────────────── -->
         <dict>
-            <!-- データ種別: 写真・ビデオ -->
             <key>NSPrivacyCollectedDataType</key>
             <string>NSPrivacyCollectedDataTypePhotosOrVideos</string>
-
-            <!-- 第三者へのリンク: しない
-                 ※ Discord Webhook で送信するが、ユーザーの明示的な操作によるものであり
-                    個人識別情報とは紐付けない -->
             <key>NSPrivacyCollectedDataTypeLinked</key>
             <false/>
-
-            <!-- トラッキング目的: しない -->
             <key>NSPrivacyCollectedDataTypeTracking</key>
             <false/>
-
-            <!-- 収集目的 -->
             <key>NSPrivacyCollectedDataTypePurposes</key>
             <array>
-                <!-- AppFunctionality: メニュー情報に誤りがある場合に写真付きで報告する機能 -->
+                <string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+            </array>
+        </dict>
+
+        <!-- 3. 識別子 (Device ID) ─────────────────────────────────────
+             Firebase Analytics / Crashlytics が使用
+             ※ ログイン機能がないため、ユーザーの個人識別情報とは紐付けない -->
+        <dict>
+            <key>NSPrivacyCollectedDataType</key>
+            <string>NSPrivacyCollectedDataTypeDeviceID</string>
+            <key>NSPrivacyCollectedDataTypeLinked</key>
+            <false/>
+            <key>NSPrivacyCollectedDataTypeTracking</key>
+            <false/>
+            <key>NSPrivacyCollectedDataTypePurposes</key>
+            <array>
+                <string>NSPrivacyCollectedDataTypePurposeAnalytics</string>
+            </array>
+        </dict>
+
+        <!-- 4. 使用状況データ (Product Interaction) ──────────────────────
+             Firebase Analytics が使用 -->
+        <dict>
+            <key>NSPrivacyCollectedDataType</key>
+            <string>NSPrivacyCollectedDataTypeProductInteraction</string>
+            <key>NSPrivacyCollectedDataTypeLinked</key>
+            <false/>
+            <key>NSPrivacyCollectedDataTypeTracking</key>
+            <false/>
+            <key>NSPrivacyCollectedDataTypePurposes</key>
+            <array>
+                <string>NSPrivacyCollectedDataTypePurposeAnalytics</string>
+            </array>
+        </dict>
+
+        <!-- 5. クラッシュデータ (Crash Data) ──────────────────────────
+             Firebase Crashlytics が使用 -->
+        <dict>
+            <key>NSPrivacyCollectedDataType</key>
+            <string>NSPrivacyCollectedDataTypeCrashData</string>
+            <key>NSPrivacyCollectedDataTypeLinked</key>
+            <false/>
+            <key>NSPrivacyCollectedDataTypeTracking</key>
+            <false/>
+            <key>NSPrivacyCollectedDataTypePurposes</key>
+            <array>
+                <string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+            </array>
+        </dict>
+
+        <!-- 6. 診断データ (Diagnostics) ───────────────────────────────
+             Firebase Crashlytics が使用 -->
+        <dict>
+            <key>NSPrivacyCollectedDataType</key>
+            <string>NSPrivacyCollectedDataTypeDiagnostics</string>
+            <key>NSPrivacyCollectedDataTypeLinked</key>
+            <false/>
+            <key>NSPrivacyCollectedDataTypeTracking</key>
+            <false/>
+            <key>NSPrivacyCollectedDataTypePurposes</key>
+            <array>
                 <string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
             </array>
         </dict>

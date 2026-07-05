@@ -1,1 +1,0 @@
-nonisolated struct A {}

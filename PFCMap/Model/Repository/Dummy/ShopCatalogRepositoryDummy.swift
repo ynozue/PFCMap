@@ -62,4 +62,5 @@ actor ShopCatalogRepositoryDummy: ShopCatalogRepository {
     func reportItem(shopId: UUID, itemId: UUID, type: ShopItemReportType, imageData: Data?) async throws {
         print("Mock: Reported item \(itemId) in shop \(shopId) as \(await type.label) (Image: \(imageData != nil))")
     }
+    func updatePhotoData(itemId: UUID, data: Data?) async throws {}
 }

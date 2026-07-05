@@ -20,8 +20,8 @@ extension ShopCatalogRepositoryImpl: ShopCatalogRepository {
     func sync(force: Bool = false) async throws {
         let lastFetchDate: Date? = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.lastFetchedAt)
         
-        if !force, let lastFetchDate = lastFetchDate, Date().timeIntervalSince(lastFetchDate) < 3600 {
-            print("Skip sync: Last sync was less than 1 hour ago.")
+        if !force, let lastFetchDate = lastFetchDate, Date().timeIntervalSince(lastFetchDate) < 72000 {
+            print("Skip sync: Last sync was less than 20 hours ago.")
             return
         }
         
@@ -71,6 +71,10 @@ extension ShopCatalogRepositoryImpl: ShopCatalogRepository {
         
         try await discordRemoteClient.sendNotification(content: message, imageData: imageData)
     }
+
+    func updatePhotoData(itemId: UUID, data: Data?) async throws {
+        try await dataOperator.updatePhotoData(itemId: itemId, data: data)
+    }
 }
 
 private extension DataOperator {
@@ -118,6 +122,7 @@ private extension DataOperator {
                     fat: item.fat,
                     carbohydrate: item.carbohydrate,
                     type: item.type,
+                    url: item.url,
                     photoURL: item.photoURL,
                     photoData: item.photoData,
                     createdAt: item.createdAt,
@@ -180,8 +185,14 @@ private extension DataOperator {
                         existingItem.fat = item.fat
                         existingItem.carbohydrate = item.carbohydrate
                         existingItem.type = item.type
-                        existingItem.photoURL = item.photoURL
-                        existingItem.photoData = item.photoData
+                        existingItem.url = item.url
+                        
+                        // URLが変わった場合のみ、写真データを破棄して再ダウンロードを促す
+                        if existingItem.photoURL != item.photoURL {
+                            existingItem.photoURL = item.photoURL
+                            existingItem.photoData = nil
+                        }
+                        
                         existingItem.updatedAt = item.updatedAt
                         existingItem.deleted = item.deleted
                         
@@ -199,6 +210,7 @@ private extension DataOperator {
                             fat: item.fat,
                             carbohydrate: item.carbohydrate,
                             type: item.type,
+                            url: item.url,
                             photoURL: item.photoURL,
                             photoData: item.photoData,
                             createdAt: item.createdAt,
@@ -216,6 +228,17 @@ private extension DataOperator {
         try await withTransaction {
             let existing = try modelContext.fetch(FetchDescriptor<ShopCatalogEntity>())
             try delete(existing)
+        }
+    }
+    
+    func updatePhotoData(itemId: UUID, data: Data?) async throws {
+        try await withTransaction {
+            let descriptor = FetchDescriptor<ShopItemEntity>(
+                predicate: #Predicate<ShopItemEntity> { $0.id == itemId }
+            )
+            if let entity = try modelContext.fetch(descriptor).first {
+                entity.photoData = data
+            }
         }
     }
 }

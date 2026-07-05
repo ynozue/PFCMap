@@ -49,35 +49,36 @@ final class HomePageModel {
                 loadingMessage = ""
             }
             do {
-                // Settings
-                await fetchSettings()
+                // 1. 設定フェッチ、現在地取得、店舗リスト取得を並行実行
+                self.loadingMessage = "初期データを読み込んでいます..."
                 
-                // 1. 現在地情報の取得
-                self.loadingMessage = "現在地情報を取得しています..."
+                async let fetchSettingsTask: () = fetchSettings()
+                async let requestLocationTask = locationRepository.requestLocation()
+                async let fetchShopsTask = shopCatalogRepository.fetchShops()
+                
+                // 並行処理の完了を待つ (SettingsとShops)
+                await fetchSettingsTask
+                let shopsResult = try await fetchShopsTask
+                self.shops = shopsResult
+                
+                // 位置情報の取得を待つ (エラーハンドリングはMainActor上で行う)
                 do {
-                    let location = try await locationRepository.requestLocation()
+                    let location = try await requestLocationTask
                     self.currentLocation = location
                 } catch {
                     print("Location request failed: \(error)")
-                    // 位置情報が取得できない場合、東京駅をセット
+                    // 位置情報が取得できない場合、東京駅をデフォルトとしてセットしアラートを表示
                     self.currentLocation = Location(latitude: 35.681236, longitude: 139.767125)
                     self.showLocationPermissionAlert = true
                 }
                 
-                // Camera
+                // Camera の位置を更新
                 updateCameraPosition(distance: self.mapDistance.rawValue)
                 
-                // 2. 表示対象のShopリスト一覧の取得
-                self.loadingMessage = "店舗リスト一覧を取得しています..."
-                self.shops = try await shopCatalogRepository.fetchShops()
-                
-                // 3. Shopリストから地図上の店舗情報を検索
+                // 2. 取得した情報をもとに地図上の店舗情報を検索
                 self.loadingMessage = "地図上の店舗情報を検索しています..."
                 await executeSearch()
                 
-                // 4. 検索にヒットした店舗情報のメニューを表示
-                self.loadingMessage = "メニューを表示しています..."
-                try await Task.sleep(nanoseconds: 500_000_000)
             } catch {
                 print("Initial data acquisition failed: \(error)")
                 errorMessage = "情報の取得に失敗しました。\(error.localizedDescription)"

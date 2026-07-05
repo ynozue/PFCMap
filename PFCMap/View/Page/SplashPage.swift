@@ -62,14 +62,21 @@ struct SplashPage: View {
             .frame(maxWidth: .infinity)
         }
         .onAppear {
-            Task { await runAnimations() }
             Task {
-                // アニメーションを十分に魅せた後に初期化を開始
-                try? await Task.sleep(nanoseconds: 2_800_000_000)
-                await model.onAppear(
-                    isInitialized: $isInitialized,
-                    isTutorialCompleted: $isTutorialCompleted
-                )
+                let clock = ContinuousClock()
+                let totalStartupElapsed = await clock.measure {
+                    async let runAnim: () = runAnimations()
+                    async let isSuccess = model.initialize(isTutorialCompleted: $isTutorialCompleted)
+                    
+                    // アニメーション完了とデータ初期化を並行して待ち、初期化が成功した場合のみ遷移
+                    let (_, success) = await (runAnim, isSuccess)
+                    if success {
+                        withAnimation {
+                            isInitialized = true
+                        }
+                    }
+                }
+                print("⏱️ [Startup] Splash to Home Screen Total Transition Time: \(totalStartupElapsed)")
             }
         }
         .alert("エラー", isPresented: Binding(
@@ -78,10 +85,12 @@ struct SplashPage: View {
         )) {
             Button("再試行") {
                 Task {
-                    await model.onAppear(
-                        isInitialized: $isInitialized,
-                        isTutorialCompleted: $isTutorialCompleted
-                    )
+                    let success = await model.initialize(isTutorialCompleted: $isTutorialCompleted)
+                    if success {
+                        withAnimation {
+                            isInitialized = true
+                        }
+                    }
                 }
             }
         } message: {
@@ -182,41 +191,41 @@ struct SplashPage: View {
     // MARK: - Animation
 
     private func runAnimations() async {
-        // 1. ピンが上から落下
-        withAnimation(.spring(response: 0.65, dampingFraction: 0.62)) {
+        // 1. ピンが上から落下（速度を上げてより軽快に）
+        withAnimation(.spring(response: 0.45, dampingFraction: 0.65)) {
             pinDropOffset = 0
             pinOpacity = 1
         }
 
         // 少し待ってからバウンド強調
-        try? await Task.sleep(nanoseconds: 50_000_000) // 50ms
-        withAnimation(.spring(response: 0.35, dampingFraction: 0.45)) {
+        try? await Task.sleep(nanoseconds: 30_000_000) // 30ms
+        withAnimation(.spring(response: 0.25, dampingFraction: 0.5)) {
             pinScale = 0.93
         }
-        try? await Task.sleep(nanoseconds: 200_000_000) // 200ms
-        withAnimation(.spring(response: 0.4, dampingFraction: 0.55)) {
+        try? await Task.sleep(nanoseconds: 120_000_000) // 120ms
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
             pinScale = 1.0
         }
 
-        // 2. PFC バーを順番に伸ばす（アイコンで左が P・中が F・右が C）
-        try? await Task.sleep(nanoseconds: 500_000_000) // 0.5s
-        withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
+        // 2. PFC バーを順番に伸ばす（間隔を狭めてテンポ良く）
+        try? await Task.sleep(nanoseconds: 250_000_000) // 0.25s
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.65)) {
             barHeightP = 72 // P（赤）は中程度
         }
 
-        try? await Task.sleep(nanoseconds: 180_000_000) // 0.18s
-        withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
+        try? await Task.sleep(nanoseconds: 100_000_000) // 0.1s
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.65)) {
             barHeightF = 48 // F（黄）は低め
         }
 
-        try? await Task.sleep(nanoseconds: 180_000_000) // 0.18s
-        withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
+        try? await Task.sleep(nanoseconds: 100_000_000) // 0.1s
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.65)) {
             barHeightC = 84 // C（緑）は最も高い
         }
 
         // 3. テキストをフェードイン
-        try? await Task.sleep(nanoseconds: 300_000_000) // 0.3s
-        withAnimation(.easeOut(duration: 0.6)) {
+        try? await Task.sleep(nanoseconds: 150_000_000) // 0.15s
+        withAnimation(.easeOut(duration: 0.4)) {
             showText = true
         }
     }
