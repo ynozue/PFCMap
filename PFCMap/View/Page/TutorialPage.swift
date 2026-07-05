@@ -193,8 +193,10 @@ private struct TutorialStep3View: View {
             // 許可済みの場合はグレーアウト
             Button {
                 Task {
-                    await model.requestLocationPermission()
-                    didRequestPermission = true
+                    let success = await model.requestLocationPermission()
+                    if success {
+                        didRequestPermission = true
+                    }
                 }
             } label: {
                 HStack(spacing: 8) {

@@ -11,4 +11,8 @@ actor LocationRepositoryDummy: LocationRepository {
     nonisolated func prefetchLocation() {
         // ダミーのため何もしない
     }
+    
+    func requestAuthorization() async -> Bool {
+        return true
+    }
 }

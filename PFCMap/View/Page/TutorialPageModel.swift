@@ -60,14 +60,15 @@ final class TutorialPageModel {
         await userDefaultsService.save(key: PFCMapUserDefaultsKeys.disabledShopIds, value: disabledShopIds.map { $0.uuidString })
     }
     
-    func requestLocationPermission() async {
-        do {
-            _ = try await locationRepository.requestLocation()
+    func requestLocationPermission() async -> Bool {
+        let isAuthorized = await locationRepository.requestAuthorization()
+        if isAuthorized {
             locationPermissionStatus = "許可済み"
-        } catch {
-            print("Failed to request location: \(error)")
-            locationPermissionStatus = "未許可またはエラー (\(error.localizedDescription))"
+            locationRepository.prefetchLocation()
+        } else {
+            locationPermissionStatus = "未許可"
         }
+        return isAuthorized
     }
     
     func completeTutorial(isTutorialCompleted: Binding<Bool>) async {
