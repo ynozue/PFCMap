@@ -62,6 +62,8 @@ final class ShopItemRowViewModel {
         do {
             let data = try await imageRepository.fetchImage(url: url)
             self.itemImageData = data
+            // データベースに画像データを永続化
+            try await repository.updatePhotoData(itemId: item.id, data: data)
         } catch {
             self.imageError = error
             print("Failed to load image: \(error)")

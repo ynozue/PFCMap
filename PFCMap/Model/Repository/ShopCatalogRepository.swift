@@ -7,6 +7,7 @@ protocol ShopCatalogRepository: Sendable {
     func saveShops(_ shops: [ShopCatalog]) async throws
     func clearAll() async throws
     func reportItem(shopId: UUID, itemId: UUID, type: ShopItemReportType, imageData: Data?) async throws
+    func updatePhotoData(itemId: UUID, data: Data?) async throws
 }
 
 extension ShopCatalogRepository {

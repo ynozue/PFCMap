@@ -25,6 +25,9 @@ struct PFCMapApp: App {
         
         self.factory = Factory.create(env: env)
 
+        // SwiftData の先行初期化 (ウォームアップ) を非同期に開始
+        factory.warmupContainer()
+
         // Firebase の初期化
         FirebaseApp.configure()
         Analytics.logEvent(AnalyticsEventScreenView, parameters: nil)

@@ -8,6 +8,7 @@ struct ShopItem: Sendable, Identifiable, Equatable {
     let fat: Double
     let carbohydrate: Double
     let type: String
+    let url: String?
     let photoURL: String?
     let photoData: Data?
     let createdAt: Date
@@ -22,6 +23,7 @@ struct ShopItem: Sendable, Identifiable, Equatable {
         fat: Double,
         carbohydrate: Double,
         type: String = "",
+        url: String? = nil,
         photoURL: String? = nil,
         photoData: Data? = nil,
         createdAt: Date = Date(),
@@ -35,6 +37,7 @@ struct ShopItem: Sendable, Identifiable, Equatable {
         self.fat = fat
         self.carbohydrate = carbohydrate
         self.type = type
+        self.url = url
         self.photoURL = photoURL
         self.photoData = photoData
         self.createdAt = createdAt

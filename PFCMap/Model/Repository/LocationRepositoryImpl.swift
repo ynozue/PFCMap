@@ -14,6 +14,12 @@ extension LocationRepositoryImpl: LocationRepository {
     func requestLocation() async throws -> Location {
         try await LocationManagerHelper.shared.requestLocation()
     }
+    
+    func prefetchLocation() {
+        Task { @MainActor in
+            LocationManagerHelper.shared.prefetchLocation()
+        }
+    }
 }
 
 @MainActor
@@ -24,12 +30,42 @@ private final class LocationManagerHelper: NSObject, CLLocationManagerDelegate {
     private var continuation: CheckedContinuation<Location, any Error>?
     private var authContinuation: CheckedContinuation<Void, Never>?
     
+    // 最新の取得位置情報と取得時間をキャッシュ
+    private var cachedLocation: Location?
+    private var lastFetchTime: Date?
+    
+    // 進行中のプリフェッチタスクがあるか確認するためのフラグ
+    private var isPrefetching = false
+    
     override init() {
         super.init()
         locationManager.delegate = self
     }
     
+    func prefetchLocation() {
+        let status = locationManager.authorizationStatus
+        // 既に許可されている場合のみ実行
+        guard status == .authorizedWhenInUse || status == .authorizedAlways else {
+            return
+        }
+        
+        // すでにプリフェッチ実行中、または有効なキャッシュ（60秒以内）がある場合はスキップ
+        if isPrefetching { return }
+        if let lastFetchTime = lastFetchTime, Date().timeIntervalSince(lastFetchTime) < 60 {
+            return
+        }
+        
+        isPrefetching = true
+        locationManager.requestLocation()
+    }
+    
     func requestLocation() async throws -> Location {
+        // 有効なキャッシュ（60秒以内）があれば即座にそれを返す
+        if let cached = cachedLocation, let lastFetchTime = lastFetchTime, Date().timeIntervalSince(lastFetchTime) < 60 {
+            print("⏱️ [Location] Return cached location")
+            return cached
+        }
+        
         let status = locationManager.authorizationStatus
         if status == .notDetermined {
             await withCheckedContinuation { continuation in
@@ -40,7 +76,9 @@ private final class LocationManagerHelper: NSObject, CLLocationManagerDelegate {
         
         return try await withCheckedThrowingContinuation { continuation in
             self.continuation = continuation
-            locationManager.requestLocation()
+            if !isPrefetching {
+                locationManager.requestLocation()
+            }
         }
     }
     
@@ -52,13 +90,19 @@ private final class LocationManagerHelper: NSObject, CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        isPrefetching = false
         guard let location = locations.last else { return }
         let domainLocation = Location(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
+        
+        self.cachedLocation = domainLocation
+        self.lastFetchTime = Date()
+        
         continuation?.resume(returning: domainLocation)
         continuation = nil
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: any Error) {
+        isPrefetching = false
         continuation?.resume(throwing: error)
         continuation = nil
     }

@@ -10,7 +10,11 @@ enum PFCMapEnv {
 
 final class Factory: @unchecked Sendable {
     let env: PFCMapEnv
-    private static var _container: ModelContainer?
+    
+    // SwiftData ModelContainer をスレッド安全に遅延初期化するための静的定数
+    private static let sharedContainer: ModelContainer = {
+        try! ModelContainer(for: ShopCatalogEntity.self, ShopItemEntity.self, ImageCacheEntity.self)
+    }()
     
     private init(env: PFCMapEnv) {
         self.env = env
@@ -22,12 +26,15 @@ final class Factory: @unchecked Sendable {
     
     @MainActor
     private var container: ModelContainer {
-        if let existing = Self._container {
-            return existing
+        return Self.sharedContainer
+    }
+    
+    /// ModelContainer をバックグラウンドで先行初期化（ウォームアップ）する
+    func warmupContainer() {
+        guard env != .preview else { return }
+        DispatchQueue.global(qos: .userInitiated).async {
+            _ = Self.sharedContainer
         }
-        let newContainer = try! ModelContainer(for: ShopCatalogEntity.self, ShopItemEntity.self, ImageCacheEntity.self)
-        Self._container = newContainer
-        return newContainer
     }
 }
 
@@ -131,7 +138,8 @@ extension Factory {
     func makeSplashPageModel() -> SplashPageModel {
         SplashPageModel(
             shopCatalogRepository: makeShopCatalogRepository(),
-            userDefaultsService: makeUserDefaultsService()
+            userDefaultsService: makeUserDefaultsService(),
+            locationRepository: makeLocationRepository()
         )
     }
     

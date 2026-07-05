@@ -13,6 +13,7 @@ final class ShopItemEntity {
     var fat: Double
     var carbohydrate: Double
     var type: String
+    var url: String?
     var photoURL: String?
     @Attribute(.externalStorage) var photoData: Data?
     var createdAt: Date
@@ -27,6 +28,7 @@ final class ShopItemEntity {
         fat: Double,
         carbohydrate: Double,
         type: String = "",
+        url: String? = nil,
         photoURL: String? = nil,
         photoData: Data? = nil,
         createdAt: Date = Date(),
@@ -40,6 +42,7 @@ final class ShopItemEntity {
         self.fat = fat
         self.carbohydrate = carbohydrate
         self.type = type
+        self.url = url
         self.photoURL = photoURL
         self.photoData = photoData
         self.createdAt = createdAt
@@ -65,6 +68,7 @@ extension ShopItemEntity: DomainConvertibleModel {
             fat: fat,
             carbohydrate: carbohydrate,
             type: type,
+            url: url,
             photoURL: photoURL,
             photoData: photoData,
             createdAt: createdAt,
