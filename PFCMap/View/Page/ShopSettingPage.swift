@@ -12,7 +12,7 @@ struct ShopSettingPage: View {
     var body: some View {
         List {
             Section {
-                ForEach(model.shops) { shop in
+                ForEach(model.store.shops) { shop in
                     Toggle(isOn: Binding(
                         get: { model.isShopEnabled(shopId: shop.id) },
                         set: { _ in model.toggleShopSetting(shopId: shop.id) }
@@ -42,8 +42,10 @@ struct ShopSettingPage: View {
 
 #Preview {
     let factory = Factory.create(env: .preview)
+    let store = Store(factory: factory)
     return NavigationStack {
-        ShopSettingPage(model: factory.makeShopSettingPageModel())
+        ShopSettingPage(model: factory.makeShopSettingPageModel(store: store))
             .environment(\.factory, factory)
+            .environment(store)
     }
 }

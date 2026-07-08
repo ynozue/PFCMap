@@ -7,12 +7,15 @@ trigger: always_on
 - strict concurrency checking を有効にしてください。
 
 ## Data Flow
-- API/DB > Repository/Service > PageModel/ViewModel > Domain > View
+- API/DB > Repository/Service > Store > PageModel/ViewModel > Domain > View
 
 ## ディレクトリ構成
 ```
-├── AppDirectory                     # メインアプリターゲット
+├── PFCMap                           # メインアプリターゲット
 │   ├── Model                        # Model
+│   │   ├── Analytics                # 分析サービス
+│   │   │   ├── Impl                 # 分析サービス実装
+│   │   │   └── Dummy                # 分析サービス Dummy
 │   │   ├── API                      # リモート API
 │   │   │   ├── DTO                  # API 用データ転送オブジェクト
 │   │   │   └── Dummy                # リモート API Dummy
@@ -26,15 +29,15 @@ trigger: always_on
 │   │   ├── Domain                   # ドメインモデル
 │   │   ├── Repository               # リポジトリ層
 │   │   │   └── Dummy                # リポジトリ層 Dummy
-│   │   └── Factory.swift            # DI
+│   │   ├── Factory.swift            # DI
+│   │   └── Store.swift              # アプリ全体の共有状態
 │   └── View
 │       ├── Page                     # 画面
 │       │   └── Part                 # 画面内の共通パーツ
 │       └── Resource
 │           ├── Assets.xcassets      # Image関連Assets
 │           └── Colors.xcassets      # Color関連Assets
-├── EatLeftTests                     # ユニットテスト
-└── EatLeftUITests                   # UI テスト
+└── PFCMapTests                      # ユニットテスト
 ```
 
 ## 定義
@@ -62,6 +65,7 @@ trigger: always_on
 - SwiftDataを利用する
 - NZData.DomainConvertibleModelを利用する
 - DomainConvertibleModelはextensionで実装する
+- **プロパティ名に Core Data の予約名（`deleted`、`updated`、`objectID` など）を使用しないこと**。`NSManagedObject` の既存プロパティと衝突し、save 後に値が正しく読めなくなる。列名を維持したい場合は `@Attribute(originalName:)` を利用する
 
 ### Model/Defaults
 - `UserDefaults` へのアクセスを抽象化する `UserDefaultsService` プロトコルを利用する
@@ -95,10 +99,18 @@ trigger: always_on
 - Envの命名規則は「プロジェクト名」+「Env」とする
 - Envは「prod」「dev」「preview」を定義
 - Repository/Serviceはextensionで「make」+「repository/service名」という形で定義
+- Repository/Serviceは単一インスタンスをキャッシュして共有する
 - previewの場合はDummy用のrepository/serviceを利用
 - prod/dev/previewなど環境固有の値についてもFactory内で生成する
 - FactoryはAppの初期処理にて#Debugかを判断して生成する
 - Factory作成後にStoreを生成しenvironmentにて設定する
+
+### Model/Store.swift
+- アプリ全体で共有する状態（店舗カタログ・ユーザー設定など）を一元管理する
+- 「@MainActor」「@Observable」なclassとして定義する
+- Storeは「Store(factory:)」で生成し、Appのルートで「.environment」に設定する
+- 共有データの取得・更新はStoreのメソッド（refreshShops / syncShops / loadSettings など）を介して行う
+- PageModelはStoreを参照し、画面固有のUI状態のみを自身で保持する
 
 ### View/Page
 - 「@MainActor」を必ずつけてください

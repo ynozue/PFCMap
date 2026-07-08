@@ -10,25 +10,41 @@ enum PFCMapEnv {
 
 final class Factory: @unchecked Sendable {
     let env: PFCMapEnv
-    
+
     // SwiftData ModelContainer をスレッド安全に遅延初期化するための静的定数
+    // マイグレーション失敗などで開けない場合はストアを破棄して再作成する
     private static let sharedContainer: ModelContainer = {
-        try! ModelContainer(for: ShopCatalogEntity.self, ShopItemEntity.self, ImageCacheEntity.self)
+        do {
+            return try ModelContainer(for: ShopCatalogEntity.self, ShopItemEntity.self)
+        } catch {
+            print("ModelContainer creation failed, recreating store: \(error)")
+            let storeURL = URL.applicationSupportDirectory.appending(path: "default.store")
+            try? FileManager.default.removeItem(at: storeURL)
+            return try! ModelContainer(for: ShopCatalogEntity.self, ShopItemEntity.self)
+        }
     }()
-    
+
+    // Repository/Service を単一インスタンスとして共有するためのキャッシュ
+    @MainActor private var cachedLocationRepository: (any LocationRepository)?
+    @MainActor private var cachedShopSearchRepository: (any ShopSearchRepository)?
+    @MainActor private var cachedShopCatalogRepository: (any ShopCatalogRepository)?
+    @MainActor private var cachedUserDefaultsService: (any UserDefaultsService)?
+    @MainActor private var cachedImageRepository: (any ImageRepository)?
+    @MainActor private var cachedAnalyticsService: (any AnalyticsService)?
+
     private init(env: PFCMapEnv) {
         self.env = env
     }
-    
+
     static func create(env: PFCMapEnv) -> Factory {
         return Factory(env: env)
     }
-    
+
     @MainActor
     private var container: ModelContainer {
         return Self.sharedContainer
     }
-    
+
     /// ModelContainer をバックグラウンドで先行初期化（ウォームアップ）する
     func warmupContainer() {
         guard env != .preview else { return }
@@ -41,22 +57,30 @@ final class Factory: @unchecked Sendable {
 extension Factory {
     @MainActor
     func makeLocationRepository() -> any LocationRepository {
+        if let cached = cachedLocationRepository { return cached }
+        let repository: any LocationRepository
         switch env {
         case .prod, .dev:
-            return LocationRepositoryImpl()
+            repository = LocationRepositoryImpl()
         case .preview:
-            return LocationRepositoryDummy()
+            repository = LocationRepositoryDummy()
         }
+        cachedLocationRepository = repository
+        return repository
     }
-    
+
     @MainActor
     func makeShopSearchRepository() -> any ShopSearchRepository {
+        if let cached = cachedShopSearchRepository { return cached }
+        let repository: any ShopSearchRepository
         switch env {
         case .prod, .dev:
-            return ShopSearchRepositoryImpl()
+            repository = ShopSearchRepositoryImpl()
         case .preview:
-            return ShopSearchRepositoryDummy()
+            repository = ShopSearchRepositoryDummy()
         }
+        cachedShopSearchRepository = repository
+        return repository
     }
     
     @MainActor
@@ -75,20 +99,21 @@ extension Factory {
     
     @MainActor
     func makeShopCatalogRepository() -> any ShopCatalogRepository {
+        if let cached = cachedShopCatalogRepository { return cached }
+        let repository: any ShopCatalogRepository
         switch env {
         case .prod, .dev:
-            let remoteClient = makePFCRemoteClient()
-            let discordRemoteClient = makeDiscordRemoteClient()
-            let userDefaultsService = makeUserDefaultsService()
-            return ShopCatalogRepositoryImpl(
-                remoteClient: remoteClient,
-                discordRemoteClient: discordRemoteClient,
+            repository = ShopCatalogRepositoryImpl(
+                remoteClient: makePFCRemoteClient(),
+                discordRemoteClient: makeDiscordRemoteClient(),
                 modelContainer: container,
-                userDefaultsService: userDefaultsService
+                userDefaultsService: makeUserDefaultsService()
             )
         case .preview:
-            return ShopCatalogRepositoryDummy()
+            repository = ShopCatalogRepositoryDummy()
         }
+        cachedShopCatalogRepository = repository
+        return repository
     }
     
     @MainActor
@@ -104,82 +129,91 @@ extension Factory {
     
     @MainActor
     func makeUserDefaultsService() -> any UserDefaultsService {
+        if let cached = cachedUserDefaultsService { return cached }
+        let service: any UserDefaultsService
         switch env {
         case .prod, .dev:
-            return UserDefaultsServiceImpl()
+            service = UserDefaultsServiceImpl()
         case .preview:
-            return UserDefaultsServiceDummy()
+            service = UserDefaultsServiceDummy()
         }
+        cachedUserDefaultsService = service
+        return service
     }
-    
+
     @MainActor
     func makeImageRepository() -> any ImageRepository {
+        if let cached = cachedImageRepository { return cached }
+        let repository: any ImageRepository
         switch env {
         case .prod, .dev:
-            return ImageRepositoryImpl(modelContainer: container)
+            repository = ImageRepositoryImpl()
         case .preview:
-            return ImageRepositoryDummy()
+            repository = ImageRepositoryDummy()
         }
+        cachedImageRepository = repository
+        return repository
     }
-    
+
     @MainActor
     func makeAnalyticsService() -> any AnalyticsService {
+        if let cached = cachedAnalyticsService { return cached }
+        let service: any AnalyticsService
         switch env {
         case .prod, .dev:
-            return AnalyticsServiceImpl()
+            service = AnalyticsServiceImpl()
         case .preview:
-            return AnalyticsServiceDummy()
+            service = AnalyticsServiceDummy()
         }
+        cachedAnalyticsService = service
+        return service
     }
 }
 
 extension Factory {
     @MainActor
-    func makeHomePageModel() -> HomePageModel {
+    func makeHomePageModel(store: Store) -> HomePageModel {
         HomePageModel(
+            store: store,
             locationRepository: makeLocationRepository(),
-            shopCatalogRepository: makeShopCatalogRepository(),
             shopSearchRepository: makeShopSearchRepository(),
-            userDefaultsService: makeUserDefaultsService(),
             analyticsService: makeAnalyticsService()
         )
     }
-    
+
     @MainActor
-    func makeSplashPageModel() -> SplashPageModel {
+    func makeSplashPageModel(store: Store) -> SplashPageModel {
         SplashPageModel(
-            shopCatalogRepository: makeShopCatalogRepository(),
+            store: store,
             userDefaultsService: makeUserDefaultsService(),
             locationRepository: makeLocationRepository()
         )
     }
-    
+
     @MainActor
-    func makeTutorialPageModel() -> TutorialPageModel {
+    func makeTutorialPageModel(store: Store) -> TutorialPageModel {
         TutorialPageModel(
-            shopCatalogRepository: makeShopCatalogRepository(),
+            store: store,
             userDefaultsService: makeUserDefaultsService(),
             locationRepository: makeLocationRepository(),
             analyticsService: makeAnalyticsService()
         )
     }
-    
+
     @MainActor
-    func makeShopSettingPageModel() -> ShopSettingPageModel {
-        ShopSettingPageModel(
-            shopCatalogRepository: makeShopCatalogRepository(),
-            userDefaultsService: makeUserDefaultsService()
-        )
+    func makeShopSettingPageModel(store: Store) -> ShopSettingPageModel {
+        ShopSettingPageModel(store: store)
     }
-    
+
     @MainActor
-    func makeMenuPageModel() -> MenuPageModel {
+    func makeMenuPageModel(store: Store) -> MenuPageModel {
         MenuPageModel(
+            store: store,
             shopCatalogRepository: makeShopCatalogRepository(),
             userDefaultsService: makeUserDefaultsService()
         )
     }
-    
+
     @MainActor
     func makeShopItemRowViewModel() -> ShopItemRowViewModel {
         ShopItemRowViewModel(

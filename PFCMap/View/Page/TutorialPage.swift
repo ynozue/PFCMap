@@ -121,10 +121,10 @@ private struct TutorialStep2View: View {
             } else {
                 ScrollView {
                     VStack(spacing: 8) {
-                        ForEach(model.shops, id: \.id) { shop in
+                        ForEach(model.store.shops, id: \.id) { shop in
                             TutorialShopRow(
                                 name: shop.name,
-                                isEnabled: !model.disabledShopIds.contains(shop.id),
+                                isEnabled: model.store.isShopEnabled(shopId: shop.id),
                                 onTap: { model.toggleShop(shop) }
                             )
                         }
@@ -136,10 +136,7 @@ private struct TutorialStep2View: View {
 
             // ── 次へボタン ──────────────────────
             TutorialPrimaryButton(title: "次へ") {
-                Task {
-                    await model.saveDisabledShops()
-                    withAnimation { selectedTab = 2 }
-                }
+                withAnimation { selectedTab = 2 }
             }
             .padding(.bottom, 64)
         }
@@ -367,6 +364,8 @@ private struct TutorialMapGridView: View {
 
 #Preview {
     let factory = Factory.create(env: .preview)
-    return TutorialPage(model: factory.makeTutorialPageModel(), isTutorialCompleted: .constant(false))
+    let store = Store(factory: factory)
+    return TutorialPage(model: factory.makeTutorialPageModel(store: store), isTutorialCompleted: .constant(false))
         .environment(\.factory, factory)
+        .environment(store)
 }

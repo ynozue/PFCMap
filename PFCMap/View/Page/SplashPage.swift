@@ -329,10 +329,12 @@ private struct SplashBarView: View {
 
 #Preview {
     let factory = Factory.create(env: .preview)
+    let store = Store(factory: factory)
     return SplashPage(
-        model: factory.makeSplashPageModel(),
+        model: factory.makeSplashPageModel(store: store),
         isInitialized: .constant(false),
         isTutorialCompleted: .constant(false)
     )
     .environment(\.factory, factory)
+    .environment(store)
 }

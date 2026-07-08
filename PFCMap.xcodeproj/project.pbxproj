@@ -15,10 +15,21 @@
 		44B0A2432F7A5D6900B46ED6 /* NZUtils in Frameworks */ = {isa = PBXBuildFile; productRef = 44B0A2422F7A5D6900B46ED6 /* NZUtils */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		AA000000000000000000000A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 44B0A22B2F7A5CA600B46ED6 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 44B0A2322F7A5CA600B46ED6;
+			remoteInfo = PFCMap;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		446612FE2F9F2FFF0024E7BC /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		446613052FA1BDF10024E7BC /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		44B0A2332F7A5CA600B46ED6 /* PFCMap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PFCMap.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA0000000000000000000002 /* PFCMapTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PFCMapTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -40,6 +51,11 @@
 			path = PFCMap;
 			sourceTree = "<group>";
 		};
+		AA0000000000000000000005 /* PFCMapTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = PFCMapTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,6 +67,13 @@
 				4466138E2FA1EB5B0024E7BC /* FirebaseCrashlytics in Frameworks */,
 				44B0A2432F7A5D6900B46ED6 /* NZUtils in Frameworks */,
 				446613042FA103000024E7BC /* FirebaseAnalyticsIdentitySupport in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AA0000000000000000000004 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -70,6 +93,7 @@
 				446613052FA1BDF10024E7BC /* GoogleService-Info.plist */,
 				446612FE2F9F2FFF0024E7BC /* PrivacyInfo.xcprivacy */,
 				44B0A2352F7A5CA600B46ED6 /* PFCMap */,
+				AA0000000000000000000005 /* PFCMapTests */,
 				4466138C2FA1EB5B0024E7BC /* Frameworks */,
 				44B0A2342F7A5CA600B46ED6 /* Products */,
 			);
@@ -79,6 +103,7 @@
 			isa = PBXGroup;
 			children = (
 				44B0A2332F7A5CA600B46ED6 /* PFCMap.app */,
+				AA0000000000000000000002 /* PFCMapTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -113,6 +138,28 @@
 			productReference = 44B0A2332F7A5CA600B46ED6 /* PFCMap.app */;
 			productType = "com.apple.product-type.application";
 		};
+		AA0000000000000000000001 /* PFCMapTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA0000000000000000000006 /* Build configuration list for PBXNativeTarget "PFCMapTests" */;
+			buildPhases = (
+				AA0000000000000000000003 /* Sources */,
+				AA0000000000000000000004 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AA0000000000000000000009 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				AA0000000000000000000005 /* PFCMapTests */,
+			);
+			name = PFCMapTests;
+			packageProductDependencies = (
+			);
+			productName = PFCMapTests;
+			productReference = AA0000000000000000000002 /* PFCMapTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -125,6 +172,10 @@
 				TargetAttributes = {
 					44B0A2322F7A5CA600B46ED6 = {
 						CreatedOnToolsVersion = 26.3;
+					};
+					AA0000000000000000000001 = {
+						CreatedOnToolsVersion = 26.3;
+						TestTargetID = 44B0A2322F7A5CA600B46ED6;
 					};
 				};
 			};
@@ -147,6 +198,7 @@
 			projectRoot = "";
 			targets = (
 				44B0A2322F7A5CA600B46ED6 /* PFCMap */,
+				AA0000000000000000000001 /* PFCMapTests */,
 			);
 		};
 /* End PBXProject section */
@@ -202,7 +254,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AA0000000000000000000003 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		AA0000000000000000000009 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 44B0A2322F7A5CA600B46ED6 /* PFCMap */;
+			targetProxy = AA000000000000000000000A /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		44B0A23C2F7A5CA800B46ED6 /* Debug */ = {
@@ -433,6 +500,52 @@
 			};
 			name = Release;
 		};
+		AA0000000000000000000007 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4XR9TBE78W;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.noz.ios.PFCMapTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PFCMap.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PFCMap";
+			};
+			name = Debug;
+		};
+		AA0000000000000000000008 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4XR9TBE78W;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.noz.ios.PFCMapTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PFCMap.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PFCMap";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -450,6 +563,15 @@
 			buildConfigurations = (
 				44B0A23F2F7A5CA800B46ED6 /* Debug */,
 				44B0A2402F7A5CA800B46ED6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AA0000000000000000000006 /* Build configuration list for PBXNativeTarget "PFCMapTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA0000000000000000000007 /* Debug */,
+				AA0000000000000000000008 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

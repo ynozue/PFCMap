@@ -5,7 +5,7 @@ actor PFCRemoteClientImpl: PFCRemoteClient {
     private let client: RemoteClient
 
     init(domain: String) {
-        client = RemoteClient(baseUrl: "http://\(domain)")
+        client = RemoteClient(baseUrl: "https://\(domain)")
     }
 
     func fetchShops(request: ShopCatalogRequestDTO) async throws -> ShopCatalogResponseDTO {
