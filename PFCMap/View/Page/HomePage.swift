@@ -119,6 +119,8 @@ struct HomePage: View {
                         model.selectedRouteDuration = nil
                         model.selectedRouteDistance = nil
                     }
+                    // 経路表示で拡大したカメラを元の縮尺（検索範囲基準）に戻す
+                    model.updateCameraPosition(distance: model.store.mapDistance.rawValue)
                 }
             }
         }
