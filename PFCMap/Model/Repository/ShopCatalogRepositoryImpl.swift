@@ -80,7 +80,7 @@ extension ShopCatalogRepositoryImpl: ShopCatalogRepository {
 private extension DataOperator {
     func fetchShops() async throws -> [ShopCatalog] {
         let descriptor = FetchDescriptor<ShopCatalogEntity>(
-            predicate: #Predicate<ShopCatalogEntity> { !$0.deleted }
+            predicate: #Predicate<ShopCatalogEntity> { !$0.isRemoved }
         )
         let entities = try modelContext.fetch(descriptor)
         return entities.map { entity in
@@ -153,7 +153,7 @@ private extension DataOperator {
                     entity.descriptionText = shop.description
                     entity.type = shop.type
                     entity.updatedAt = shop.updatedAt
-                    entity.deleted = shop.deleted
+                    entity.isRemoved = shop.deleted
                 } else {
                     // 新規作成
                     entity = ShopCatalogEntity(
@@ -194,7 +194,7 @@ private extension DataOperator {
                         }
                         
                         existingItem.updatedAt = item.updatedAt
-                        existingItem.deleted = item.deleted
+                        existingItem.isRemoved = item.deleted
                         
                         // リレーションに追加されていない場合は追加（基本的には入っているはずだが念のため）
                         if !entity.items.contains(where: { $0.id == itemId }) {

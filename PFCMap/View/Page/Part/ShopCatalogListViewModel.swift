@@ -29,98 +29,84 @@ class ShopCatalogListViewModel {
     }
     
     func inRangeShops(
-        from shops: [ShopCatalog],
-        disabledShopIds: Set<UUID>,
+        store: Store,
         currentLocation: Location?,
-        searchResults: [ShopSearchResult],
-        mapDistance: Int
+        searchResults: [ShopSearchResult]
     ) -> [ShopCatalog] {
-        shops.filter { shop in
+        store.shops.filter { shop in
             // 非表示店舗
-            guard !disabledShopIds.contains(shop.id) else { return false }
-            
+            guard !store.disabledShopIds.contains(shop.id) else { return false }
+
             // 主食メニューがあるか
-            guard shop.items.contains(where: { $0.type == "主食" }) else { return false }
-            
+            guard shop.items.contains(where: { $0.type == ShopItem.stapleFoodType }) else { return false }
+
             // 指定された円（mapDistance）の中に店舗があるかチェック
             if let currentLocation {
                 return searchResults.contains { result in
                     result.query == shop.name &&
-                    result.location.distance(to: currentLocation) <= Double(mapDistance)
+                    result.location.distance(to: currentLocation) <= Double(store.mapDistance.rawValue)
                 }
             }
             return true
         }
     }
-    
+
     func tabItems(
-        from shops: [ShopCatalog],
-        proteinThreshold: ProteinThreshold,
-        fatThreshold: FatThreshold,
-        disabledShopIds: Set<UUID>,
+        store: Store,
         currentLocation: Location?,
-        searchResults: [ShopSearchResult],
-        mapDistance: Int
+        searchResults: [ShopSearchResult]
     ) -> [TabItem] {
         let inRange = inRangeShops(
-            from: shops,
-            disabledShopIds: disabledShopIds,
+            store: store,
             currentLocation: currentLocation,
-            searchResults: searchResults,
-            mapDistance: mapDistance
+            searchResults: searchResults
         )
-        
+
         var tabs: [TabItem] = []
-        
+
         // Calculate ALL count
         var allCount = 0
         for shop in inRange {
             let shopItemCount = shop.items.filter { item in
-                item.type == "主食" &&
-                item.protein >= Double(proteinThreshold.rawValue) &&
-                item.fat <= Double(fatThreshold.rawValue)
+                item.type == ShopItem.stapleFoodType &&
+                item.protein >= Double(store.proteinThreshold.rawValue) &&
+                item.fat <= Double(store.fatThreshold.rawValue)
             }.count
-            
+
             if shopItemCount > 0 {
                 tabs.append(TabItem(id: shop.id, name: shop.name, count: shopItemCount))
                 allCount += shopItemCount
             }
         }
-        
+
         // Add ALL at the beginning
         if allCount > 0 {
             tabs.insert(TabItem(id: nil, name: "ALL", count: allCount), at: 0)
         }
-        
+
         return tabs
     }
-    
-    
+
+
     func displayItemsForTab(
         tab: TabItem,
-        from shops: [ShopCatalog],
-        proteinThreshold: ProteinThreshold,
-        fatThreshold: FatThreshold,
-        disabledShopIds: Set<UUID>,
+        store: Store,
         currentLocation: Location?,
-        searchResults: [ShopSearchResult],
-        mapDistance: Int
+        searchResults: [ShopSearchResult]
     ) -> [DisplayItem] {
         var items = inRangeShops(
-            from: shops,
-            disabledShopIds: disabledShopIds,
+            store: store,
             currentLocation: currentLocation,
-            searchResults: searchResults,
-            mapDistance: mapDistance
+            searchResults: searchResults
         )
             .filter { shop in
                 tab.id == nil || shop.id == tab.id
             }
             .flatMap { shop in
                 shop.items.compactMap { item -> DisplayItem? in
-                    guard item.protein >= Double(proteinThreshold.rawValue) else { return nil }
-                    guard item.fat <= Double(fatThreshold.rawValue) else { return nil }
-                    guard item.type == "主食" else { return nil }
+                    guard item.protein >= Double(store.proteinThreshold.rawValue) else { return nil }
+                    guard item.fat <= Double(store.fatThreshold.rawValue) else { return nil }
+                    guard item.type == ShopItem.stapleFoodType else { return nil }
                     return DisplayItem(shop: shop, item: item)
                 }
             }

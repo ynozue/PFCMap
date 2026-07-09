@@ -3,6 +3,13 @@ import MapKit
 import Observation
 import NZData
 
+enum ActiveMapApp: String, Sendable, Identifiable {
+    case apple = "Apple マップ"
+    case google = "Google マップ"
+    
+    var id: String { self.rawValue }
+}
+
 @MainActor
 @Observable
 final class HomePageModel {
@@ -14,53 +21,56 @@ final class HomePageModel {
     var selectedResultID: UUID? = nil
     var searchResults: [ShopSearchResult] = []
     var loadingMessage: String = ""
+    
+    // Route variables
+    var selectedRoute: MKRoute? = nil
+    var selectedRouteDuration: TimeInterval? = nil
+    var selectedRouteDistance: CLLocationDistance? = nil
+    var isCalculatingRoute = false
+    
+    // Map launching state
+    var showMapAppAlert = false
+    var selectedMapApp: ActiveMapApp? = nil
     var showLocationPermissionAlert = false
-    
-    // Shared Data normally held by Store
+
     var currentLocation: Location? = nil
-    var shops: [ShopCatalog] = []
-    var mapDistance: MapDistance = .m500
-    var proteinThreshold: ProteinThreshold = .g20
-    var fatThreshold: FatThreshold = .g20
-    var disabledShopIds: Set<UUID> = []
-    
+
+    let store: Store
     private let locationRepository: any LocationRepository
-    private let shopCatalogRepository: any ShopCatalogRepository
     private let shopSearchRepository: any ShopSearchRepository
-    private let userDefaultsService: any UserDefaultsService
-    
+    private let analyticsService: any AnalyticsService
+
     init(
+        store: Store,
         locationRepository: any LocationRepository,
-        shopCatalogRepository: any ShopCatalogRepository,
         shopSearchRepository: any ShopSearchRepository,
-        userDefaultsService: any UserDefaultsService
+        analyticsService: any AnalyticsService
     ) {
+        self.store = store
         self.locationRepository = locationRepository
-        self.shopCatalogRepository = shopCatalogRepository
         self.shopSearchRepository = shopSearchRepository
-        self.userDefaultsService = userDefaultsService
+        self.analyticsService = analyticsService
     }
-    
+
     func onAppear() {
         isLoading = true
         Task {
-            defer { 
-                isLoading = false 
+            defer {
+                isLoading = false
                 loadingMessage = ""
             }
             do {
                 // 1. 設定フェッチ、現在地取得、店舗リスト取得を並行実行
                 self.loadingMessage = "初期データを読み込んでいます..."
-                
-                async let fetchSettingsTask: () = fetchSettings()
+
+                async let fetchSettingsTask: () = store.loadSettings()
                 async let requestLocationTask = locationRepository.requestLocation()
-                async let fetchShopsTask = shopCatalogRepository.fetchShops()
-                
+                async let fetchShopsTask: () = store.refreshShops()
+
                 // 並行処理の完了を待つ (SettingsとShops)
                 await fetchSettingsTask
-                let shopsResult = try await fetchShopsTask
-                self.shops = shopsResult
-                
+                try await fetchShopsTask
+
                 // 位置情報の取得を待つ (エラーハンドリングはMainActor上で行う)
                 do {
                     let location = try await requestLocationTask
@@ -68,67 +78,66 @@ final class HomePageModel {
                 } catch {
                     print("Location request failed: \(error)")
                     // 位置情報が取得できない場合、東京駅をデフォルトとしてセットしアラートを表示
-                    self.currentLocation = Location(latitude: 35.681236, longitude: 139.767125)
+                    self.currentLocation = .tokyoStation
                     self.showLocationPermissionAlert = true
                 }
-                
+
                 // Camera の位置を更新
-                updateCameraPosition(distance: self.mapDistance.rawValue)
-                
+                updateCameraPosition(distance: store.mapDistance.rawValue)
+
                 // 2. 取得した情報をもとに地図上の店舗情報を検索
                 self.loadingMessage = "地図上の店舗情報を検索しています..."
                 await executeSearch()
-                
+
             } catch {
                 print("Initial data acquisition failed: \(error)")
                 errorMessage = "情報の取得に失敗しました。\(error.localizedDescription)"
             }
         }
     }
-    
+
     func onDismissMenu() {
         Task {
-            await fetchSettings()
-            self.shops = try await shopCatalogRepository.fetchShops()
+            do {
+                await store.loadSettings()
+                try await store.refreshShops()
+                await executeSearch()
+            } catch {
+                print("Failed to reload after menu dismiss: \(error)")
+                errorMessage = "情報の取得に失敗しました。\(error.localizedDescription)"
+            }
+        }
+    }
+
+    /// バックグラウンド同期などで Store の shops が更新された際に検索結果を追従させる
+    func onShopsUpdated() {
+        Task {
             await executeSearch()
         }
     }
-    
-    private func fetchSettings() async {
-        let distance: Int = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.mapDistance)
-        self.mapDistance = MapDistance(rawValue: distance) ?? .m500
-
-        let protein: Int = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.proteinThreshold)
-        self.proteinThreshold = ProteinThreshold(rawValue: protein) ?? .g20
-        
-        let fat: Int = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.fatThreshold)
-        self.fatThreshold = FatThreshold(rawValue: fat) ?? .g20
-
-        let ids: [String] = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.disabledShopIds)
-        self.disabledShopIds = Set(ids.compactMap { UUID(uuidString: $0) })
-    }
 
     private func executeSearch() async {
-        let disabledIds = self.disabledShopIds
-        let shopsData = self.shops
+        let disabledIds = store.disabledShopIds
+        let shopsData = store.shops
         let queries = await Task.detached {
             shopsData
                 .filter { shop in
                     !disabledIds.contains(shop.id) &&
-                    shop.items.contains(where: { $0.type == "主食" })
+                    shop.items.contains(where: { $0.type == ShopItem.stapleFoodType })
                 }
                 .map { $0.name }
         }.value
-        
+
         if !queries.isEmpty {
-            let radiusWithBuffer = Double(self.mapDistance.rawValue) + 100.0
-            
-            let searchCenter = currentLocation?.coordinate ?? CLLocationCoordinate2D(latitude: 35.681236, longitude: 139.767125) // fallback to Tokyo
+            let radiusWithBuffer = Double(store.mapDistance.rawValue) + 100.0
+
+            let searchCenter = currentLocation?.coordinate ?? Location.tokyoStation.coordinate
             let region = visibleRegion ?? MKCoordinateRegion(center: searchCenter, latitudinalMeters: radiusWithBuffer * 2, longitudinalMeters: radiusWithBuffer * 2)
-            
+
             do {
                 let results = try await shopSearchRepository.search(queries: queries, region: region)
                 self.searchResults = results
+                logSearch()
             } catch {
                 print("Search error: \(error)")
             }
@@ -192,21 +201,122 @@ final class HomePageModel {
     }
     
     func updateMapDistance(distance: MapDistance) {
-        self.mapDistance = distance
         Task {
-            await userDefaultsService.save(key: PFCMapUserDefaultsKeys.mapDistance, value: distance.rawValue)
+            await store.updateMapDistance(distance)
             await executeSearch()
             updateCameraPosition(distance: distance.rawValue)
         }
     }
-    
+
     func updateProteinThreshold(threshold: ProteinThreshold) {
-        self.proteinThreshold = threshold
-        Task { await userDefaultsService.save(key: PFCMapUserDefaultsKeys.proteinThreshold, value: threshold.rawValue) }
+        Task {
+            await store.updateProteinThreshold(threshold)
+            logSearch()
+        }
+    }
+
+    func updateFatThreshold(threshold: FatThreshold) {
+        Task {
+            await store.updateFatThreshold(threshold)
+            logSearch()
+        }
+    }
+
+    func logSearch() {
+        analyticsService.logSearch(
+            proteinThreshold: store.proteinThreshold.rawValue,
+            fatThreshold: store.fatThreshold.rawValue,
+            mapDistance: store.mapDistance.rawValue
+        )
     }
     
-    func updateFatThreshold(threshold: FatThreshold) {
-        self.fatThreshold = threshold
-        Task { await userDefaultsService.save(key: PFCMapUserDefaultsKeys.fatThreshold, value: threshold.rawValue) }
+    func logViewShopDetail(shopName: String) {
+        analyticsService.logViewShopDetail(shopName: shopName)
+    }
+    
+    func calculateRouteToSelectedResult() {
+        guard let currentLocation else {
+            self.selectedRoute = nil
+            return
+        }
+        guard let selectedResultID,
+              let destinationResult = searchResults.first(where: { $0.id == selectedResultID }) else {
+            self.selectedRoute = nil
+            self.selectedRouteDuration = nil
+            self.selectedRouteDistance = nil
+            return
+        }
+        
+        isCalculatingRoute = true
+        
+        let start = currentLocation.coordinate
+        let end = CLLocationCoordinate2D(
+            latitude: destinationResult.location.latitude,
+            longitude: destinationResult.location.longitude
+        )
+        
+        Task {
+            let request = MKDirections.Request()
+            request.source = MKMapItem(location: CLLocation(latitude: start.latitude, longitude: start.longitude), address: nil)
+            request.destination = MKMapItem(location: CLLocation(latitude: end.latitude, longitude: end.longitude), address: nil)
+            request.transportType = .walking
+            
+            let directions = MKDirections(request: request)
+            do {
+                let response = try await directions.calculate()
+                if let route = response.routes.first {
+                    self.selectedRoute = route
+                    self.selectedRouteDuration = route.expectedTravelTime
+                    self.selectedRouteDistance = route.distance
+                    
+                    updateCameraPositionToFitRoute(route: route)
+                }
+            } catch {
+                print("Failed to calculate route: \(error)")
+                self.selectedRoute = nil
+                self.selectedRouteDuration = nil
+                self.selectedRouteDistance = nil
+            }
+            isCalculatingRoute = false
+        }
+    }
+    
+    private func updateCameraPositionToFitRoute(route: MKRoute) {
+        let rect = route.polyline.boundingMapRect
+        var region = MKCoordinateRegion(rect)
+        
+        // 全体が綺麗に収まるように1.4倍に拡大
+        region.span.latitudeDelta *= 1.4
+        region.span.longitudeDelta *= 1.4
+        
+        // 下部の詳細カードと重ならないように、中心を少し南（緯度を下げる）にシフトして
+        // 経路全体を画面上部に寄せる
+        region.center.latitude -= region.span.latitudeDelta * 0.15
+        
+        withAnimation {
+            cameraPosition = MapCameraPosition.region(region)
+        }
+    }
+    
+    func distanceString(_ distance: CLLocationDistance) -> String {
+        if distance < 1000 {
+            return "\(Int(distance))m"
+        } else {
+            return String(format: "%.1fkm", distance / 1000.0)
+        }
+    }
+    
+    func triggerMapAppAlert(app: ActiveMapApp) {
+        self.selectedMapApp = app
+        self.showMapAppAlert = true
+    }
+    
+    var routeMidCoordinate: CLLocationCoordinate2D? {
+        guard let route = selectedRoute else { return nil }
+        let pointCount = route.polyline.pointCount
+        guard pointCount > 0 else { return nil }
+        let midIndex = pointCount / 2
+        let midPoint = route.polyline.points()[midIndex]
+        return midPoint.coordinate
     }
 }

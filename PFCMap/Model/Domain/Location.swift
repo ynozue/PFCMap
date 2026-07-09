@@ -4,10 +4,13 @@ struct Location: Sendable, Codable, Equatable {
     let latitude: Double
     let longitude: Double
     
-    init(latitude: Double, longitude: Double) {
+    nonisolated init(latitude: Double, longitude: Double) {
         self.latitude = latitude
         self.longitude = longitude
     }
+
+    /// 位置情報が取得できない場合のフォールバック地点（東京駅）
+    static let tokyoStation = Location(latitude: 35.681236, longitude: 139.767125)
 }
 
 import CoreLocation

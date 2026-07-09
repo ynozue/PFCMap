@@ -6,7 +6,7 @@ struct ShopSearchResult: Identifiable, Sendable, Equatable {
     let query: String
     let location: Location
     
-    init(id: UUID = UUID(), name: String, query: String, location: Location) {
+    nonisolated init(id: UUID = UUID(), name: String, query: String, location: Location) {
         self.id = id
         self.name = name
         self.query = query

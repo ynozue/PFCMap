@@ -12,8 +12,10 @@ final class ShopCatalogEntity {
     @Relationship(deleteRule: .cascade) var items: [ShopItemEntity]
     var createdAt: Date
     var updatedAt: Date
-    var deleted: Bool
-    
+    // 注意: "deleted" は Core Data の予約名 (NSManagedObject.isDeleted) と衝突し
+    // save 後に常に false を返すようになるため、プロパティ名を変えて列名だけ維持する
+    @Attribute(originalName: "deleted") var isRemoved: Bool
+
     init(
         id: UUID,
         name: String,
@@ -33,7 +35,7 @@ final class ShopCatalogEntity {
         self.items = items
         self.createdAt = createdAt
         self.updatedAt = updatedAt
-        self.deleted = deleted
+        self.isRemoved = deleted
     }
 }
 
@@ -55,7 +57,7 @@ extension ShopCatalogEntity: DomainConvertibleModel {
             items: items.map { $0.toDomain() },
             createdAt: createdAt,
             updatedAt: updatedAt,
-            deleted: deleted
+            deleted: isRemoved
         )
     }
 }

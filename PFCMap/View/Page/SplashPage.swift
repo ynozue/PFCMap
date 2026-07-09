@@ -228,6 +228,9 @@ struct SplashPage: View {
         withAnimation(.easeOut(duration: 0.4)) {
             showText = true
         }
+
+        // 最低表示時間を 1.3 秒に保証（現在の sleep 合計 750ms + 追加 550ms）
+        try? await Task.sleep(nanoseconds: 550_000_000) // 0.55s
     }
 }
 
@@ -326,10 +329,12 @@ private struct SplashBarView: View {
 
 #Preview {
     let factory = Factory.create(env: .preview)
+    let store = Store(factory: factory)
     return SplashPage(
-        model: factory.makeSplashPageModel(),
+        model: factory.makeSplashPageModel(store: store),
         isInitialized: .constant(false),
         isTutorialCompleted: .constant(false)
     )
     .environment(\.factory, factory)
+    .environment(store)
 }

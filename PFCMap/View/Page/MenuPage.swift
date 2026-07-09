@@ -4,6 +4,7 @@ import SwiftUI
 struct MenuPage: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.factory) private var factory
+    @Environment(Store.self) private var store
     @State private var model: MenuPageModel
     
     init(model: MenuPageModel) {
@@ -38,7 +39,7 @@ struct MenuPage: View {
                     }
                     
                     NavigationLink {
-                        ShopSettingPage(model: factory.makeShopSettingPageModel())
+                        ShopSettingPage(model: factory.makeShopSettingPageModel(store: store))
                     } label: {
                         Label("表示ショップ設定", systemImage: "list.bullet.rectangle")
                     }
@@ -68,17 +69,11 @@ struct MenuPage: View {
 #if DEBUG
                 Section("デバッグメニュー") {
                     Button {
-                        Task { await model.syncAPI() }
+                        Task { await model.forceSync() }
                     } label: {
                         Label("API同期", systemImage: "arrow.triangle.2.circlepath")
                     }
-                    
-                    Button {
-                        Task { await model.generateDBData() }
-                    } label: {
-                        Label("DB情報の生成", systemImage: "plus.square.on.square")
-                    }
-                    
+
                     Button(role: .destructive) {
                         Task { await model.deleteLastSyncDate() }
                     } label: {
@@ -139,6 +134,8 @@ struct IdentifiableURL: Identifiable {
 
 #Preview {
     let factory = Factory.create(env: .preview)
-    return MenuPage(model: factory.makeMenuPageModel())
+    let store = Store(factory: factory)
+    return MenuPage(model: factory.makeMenuPageModel(store: store))
         .environment(\.factory, factory)
+        .environment(store)
 }

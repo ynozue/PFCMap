@@ -15,15 +15,17 @@ struct PFCMapApp: App {
     @State private var isInitialized = false
     @State private var isTutorialCompleted = false
     let factory: Factory
-    
+    let store: Store
+
     init() {
         #if DEBUG
         let env: PFCMapEnv = .dev
         #else
         let env: PFCMapEnv = .prod
         #endif
-        
+
         self.factory = Factory.create(env: env)
+        self.store = Store(factory: factory)
 
         // SwiftData の先行初期化 (ウォームアップ) を非同期に開始
         factory.warmupContainer()
@@ -32,21 +34,22 @@ struct PFCMapApp: App {
         FirebaseApp.configure()
         Analytics.logEvent(AnalyticsEventScreenView, parameters: nil)
     }
-    
+
     var body: some Scene {
         WindowGroup {
             Group {
                 if isInitialized {
                     if isTutorialCompleted {
-                        HomePage(model: factory.makeHomePageModel())
+                        HomePage(model: factory.makeHomePageModel(store: store))
                     } else {
-                        TutorialPage(model: factory.makeTutorialPageModel(), isTutorialCompleted: $isTutorialCompleted)
+                        TutorialPage(model: factory.makeTutorialPageModel(store: store), isTutorialCompleted: $isTutorialCompleted)
                     }
                 } else {
-                    SplashPage(model: factory.makeSplashPageModel(), isInitialized: $isInitialized, isTutorialCompleted: $isTutorialCompleted)
+                    SplashPage(model: factory.makeSplashPageModel(store: store), isInitialized: $isInitialized, isTutorialCompleted: $isTutorialCompleted)
                 }
             }
             .environment(\.factory, factory)
+            .environment(store)
         }
     }
 }

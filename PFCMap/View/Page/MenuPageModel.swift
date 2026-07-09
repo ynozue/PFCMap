@@ -12,10 +12,12 @@ final class MenuPageModel {
     var lastFetchedAt: Date? = nil
     var privacyPolicyURL: URL? = nil
     
+    private let store: Store
     private let shopCatalogRepository: any ShopCatalogRepository
     private let userDefaultsService: any UserDefaultsService
-    
-    init(shopCatalogRepository: any ShopCatalogRepository, userDefaultsService: any UserDefaultsService) {
+
+    init(store: Store, shopCatalogRepository: any ShopCatalogRepository, userDefaultsService: any UserDefaultsService) {
+        self.store = store
         self.shopCatalogRepository = shopCatalogRepository
         self.userDefaultsService = userDefaultsService
     }
@@ -34,28 +36,17 @@ final class MenuPageModel {
     }
 
 #if DEBUG
-    func syncAPI() async {
+    func forceSync() async {
         print("API 同期開始")
         do {
-            try await shopCatalogRepository.sync(force: true)
+            try await store.syncShops(force: true)
             self.lastFetchedAt = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.lastFetchedAt)
             print("API 同期完了")
         } catch {
             print("API 同期失敗: \(error)")
         }
     }
-    
-    func generateDBData() async {
-        print("DB 情報の生成開始")
-        do {
-            try await shopCatalogRepository.sync(force: true)
-            self.lastFetchedAt = await userDefaultsService.value(key: PFCMapUserDefaultsKeys.lastFetchedAt)
-            print("DB 情報の生成完了")
-        } catch {
-            print("DB 情報の生成失敗: \(error)")
-        }
-    }
-    
+
     func deleteLastSyncDate() async {
         await userDefaultsService.remove(key: PFCMapUserDefaultsKeys.lastFetchedAt)
         self.lastFetchedAt = nil
@@ -69,7 +60,8 @@ final class MenuPageModel {
         print("DB クリア開始")
         do {
             try await shopCatalogRepository.clearAll()
-            
+            try await store.refreshShops()
+
             // すべての UserDefaults をデフォルト値に戻す
             await userDefaultsService.remove(key: PFCMapUserDefaultsKeys.lastFetchedAt)
             await userDefaultsService.save(key: PFCMapUserDefaultsKeys.mapDistance, value: PFCMapUserDefaultsKeys.mapDistance.defaultValue)
@@ -77,7 +69,8 @@ final class MenuPageModel {
             await userDefaultsService.save(key: PFCMapUserDefaultsKeys.fatThreshold, value: PFCMapUserDefaultsKeys.fatThreshold.defaultValue)
             await userDefaultsService.save(key: PFCMapUserDefaultsKeys.disabledShopIds, value: PFCMapUserDefaultsKeys.disabledShopIds.defaultValue)
             await userDefaultsService.remove(key: PFCMapUserDefaultsKeys.isTutorialCompleted)
-            
+            await store.loadSettings()
+
             self.lastFetchedAt = nil
             
             print("DB クリア完了")

@@ -1,6 +1,9 @@
 import Foundation
 
 struct ShopItem: Sendable, Identifiable, Equatable {
+    /// 主食メニューを表す type 値（マップ検索・リスト表示の対象）
+    static let stapleFoodType = "主食"
+
     let id: UUID
     let name: String
     let calorie: Double

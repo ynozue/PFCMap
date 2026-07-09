@@ -20,6 +20,10 @@ extension LocationRepositoryImpl: LocationRepository {
             LocationManagerHelper.shared.prefetchLocation()
         }
     }
+    
+    func requestAuthorization() async -> Bool {
+        await LocationManagerHelper.shared.requestAuthorization()
+    }
 }
 
 @MainActor
@@ -57,6 +61,19 @@ private final class LocationManagerHelper: NSObject, CLLocationManagerDelegate {
         
         isPrefetching = true
         locationManager.requestLocation()
+    }
+    
+    func requestAuthorization() async -> Bool {
+        let status = locationManager.authorizationStatus
+        if status == .notDetermined {
+            await withCheckedContinuation { continuation in
+                self.authContinuation = continuation
+                locationManager.requestWhenInUseAuthorization()
+            }
+        }
+        
+        let newStatus = locationManager.authorizationStatus
+        return newStatus == .authorizedWhenInUse || newStatus == .authorizedAlways
     }
     
     func requestLocation() async throws -> Location {

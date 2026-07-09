@@ -7,28 +7,23 @@ struct ShopCatalogListView: View {
     let maxHeight: CGFloat
     var onSelect: (ShopCatalog) -> Void = { _ in }
     @Environment(\.factory) private var factory
+    @Environment(Store.self) private var store
     @State private var model = ShopCatalogListViewModel()
     @State private var dragOffset: CGFloat = 0
-    
+
     private var inRangeShops: [ShopCatalog] {
         model.inRangeShops(
-            from: homeModel.shops,
-            disabledShopIds: homeModel.disabledShopIds,
+            store: store,
             currentLocation: homeModel.currentLocation,
-            searchResults: homeModel.searchResults,
-            mapDistance: homeModel.mapDistance.rawValue
+            searchResults: homeModel.searchResults
         )
     }
 
     private var tabs: [ShopCatalogListViewModel.TabItem] {
         model.tabItems(
-            from: homeModel.shops,
-            proteinThreshold: homeModel.proteinThreshold,
-            fatThreshold: homeModel.fatThreshold,
-            disabledShopIds: homeModel.disabledShopIds,
+            store: store,
             currentLocation: homeModel.currentLocation,
-            searchResults: homeModel.searchResults,
-            mapDistance: homeModel.mapDistance.rawValue
+            searchResults: homeModel.searchResults
         )
     }
     
@@ -62,7 +57,7 @@ struct ShopCatalogListView: View {
                         // Protein Filter Toggle
                         Menu {
                             Picker("Protein 閾値", selection: Binding(
-                                get: { homeModel.proteinThreshold },
+                                get: { store.proteinThreshold },
                                 set: { homeModel.updateProteinThreshold(threshold: $0) }
                             )) {
                                 ForEach(ProteinThreshold.allCases, id: \.self) { threshold in
@@ -72,7 +67,7 @@ struct ShopCatalogListView: View {
                         } label: {
                             HStack(spacing: 4) {
                                 Image(systemName: "line.3.horizontal.decrease.circle")
-                                Text("P≥\(homeModel.proteinThreshold.label)")
+                                Text("P≥\(store.proteinThreshold.label)")
                             }
                             .font(.system(size: 11, weight: .bold))
                             .padding(.horizontal, 10)
@@ -85,7 +80,7 @@ struct ShopCatalogListView: View {
                         // Fat Filter Toggle
                         Menu {
                             Picker("Fat 閾値", selection: Binding(
-                                get: { homeModel.fatThreshold },
+                                get: { store.fatThreshold },
                                 set: { homeModel.updateFatThreshold(threshold: $0) }
                             )) {
                                 ForEach(FatThreshold.allCases, id: \.self) { threshold in
@@ -95,7 +90,7 @@ struct ShopCatalogListView: View {
                         } label: {
                             HStack(spacing: 4) {
                                 Image(systemName: "line.3.horizontal.decrease.circle")
-                                Text("F≤\(homeModel.fatThreshold.label)")
+                                Text("F≤\(store.fatThreshold.label)")
                             }
                             .font(.system(size: 11, weight: .bold))
                             .padding(.horizontal, 10)
@@ -201,13 +196,9 @@ struct ShopCatalogListView: View {
                             LazyVStack(spacing: 12) {
                                 let items = model.displayItemsForTab(
                                     tab: tab,
-                                    from: homeModel.shops,
-                                    proteinThreshold: homeModel.proteinThreshold,
-                                    fatThreshold: homeModel.fatThreshold,
-                                    disabledShopIds: homeModel.disabledShopIds,
+                                    store: store,
                                     currentLocation: homeModel.currentLocation,
-                                    searchResults: homeModel.searchResults,
-                                    mapDistance: homeModel.mapDistance.rawValue
+                                    searchResults: homeModel.searchResults
                                 )
                                 ForEach(items) { displayItem in
                                     ShopItemRowView(
@@ -251,48 +242,52 @@ struct ShopCatalogListView: View {
 
 #Preview("0件") {
     let factory = Factory.create(env: .preview)
+    let store = Store(factory: factory)
     return ZStack(alignment: .bottom) {
         Color.gray.opacity(0.1).ignoresSafeArea()
-        ShopCatalogListView(homeModel: factory.makeHomePageModel(), maxHeight: 600)
+        ShopCatalogListView(homeModel: factory.makeHomePageModel(store: store), maxHeight: 600)
             .frame(height: 400)
     }
     .environment(\.factory, factory)
+    .environment(store)
 }
 
 #Preview("複数件") {
     let factory = Factory.create(env: .preview)
-    let homeModel = factory.makeHomePageModel()
-    
+    let store = Store(factory: factory)
+    let homeModel = factory.makeHomePageModel(store: store)
+
     // プレビュー用にデータをセット
     let shop1 = ShopCatalog(
         name: "ガスト",
         items: [
-            ShopItem(name: "チーズINハンバーグ", calorie: 757, protein: 36.1, fat: 25.0, carbohydrate: 23.7, type: "主食"),
-            ShopItem(name: "糖質0麺 ほうれん草の和風ジェノベーゼ", calorie: 218, protein: 20.0, fat: 12.1, carbohydrate: 2.4, type: "主食")
+            ShopItem(name: "チーズINハンバーグ", calorie: 757, protein: 36.1, fat: 25.0, carbohydrate: 23.7, type: ShopItem.stapleFoodType),
+            ShopItem(name: "糖質0麺 ほうれん草の和風ジェノベーゼ", calorie: 218, protein: 20.0, fat: 12.1, carbohydrate: 2.4, type: ShopItem.stapleFoodType)
         ]
     )
     let shop2 = ShopCatalog(
         name: "サイゼリヤ",
         items: [
-            ShopItem(name: "若鶏のディアボラ風", calorie: 390, protein: 31.0, fat: 17.7, carbohydrate: 6.0, type: "主食")
+            ShopItem(name: "若鶏のディアボラ風", calorie: 390, protein: 31.0, fat: 17.7, carbohydrate: 6.0, type: ShopItem.stapleFoodType)
         ]
     )
-    homeModel.shops = [shop1, shop2]
-    homeModel.currentLocation = Location(latitude: 35.681236, longitude: 139.767125)
+    store.shops = [shop1, shop2]
+    homeModel.currentLocation = .tokyoStation
     homeModel.searchResults = [
-        ShopSearchResult(name: "ガスト", query: "ガスト", location: homeModel.currentLocation!),
-        ShopSearchResult(name: "サイゼリヤ", query: "サイゼリヤ", location: homeModel.currentLocation!)
+        ShopSearchResult(name: "ガスト", query: "ガスト", location: .tokyoStation),
+        ShopSearchResult(name: "サイゼリヤ", query: "サイゼリヤ", location: .tokyoStation)
     ]
-    homeModel.proteinThreshold = .g15
-    homeModel.fatThreshold = .g30
-    homeModel.mapDistance = .m500
-    
+    store.proteinThreshold = .g15
+    store.fatThreshold = .g30
+    store.mapDistance = .m500
+
     return ZStack(alignment: .bottom) {
         Color.gray.opacity(0.1).ignoresSafeArea()
         ShopCatalogListView(homeModel: homeModel, maxHeight: 600)
             .frame(height: 400)
     }
     .environment(\.factory, factory)
+    .environment(store)
 }
 
 

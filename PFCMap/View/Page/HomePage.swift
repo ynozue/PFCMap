@@ -16,13 +16,23 @@ struct HomePage: View {
                 ZStack(alignment: .bottom) {
                     mapView(height: geometry.size.height)
                     
-                    ShopCatalogListView(
-                        homeModel: model,
-                        maxHeight: geometry.size.height,
-                        onSelect: { shop in
-                            // 必要に応じて地図への移動処理などをここに追加可能
-                        }
-                    )
+                    if model.selectedResultID != nil {
+                        routeDetailCard
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                    } else {
+                        ShopCatalogListView(
+                            homeModel: model,
+                            maxHeight: geometry.size.height,
+                            onSelect: { shop in
+                                if let result = model.searchResults.first(where: { $0.query == shop.name }) {
+                                    withAnimation {
+                                        model.selectedResultID = result.id
+                                    }
+                                }
+                            }
+                        )
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                    }
                     
                     loadingOverlay
                     
@@ -71,10 +81,47 @@ struct HomePage: View {
             .sheet(isPresented: Binding(get: { model.isMenuShowing }, set: { model.isMenuShowing = $0 }), onDismiss: {
                 model.onDismissMenu()
             }) {
-                MenuPage(model: factory.makeMenuPageModel())
+                MenuPage(model: factory.makeMenuPageModel(store: model.store))
             }
-            .onChange(of: model.mapDistance) { _, newValue in
+            .alert("マップアプリの起動", isPresented: $model.showMapAppAlert, presenting: model.selectedMapApp) { app in
+                Button("開く") {
+                    if let selectedResultID = model.selectedResultID,
+                       let result = model.searchResults.first(where: { $0.id == selectedResultID }) {
+                        switch app {
+                        case .apple:
+                            model.openInMaps(result: result)
+                        case .google:
+                            model.openInGoogleMaps(result: result)
+                        }
+                    }
+                    model.selectedMapApp = nil
+                }
+                Button("キャンセル", role: .cancel) {
+                    model.selectedMapApp = nil
+                }
+            } message: { app in
+                Text("\(app.rawValue)を起動して経路案内を表示しますか？")
+            }
+            .onChange(of: model.store.mapDistance) { _, newValue in
                 model.updateCameraPosition(distance: newValue.rawValue)
+            }
+            .onChange(of: model.store.shops) { _, _ in
+                // バックグラウンド同期などで店舗リストが更新されたら検索結果を追従させる
+                model.onShopsUpdated()
+            }
+            .onChange(of: model.selectedResultID) { _, newValue in
+                if let newValue, let result = model.searchResults.first(where: { $0.id == newValue }) {
+                    model.logViewShopDetail(shopName: result.name)
+                    model.calculateRouteToSelectedResult()
+                } else {
+                    withAnimation {
+                        model.selectedRoute = nil
+                        model.selectedRouteDuration = nil
+                        model.selectedRouteDistance = nil
+                    }
+                    // 経路表示で拡大したカメラを元の縮尺（検索範囲基準）に戻す
+                    model.updateCameraPosition(distance: model.store.mapDistance.rawValue)
+                }
             }
         }
     }
@@ -86,7 +133,7 @@ struct HomePage: View {
             
             // 検索範囲の円を描画
             if let currentLocation = model.currentLocation {
-                let radius = Double(model.mapDistance.rawValue)
+                let radius = Double(model.store.mapDistance.rawValue)
                 MapCircle(center: currentLocation.coordinate, radius: CLLocationDistance(radius))
                     .foregroundStyle(.blue.opacity(0.15))
                     .stroke(.blue, lineWidth: 1)
@@ -104,7 +151,7 @@ struct HomePage: View {
                 Annotation("", coordinate: upperRight, anchor: .bottomLeading) {
                     Menu {
                         Picker("距離を選択", selection: Binding(
-                            get: { model.mapDistance },
+                            get: { model.store.mapDistance },
                             set: { model.updateMapDistance(distance: $0) }
                         )) {
                             ForEach(MapDistance.allCases, id: \.self) { distance in
@@ -112,7 +159,7 @@ struct HomePage: View {
                             }
                         }
                     } label: {
-                        Text("\(model.mapDistance.label)")
+                        Text("\(model.store.mapDistance.label)")
                             .font(.system(size: 12, weight: .bold))
                             .foregroundStyle(.blue)
                             .padding(.horizontal, 9)
@@ -129,7 +176,7 @@ struct HomePage: View {
             // Search Results
             ForEach(model.searchResults.filter { result in
                 guard let currentLocation = model.currentLocation else { return true }
-                let radius = Double(model.mapDistance.rawValue)
+                let radius = Double(model.store.mapDistance.rawValue)
                 return result.location.distance(to: currentLocation) <= radius + 100
             }) { result in
                 Marker(result.name, coordinate: CLLocationCoordinate2D(
@@ -137,6 +184,30 @@ struct HomePage: View {
                     longitude: result.location.longitude
                 ))
                 .tag(result.id)
+            }
+            
+            // アプリ内経路の描画
+            if let route = model.selectedRoute {
+                MapPolyline(route.polyline)
+                    .stroke(.blue, lineWidth: 6)
+                
+                // ルート上の吹き出し表示 (徒歩時間)
+                if let duration = model.selectedRouteDuration,
+                   let midCoordinate = model.routeMidCoordinate {
+                    Annotation("", coordinate: midCoordinate, anchor: .center) {
+                        Text("徒歩 \(Int(ceil(duration / 60)))分")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(Color.blue)
+                            .clipShape(Capsule())
+                            .overlay {
+                                Capsule().stroke(.white, lineWidth: 1.5)
+                            }
+                            .shadow(color: .black.opacity(0.15), radius: 6, x: 0, y: 3)
+                    }
+                }
             }
         }
         .onMapCameraChange { context in
@@ -149,42 +220,6 @@ struct HomePage: View {
             MapScaleView()
         }
         .contentMargins(.bottom, height / 5)
-        .alert(
-            model.canOpenAppleMaps() || model.canOpenGoogleMaps() ? "経路案内" : "マップアプリが見つかりません",
-            isPresented: Binding(
-                get: { model.selectedResultID != nil },
-                set: { if !$0 { model.selectedResultID = nil } }
-            ),
-            presenting: model.searchResults.first(where: { $0.id == model.selectedResultID })
-        ) { result in
-            if model.canOpenAppleMaps() {
-                Button("Apple マップで表示") {
-                    model.openInMaps(result: result)
-                    model.selectedResultID = nil
-                }
-            }
-            if model.canOpenGoogleMaps() {
-                Button("Google マップで表示") {
-                    model.openInGoogleMaps(result: result)
-                    model.selectedResultID = nil
-                }
-            }
-            if !model.canOpenAppleMaps() && !model.canOpenGoogleMaps() {
-                Button("Google マップをインストール") {
-                    model.openAppStoreForGoogleMaps()
-                    model.selectedResultID = nil
-                }
-            }
-            Button("キャンセル", role: .cancel) {
-                model.selectedResultID = nil
-            }
-        } message: { result in
-            if model.canOpenAppleMaps() || model.canOpenGoogleMaps() {
-                Text("\(result.name) までの経路をマップアプリで表示しますか？")
-            } else {
-                Text("経路案内を利用するには、マップアプリをインストールしてください。")
-            }
-        }
     }
     
     @ViewBuilder
@@ -248,20 +283,117 @@ struct HomePage: View {
             .zIndex(100)
         }
     }
+    
+    @ViewBuilder
+    private var routeDetailCard: some View {
+        if let selectedResultID = model.selectedResultID,
+           let result = model.searchResults.first(where: { $0.id == selectedResultID }),
+           let duration = model.selectedRouteDuration,
+           let distance = model.selectedRouteDistance {
+            
+            VStack(spacing: 16) {
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(result.name)
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundStyle(.primary)
+                            .lineLimit(1)
+                        
+                        HStack(spacing: 8) {
+                            Label("徒歩 \(Int(ceil(duration / 60)))分", systemImage: "figure.walk")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundStyle(.blue)
+                            
+                            Text("•")
+                                .foregroundStyle(.secondary)
+                            
+                            Text(model.distanceString(distance))
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    
+                    Spacer()
+                    
+                    Button {
+                        withAnimation {
+                            model.selectedResultID = nil
+                        }
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.title2)
+                            .foregroundStyle(.secondary.opacity(0.8))
+                    }
+                }
+                
+                HStack(spacing: 12) {
+                    if model.canOpenAppleMaps() {
+                        Button {
+                            model.triggerMapAppAlert(app: .apple)
+                        } label: {
+                            HStack {
+                                Image(systemName: "map")
+                                Text("Apple マップ")
+                            }
+                            .font(.system(size: 14, weight: .semibold))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(Color.secondary.opacity(0.1))
+                            .cornerRadius(12)
+                            .foregroundStyle(.primary)
+                        }
+                    }
+                    
+                    if model.canOpenGoogleMaps() {
+                        Button {
+                            model.triggerMapAppAlert(app: .google)
+                        } label: {
+                            HStack {
+                                Image(systemName: "location.circle")
+                                Text("Google マップ")
+                            }
+                            .font(.system(size: 14, weight: .semibold))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(Color.blue)
+                            .foregroundStyle(.white)
+                            .cornerRadius(12)
+                        }
+                    }
+                }
+            }
+            .padding(18)
+            .background {
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .fill(.ultraThinMaterial)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 24, style: .continuous)
+                            .stroke(.white.opacity(0.4), lineWidth: 1)
+                    }
+                    .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
+            }
+            .padding(.horizontal, 16)
+            .padding(.bottom, 16)
+        }
+    }
 }
 
 #Preview("通常時") {
     let factory = Factory.create(env: .preview)
-    return HomePage(model: factory.makeHomePageModel())
+    let store = Store(factory: factory)
+    return HomePage(model: factory.makeHomePageModel(store: store))
         .environment(\.factory, factory)
+        .environment(store)
 }
 
 #Preview("ローディング中") {
     let factory = Factory.create(env: .preview)
-    let model = factory.makeHomePageModel()
+    let store = Store(factory: factory)
+    let model = factory.makeHomePageModel(store: store)
     model.isLoading = true
     model.loadingMessage = "周辺の店舗を探索しています..."
     return HomePage(model: model)
         .environment(\.factory, factory)
+        .environment(store)
 }
 
